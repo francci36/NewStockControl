@@ -27,6 +27,7 @@ class CommandeController extends Controller
             'product' => 'required|string|max:255',
             'quantity' => 'required|integer',
             'status' => 'required|string|max:255',
+            'date' => 'required|date',
         ]);
 
         Commande::create([
@@ -34,6 +35,7 @@ class CommandeController extends Controller
             'product' => $request->product,
             'quantity' => $request->quantity,
             'status' => $request->status,
+            'date' => $request->date,
         ]);
 
         return redirect()->route('commandes.index')->with('success', 'Commande passée avec succès');

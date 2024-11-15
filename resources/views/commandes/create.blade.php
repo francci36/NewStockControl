@@ -31,6 +31,10 @@
             <label for="status" class="form-label">Statut</label>
             <input type="text" class="form-control" id="status" name="status" value="En cours" required>
         </div>
+        <div class="mb-3">
+            <label for="date" class="form-label">Date</label>
+            <input type="date" class="form-control" id="date" name="date" value="{{ old('date') }}" required>
+        </div>
         <button type="submit" class="btn btn-primary">Passer la commande</button>
     </form>
 </div>

@@ -16,6 +16,7 @@ class Commande extends Model
         'product',
         'quantity',
         'status',
+        'date',
     ];
 
     public function supplier()
@@ -23,5 +24,3 @@ class Commande extends Model
         return $this->belongsTo(Supplier::class);
     }
 }
-
-
