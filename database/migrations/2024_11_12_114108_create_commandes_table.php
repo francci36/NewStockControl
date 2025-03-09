@@ -8,23 +8,24 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateCommandesTable extends Migration
 {
-    public function up()
+    public function up(): void
     {
         Schema::create('commandes', function (Blueprint $table) {
             $table->id();
             $table->date('date');
-            $table->string('statut');
+            $table->string('statut')->default('En cours');
             $table->unsignedBigInteger('supplier_id');
-            $table->string('product');
+            $table->unsignedBigInteger('product_id'); // Ajoutez cette ligne
             $table->integer('quantity');
             $table->string('status');
             $table->timestamps();
 
             $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('cascade');
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade'); // Ajoutez cette ligne
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('commandes');
     }

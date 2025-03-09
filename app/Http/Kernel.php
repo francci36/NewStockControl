@@ -1,5 +1,5 @@
-<?
-// app/Http/Kernel.php
+<?php
+
 namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
@@ -20,6 +20,7 @@ class Kernel extends HttpKernel
             ShareErrorsFromSession::class,
             VerifyCsrfToken::class,
             SubstituteBindings::class,
+            \App\Http\Middleware\LogSqlQueries::class, // Ajouter ce middleware
         ],
 
         'api' => [
