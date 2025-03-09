@@ -1,9 +1,9 @@
-<!-- resources/views/register.blade.php -->
 <!DOCTYPE html>
 <html>
 <head>
     <title>Inscription</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @voltStyles
 </head>
 <body>
     <div class="container">
@@ -28,6 +28,11 @@
             </div>
             <button type="submit">S'inscrire</button>
         </form>
+
+        <!-- Composant Volt pour l'inscription -->
+        @volt('pages.auth.register')
     </div>
+
+    @voltScripts
 </body>
 </html>
