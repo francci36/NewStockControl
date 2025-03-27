@@ -33,6 +33,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/products/create/{supplier_id}', [ProductController::class, 'create'])->name('products.create');
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+    Route::get('/api/products/{supplier_id}', [OrderController::class, 'getProductsBySupplier']);
 });
 
 // Routes pour le tableau de bord et les autres fonctionnalités
@@ -41,10 +42,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard/transactions-data', [DashboardController::class, 'transactionsData'])->name('dashboard.transactionsData');
 
     Route::get('/stocks', [StockController::class, 'index'])->name('stocks.index');
+    Route::get('/api/stock-data', [DashboardController::class, 'getStockData']);
+    Route::get('/dashboard/stock-data', [DashboardController::class, 'getStockData']);
+
     // routes/web.php
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
     Route::get('/transactions/create', [TransactionController::class, 'create'])->name('transactions.create');
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
+    Route::get('/dashboard/transactions-data', [DashboardController::class, 'transactionsData']);
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/create/{supplier_id}', [OrderController::class, 'create'])->name('orders.create');
@@ -53,12 +58,18 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/orders/{id}', [OrderController::class, 'update'])->name('orders.update');
     Route::delete('/orders/{id}', [OrderController::class, 'destroy'])->name('orders.destroy');
     Route::patch('/orders/{id}/updateStatus', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+
+    // routes/suppliers.php
     Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
     Route::get('/suppliers/create', [SupplierController::class, 'create'])->name('suppliers.create');
     Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
     Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
     Route::get('/suppliers/{id}/edit', [SupplierController::class, 'edit'])->name('suppliers.edit');
     Route::patch('/suppliers/{id}', [SupplierController::class, 'update'])->name('suppliers.update');
+    Route::post('/suppliers/store-with-products', [SupplierController::class, 'storeWithProducts'])->name('suppliers.storeWithProducts');
+    
+    // routes/rapports.php
     Route::get('/rapports', [RapportController::class, 'index'])->name('rapports.index');
 });
 
@@ -76,7 +87,8 @@ Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name(
 
 // Routes de profil
 Route::middleware(['auth'])->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit'); // GET for displaying the profile page
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update'); // PATCH for updating the profile
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy'); // DELETE for deleting the account
 });
+

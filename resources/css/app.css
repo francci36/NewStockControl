@@ -4,292 +4,218 @@
 
 /* Styles de base */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
-    margin: 0;
-    padding: 0;
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
+    @apply bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans;
 }
-
 
 /* Barre de navigation */
-nav {
-    background-color: #343a40; /* Fond sombre */
-    padding: 20px;
-    display: flex;
-    justify-content: flex-end; /* Aligne la navigation à droite */
+.navbar {
+    @apply bg-gray-800 dark:bg-gray-700 text-white px-4 py-2;
 }
 
-nav a {
-    color: #ffffff; /* Texte blanc */
-    margin-right: 20px;
-    text-decoration: none;
-    font-weight: bold;
+.navbar a {
+    @apply text-white hover:text-gray-300 no-underline font-semibold mx-2;
 }
 
-nav a:hover {
-    color: #adb5bd; /* Texte gris clair au survol */
-    text-decoration: underline;
+.navbar-brand {
+    @apply font-bold text-lg tracking-wide;
 }
 
 /* Conteneur principal */
 .custom-container {
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #ffffff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    @apply max-w-screen-lg mx-auto my-6 p-6 bg-white dark:bg-gray-800 shadow-lg rounded-lg;
 }
 
 /* Titres */
+h1, h2, h3 {
+    @apply text-gray-800 dark:text-white font-bold;
+}
+
 h1 {
-    color: #343a40;
+    @apply text-2xl;
 }
 
-/* Section du tableau de bord */
-.dashboard-section {
-    margin: 20px 0;
+h2 {
+    @apply text-xl mb-4;
 }
 
-.dashboard-section h2 {
-    margin-bottom: 10px;
-    color: #007bff;
+h3 {
+    @apply text-lg;
 }
 
-.dashboard-section table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
+/* Tableaux */
+table {
+    @apply w-full border-collapse mt-6;
 }
 
-.dashboard-section table, .dashboard-section th, .dashboard-section td {
-    border: 1px solid #ddd;
+th, td {
+    @apply border border-gray-300 dark:border-gray-700 px-4 py-2 text-left;
 }
 
-.dashboard-section th, .dashboard-section td {
-    padding: 10px;
-    text-align: left;
+th {
+    @apply bg-gray-200 dark:bg-gray-700 font-semibold;
 }
 
-.dashboard-section th {
-    background-color: #f1f1f1;
+td {
+    @apply bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200;
 }
 
-/* Styles pour les boîtes de statistiques */
-.small-box {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    color: #ffffff;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 20px;
+tbody tr:nth-child(even) {
+    @apply bg-gray-100 dark:bg-gray-800;
 }
 
-.small-box:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+tbody tr:hover {
+    @apply bg-gray-200 dark:bg-gray-700;
 }
 
-.small-box .inner {
-    padding: 10px;
+/* Boutons */
+button, .btn {
+    @apply px-4 py-2 rounded text-white font-semibold transition duration-300;
 }
 
-.small-box h3 {
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin: 0 0 10px 0;
-    animation: pulse 1.5s infinite;
+.btn-primary {
+    @apply bg-blue-500 hover:bg-blue-600 dark:bg-blue-700 dark:hover:bg-blue-800;
 }
 
-.small-box p {
-    font-size: 1.2rem;
-    margin: 0;
+.btn-secondary {
+    @apply bg-gray-500 hover:bg-gray-600 dark:bg-gray-700 dark:hover:bg-gray-800;
 }
 
-.small-box .icon {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    font-size: 70px;
-    color: rgba(255, 255, 255, 0.15);
-    transition: transform 0.3s ease;
+.btn-danger {
+    @apply bg-red-500 hover:bg-red-600 dark:bg-red-700 dark:hover:bg-red-800;
 }
 
-.small-box:hover .icon {
-    transform: scale(1.1);
+/* Sidebar */
+.main-sidebar {
+    @apply bg-gray-800 dark:bg-gray-900 text-white h-full;
 }
 
-.small-box .small-box-footer {
-    display: block;
-    padding: 10px;
-    background-color: rgba(0, 0, 0, 0.1);
-    color: rgba(255, 255, 255, 0.8);
-    text-align: center;
-    text-decoration: none;
-    transition: background-color 0.3s ease;
+.nav-sidebar .nav-link {
+    @apply text-white hover:bg-gray-700 dark:hover:bg-gray-800 px-4 py-2 rounded-md;
 }
 
-.small-box .small-box-footer:hover {
-    background-color: rgba(0, 0, 0, 0.2);
-    color: #ffffff;
+.nav-sidebar .nav-link.active {
+    @apply bg-blue-500 dark:bg-blue-600;
 }
 
-/* Dégradés de couleur pour les boîtes */
-.small-box.bg-info {
-    background: linear-gradient(135deg, #17a2b8, #1abc9c);
+/* Sidebar Heading */
+.sidebar-heading {
+    @apply text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide px-3 py-2;
 }
 
-.small-box.bg-success {
-    background: linear-gradient(135deg, #28a745, #2ecc71);
+/* Cartes */
+.card {
+    @apply bg-white dark:bg-gray-800 shadow rounded p-4 mb-6;
 }
 
-.small-box.bg-warning {
-    background: linear-gradient(135deg, #ffc107, #f39c12);
+.card-header {
+    @apply font-bold text-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200;
 }
 
-.small-box.bg-danger {
-    background: linear-gradient(135deg, #dc3545, #e74c3c);
+.card-body {
+    @apply p-4 text-gray-800 dark:text-gray-200;
 }
 
-/* Barre de progression */
-.progress {
-    height: 5px;
-    background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
-    margin-top: 10px;
+/* Formulaires */
+.form-input, .form-select {
+    @apply w-full px-4 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500;
 }
 
-.progress-bar {
-    background-color: white;
-    border-radius: 2px;
+textarea.form-input {
+    @apply h-24 resize-none;
 }
 
-/* Animation de pulsation pour les titres */
-@keyframes pulse {
-    0% {
-        transform: scale(1);
+/* Modales */
+.modal {
+    @apply fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 hidden;
+}
+
+.modal-content {
+    @apply bg-white dark:bg-gray-800 p-6 rounded shadow-lg max-w-lg mx-auto;
+}
+
+.modal-header {
+    @apply flex justify-between items-center border-b border-gray-300 dark:border-gray-700 pb-3;
+}
+
+.modal-header h2 {
+    @apply text-lg font-bold text-gray-800 dark:text-gray-200;
+}
+
+.modal-close {
+    @apply text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 cursor-pointer;
+}
+
+.modal-body {
+    @apply text-gray-800 dark:text-gray-200 mt-4;
+}
+
+/* Pages de tableau de bord */
+.dashboard-stat {
+    @apply bg-blue-500 dark:bg-blue-600 text-white p-6 rounded-lg shadow-lg flex items-center justify-between;
+}
+
+.dashboard-stat-icon {
+    @apply text-4xl text-blue-300 dark:text-blue-400;
+}
+
+.dashboard-stat-content {
+    @apply text-white text-lg font-semibold;
+}
+
+/* Footer */
+.footer {
+    @apply bg-gray-800 dark:bg-gray-900 text-gray-400 dark:text-gray-500 py-4 text-center;
+}
+
+/* Assurez-vous que les titres de colonnes sont visibles */
+.table th {
+    @apply bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200;
+}
+
+/* Si vous utilisez des tableaux AdminLTE, ajoutez ceci */
+.table thead th {
+    @apply bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200;
+}
+
+/* Styles pour le mode sombre */
+.dark .content-wrapper {
+    @apply bg-gray-900 text-gray-200;
+}
+
+.dark .card {
+    @apply bg-gray-800 text-gray-200;
+}
+
+.dark .card-header {
+    @apply bg-gray-700 text-gray-200;
+}
+
+.dark .table {
+    @apply text-gray-200;
+}
+
+.dark .table th {
+    @apply bg-gray-700 text-gray-200;
+}
+
+.dark .table td {
+    @apply bg-gray-800 text-gray-200;
+}
+
+.dark .navbar {
+    @apply bg-gray-800 text-gray-200;
+}
+
+.dark .sidebar {
+    @apply bg-gray-800 text-gray-200;
+}
+
+.dark .footer {
+    @apply bg-gray-800 text-gray-500;
+}
+@media (max-width: 640px) {
+    #darkModeToggle {
+        font-size: 12px; /* Taille de police encore plus petite */
+        padding: 4px 8px; /* Padding réduit */
     }
-    50% {
-        transform: scale(1.1);
-    }
-    100% {
-        transform: scale(1);
-    }
-}
-
-/* Styles pour le pied de page */
-footer {
-    background-color: #343a40; /* Fond sombre */
-    color: #ffffff; /* Texte blanc */
-    padding: 20px 0;
-    text-align: center;
-}
-
-footer .footer-content {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-footer h5 {
-    font-size: 1.2rem;
-    margin-bottom: 10px;
-    color: #ffffff; /* Texte blanc */
-}
-
-footer ul {
-    list-style: none;
-    padding: 0;
-}
-
-footer ul li {
-    margin-bottom: 5px;
-}
-
-footer ul li a {
-    color: #ffffff; /* Texte blanc */
-    text-decoration: none;
-}
-
-footer ul li a:hover {
-    color: #adb5bd; /* Texte gris clair au survol */
-    text-decoration: underline;
-}
-
-footer .social-icons a {
-    color: #ffffff; /* Texte blanc */
-    margin-right: 10px;
-    font-size: 1.5rem;
-}
-
-footer .social-icons a:hover {
-    color: #adb5bd; /* Texte gris clair au survol */
-}
-
-footer .text-center {
-    background-color: rgba(0, 0, 0, 0.2);
-    padding: 10px 0;
-    margin-top: 20px;
-}
-
-footer .text-center a {
-    color: #ffffff; /* Texte blanc */
-    text-decoration: none;
-}
-
-footer .text-center a:hover {
-    color: #adb5bd; /* Texte gris clair au survol */
-    text-decoration: underline;
-}
-
-/* Styles pour le bouton du menu hamburger */
-#menu-toggle {
-    display: none; /* Masqué par défaut sur les grands écrans */
-}
-
-@media (max-width: 767px) {
-    #menu-toggle {
-        display: block; /* Affiché sur les petits écrans */
-    }
-
-    .nav-links, .user-info {
-        display: none; /* Masque les liens et les infos utilisateur sur les petits écrans */
-    }
-
-    #mobile-menu {
-        display: none; /* Masqué par défaut */
-    }
-
-    #mobile-menu.show {
-        display: block; /* Affiché lorsqu'il est activé */
-    }
-
-    #mobile-menu a {
-        display: block;
-        padding: 10px 20px;
-        color: #ffffff;
-        text-decoration: none;
-    }
-
-    #mobile-menu a:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-    }
-}
-
-/* Compatibilité des navigateurs */
-.your-class {
-    text-align: -webkit-match-parent;
-    text-align: match-parent;
-}
-
-.your-class {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
 }

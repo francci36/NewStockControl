@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Notifications\Notifiable;
 
 class Product extends Model
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
 
     protected $fillable = [
         'name',
@@ -16,36 +15,34 @@ class Product extends Model
         'price',
         'quantity',
         'supplier_id',
-        'stock_threshold',
-        'stock',
+        'stock_threshold' => 5,
     ];
-    /**
-     * Relation avec le fournisseur.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
+
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
     }
 
-    /**
-     * Relation avec les commandes.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */ 
     public function orders()
     {
-        return $this->hasMany(Order::class);
+        return $this->belongsToMany(Order::class, 'order_items')
+                    ->withPivot('quantity')
+                    ->withTimestamps();
     }
 
-    /**
-     * Relation avec le stock.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
-     */
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
     public function stock()
     {
         return $this->hasOne(Stock::class);
     }
+
+    public function getStockThresholdAttribute($value)
+    {
+        return $value ?? 5; // Utilise 5 comme valeur par défaut
+    }
+
 }

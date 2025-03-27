@@ -9,11 +9,20 @@ class Transaction extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['product_id', 'quantity', 'type'];
-
+    protected $fillable = [
+        'product_id',
+        'quantity',
+        'price', // Assurez-vous que cette colonne existe dans la table `transactions`
+        'type', // 'entry' ou 'exit'
+    ];
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function report()
+    {
+        return $this->belongsTo(Report::class);
     }
 }
 
