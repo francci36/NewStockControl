@@ -1,4 +1,5 @@
 <?php
+// app/Http/Controllers/Auth/RegisteredUserController.php
 
 namespace App\Http\Controllers\Auth;
 
@@ -7,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Auth\Events\Registered;
 
 class RegisteredUserController extends Controller
 {
@@ -29,12 +31,18 @@ class RegisteredUserController extends Controller
                              ->withInput();
         }
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => 'user', // Rôle par défaut
         ]);
 
-        return redirect()->route('home');
+        event(new Registered($user));
+
+        // Connecter automatiquement l'utilisateur après inscription
+        auth()->login($user);
+
+        return redirect()->route('dashboard');
     }
 }

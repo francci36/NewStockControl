@@ -14,7 +14,7 @@
 
         <!-- Formulaire -->
         <div class="px-6 py-4">
-            <form method="POST" action="{{ route('suppliers.store') }}" class="space-y-4">
+            <form method="POST" action="{{ route('admin.suppliers.store') }}" class="space-y-4">
                 @csrf
                 <div>
                     <label for="name" class="block text-gray-700 dark:text-gray-200 font-medium">Nom</label>

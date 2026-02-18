@@ -14,7 +14,7 @@
 
         <!-- Bouton pour ajouter un fournisseur -->
         <div class="px-6 py-4">
-            <a href="{{ route('suppliers.create') }}" class="btn btn-primary flex items-center gap-2">
+            <a href="{{ route('admin.suppliers.create') }}" class="btn btn-primary flex items-center gap-2">
                 <i class="fas fa-plus"></i> Ajouter un fournisseur
             </a>
         </div>
@@ -40,20 +40,20 @@
                             <td class="border px-4 py-2">
                                 <!-- Actions -->
                                 <div class="inline-flex gap-2">
-                                    <a href="{{ route('suppliers.edit', $supplier->id) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-600">
+                                    <a href="{{ route('admin.suppliers.edit', $supplier->id) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-600">
                                         <i class="fas fa-edit"></i> Modifier
                                     </a>
-                                    <form action="{{ route('suppliers.destroy', $supplier->id) }}" method="POST" class="inline">
+                                    <form action="{{ route('admin.suppliers.destroy', $supplier->id) }}" method="POST" class="inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-600" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce fournisseur ?')">
                                             <i class="fas fa-trash"></i> Supprimer
                                         </button>
                                     </form>
-                                    <a href="{{ route('products.create', $supplier->id) }}" class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-600">
+                                    <a href="{{ route('admin.products.create', $supplier->id) }}" class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-600">
                                         <i class="fas fa-box"></i> Ajouter produit
                                     </a>
-                                    <a href="{{ route('orders.create', $supplier->id) }}" class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-600">
+                                    <a href="{{ route('admin.orders.create', $supplier->id) }}" class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-600">
                                         <i class="fas fa-shopping-cart"></i> Commander
                                     </a>
                                 </div>

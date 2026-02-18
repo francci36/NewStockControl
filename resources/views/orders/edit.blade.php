@@ -4,7 +4,7 @@
 <div class="container mx-auto py-6">
     <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
         <h1 class="text-2xl font-semibold text-blue-700 dark:text-blue-400 mb-6">Modifier la commande #{{ $order->id }}</h1>
-        <form action="{{ route('orders.update', $order->id) }}" method="POST">
+        <form action="{{ route('admin.orders.update', $order->id) }}" method="POST">
             @csrf
             @method('PUT')
 

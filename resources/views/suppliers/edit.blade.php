@@ -14,7 +14,7 @@
 
         <!-- Formulaire -->
         <div class="px-6 py-4">
-            <form method="POST" action="{{ route('suppliers.update', $supplier->id) }}" class="space-y-4">
+            <form method="POST" action="{{ route('admin.suppliers.update', $supplier->id) }}" class="space-y-4">
                 @csrf
                 @method('PATCH')
                 <div>

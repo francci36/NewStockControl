@@ -14,7 +14,7 @@
     @endif
 
     <!-- Profile Edit Form -->
-    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('admin.profile.update') }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PATCH') <!-- Spoofs a PATCH method -->
 
@@ -63,7 +63,7 @@
     </form>
 
     <!-- Delete Account Form -->
-    <form action="{{ route('profile.destroy') }}" method="POST" class="mt-3">
+    <form action="{{ route('admin.profile.destroy') }}" method="POST" class="mt-3">
         @csrf
         @method('DELETE')
         <button type="submit" class="btn btn-danger">Supprimer le compte</button>

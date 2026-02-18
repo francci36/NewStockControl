@@ -1,4 +1,5 @@
 <?php
+// app/Http/Controllers/RapportController.php
 
 namespace App\Http\Controllers;
 
@@ -8,6 +9,7 @@ use App\Models\Stock;
 use App\Models\Report;
 use App\Models\Order;
 use App\Models\Supplier;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class RapportController extends Controller
@@ -17,42 +19,56 @@ class RapportController extends Controller
         // Automatisation des rapports
         $this->updateReports();
 
-        // Calcul du chiffre d'affaires mensuel (transactions de type 'exit')
+        // Chiffre d'affaires mensuel (ventes clients)
         $chiffreAffaires = Transaction::whereMonth('created_at', now()->month)
             ->where('type', 'exit')
             ->sum(DB::raw('quantity * price'));
 
-        // Calcul du nombre de produits en stock critique (avec seuil configurable)
+        // Total des achats fournisseurs du mois
+        $totalAchats = Order::whereMonth('created_at', now()->month)
+            ->where('type', 'supplier')
+            ->sum('total_amount');
+
+        // Bénéfice brut estimé
+        $benefice = $chiffreAffaires - $totalAchats;
+
+        // Produits en stock critique
         $seuilCritique = config('inventory.stock_critique', 10);
         $stockCritique = Stock::where('quantity', '<=', $seuilCritique)->count();
 
-        // Calcul du nombre total de commandes
+        // Statistiques clients
+        $clientsActifs = User::where('role', 'user')->count();
+        $nombreCommandesClients = Order::where('type', 'client')->count();
+        $panierMoyen = Order::where('type', 'client')
+            ->avg('total_amount') ?? 0;
+
+        // Nombre total de commandes (tous types)
         $totalCommandes = Order::count();
 
-        // Calcul des commandes par statut
+        // Commandes par statut
         $commandesParStatut = Order::selectRaw('status, count(*) as count')
             ->groupBy('status')
             ->get();
 
-        // Calcul des produits en stock (pour le graphique)
+        // Produits en stock (pour le graphique)
         $produitsEnStock = Stock::with('product')
             ->orderBy('quantity', 'desc')
             ->limit(10)
             ->get();
 
-        // Mise à jour des montants totaux pour toutes les commandes
-        $orders = Order::with('orderItems')->get();
-        foreach ($orders as $order) {
-            $order->total_amount = $order->calculateTotalAmount();
-            $order->save();
-        }
-
-        // Calcul des statistiques des fournisseurs
+        // Statistiques des fournisseurs
         $fournisseurs = Supplier::withCount('orders')
-            ->withSum('orders', 'total_amount')
-            ->get();
+            ->get()
+            ->map(function ($supplier) {
+                $totalAmount = Order::where('supplier_id', $supplier->id)
+                    ->where('type', 'supplier')
+                    ->sum('total_amount');
+                
+                $supplier->orders_sum_total_amount = $totalAmount;
+                return $supplier;
+            });
 
-        // Pagination des rapports avec les transactions et les stocks associés
+        // Rapports générés
         $reports = Report::with([
             'transactions' => function ($query) {
                 $query->whereIn('type', ['entry', 'exit']);
@@ -60,10 +76,14 @@ class RapportController extends Controller
             'stocks'
         ])->paginate(10);
 
-        // Passer les données à la vue
         return view('rapports.index', compact(
             'chiffreAffaires',
+            'totalAchats',
+            'benefice',
             'stockCritique',
+            'clientsActifs',
+            'nombreCommandesClients',
+            'panierMoyen',
             'totalCommandes',
             'commandesParStatut',
             'produitsEnStock',
@@ -77,27 +97,28 @@ class RapportController extends Controller
         $rapportVentes = Report::firstOrCreate([
             'name' => 'Rapport des Ventes',
             'description' => 'Analyse des ventes mensuelles',
-        ], [
-            'created_at' => now(),
-            'updated_at' => now(),
+        ]);
+
+        $rapportAchats = Report::firstOrCreate([
+            'name' => 'Rapport des Achats',
+            'description' => 'Analyse des achats fournisseurs',
         ]);
 
         $rapportStocks = Report::firstOrCreate([
             'name' => 'Rapport des Stocks',
             'description' => 'État des stocks actuels',
-        ], [
-            'created_at' => now(),
-            'updated_at' => now(),
         ]);
 
+        // Associer les transactions aux rapports
         Transaction::where('type', 'exit')
             ->whereNull('report_id')
             ->update(['report_id' => $rapportVentes->id]);
 
         Transaction::where('type', 'entry')
             ->whereNull('report_id')
-            ->update(['report_id' => $rapportStocks->id]);
+            ->update(['report_id' => $rapportAchats->id]);
 
+        // Stocks critiques
         $seuilCritique = config('inventory.stock_critique', 10);
         Stock::where('quantity', '<=', $seuilCritique)
             ->whereNull('report_id')

@@ -1,191 +1,200 @@
 <?php
+// app/Http/Controllers/OrderController.php
 
 namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Product;
-use App\Models\User;
 use App\Models\Supplier;
 use App\Models\Stock;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
-    /**
-     * Affiche la liste des commandes.
-     */
-    public function index()
-    {
-        $orders = Order::with(['user', 'supplier', 'products'])->paginate(20); // Pagination
-        return view('orders.index', compact('orders'));
+    
+    public function index(Request $request)
+{
+    $query = Order::with(['supplier', 'client', 'products']);
+    
+    // Filtrer par type
+    if ($request->has('type') && $request->type == 'client') {
+        $query->where('type', 'client');
+    } else {
+        $query->where('type', 'supplier'); // Par défaut, afficher les commandes fournisseurs
     }
+    
+    $orders = $query->orderBy('created_at', 'desc')->paginate(20);
+    
+    return view('orders.index', compact('orders'));
+}
 
-    /**
-     * Affiche le formulaire de création d'une commande pour un fournisseur donné.
-     */
-    public function create($supplier_id)
+    public function create(Request $request)
     {
-        $users = User::all();
+        $supplier_id = $request->get('supplier_id');
         $suppliers = Supplier::all();
+        $products = $supplier_id ? Product::where('supplier_id', $supplier_id)->get() : collect();
 
-        // Récupérer uniquement les produits du fournisseur sélectionné
-        $products = Product::where('supplier_id', $supplier_id)->get();
-
-         // ID de l'utilisateur connecté
-        $user_id = auth()->id();
-
-        return view('orders.create', compact('users', 'suppliers', 'products', 'supplier_id', 'user_id'));
+        return view('orders.create', compact('suppliers', 'products', 'supplier_id'));
     }
 
-    /**
-     * Enregistre une nouvelle commande dans la base de données.
-     */
     public function store(Request $request)
-    {
-        // Validation des données
-        $validatedData = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'supplier_id' => 'required|exists:suppliers,id',
-            'date' => 'required|date',
-            'items' => 'required|array',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
-        ]);
+{
+    // Validation
+    $validated = $request->validate([
+        'supplier_id' => 'required|exists:suppliers,id',
+        'date' => 'required|date',
+        'items' => 'required|array|min:1',
+        'items.*.product_id' => 'required|exists:products,id',
+        'items.*.quantity' => 'required|integer|min:1',
+    ]);
 
-        // Création de la commande
+    try {
+        DB::beginTransaction();
+
+        // 1. Créer la commande
         $order = Order::create([
-            'user_id' => $validatedData['user_id'],
-            'supplier_id' => $validatedData['supplier_id'],
-            'status' => 'pending',
-            'date' => $validatedData['date'],
-        ]);
-
-        // Ajout des produits à la commande
-        foreach ($validatedData['items'] as $itemData) {
-            $order->products()->attach($itemData['product_id'], [
-                'quantity' => $itemData['quantity'],
-            ]);
-        }
-
-        return redirect()->route('orders.index')->with('success', 'Commande créée avec succès.');
-    }
-
-    /**
-     * Affiche le formulaire d'édition d'une commande existante.
-     */
-    public function edit($id)
-    {
-        $order = Order::findOrFail($id);
-
-        // Produits disponibles pour le fournisseur associé à la commande
-        $products = Product::where('supplier_id', $order->supplier_id)->get();
-        $suppliers = Supplier::all();
-
-        return view('orders.edit', compact('order', 'products', 'suppliers'));
-    }
-
-    /**
-     * Met à jour une commande existante.
-     */
-    public function update(Request $request, $id)
-    {
-        $validated = $request->validate([
-            'supplier_id' => 'required|exists:suppliers,id',
-            'date' => 'required|date',
-            'status' => 'required|string',
-            'items' => 'required|array',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
-        ]);
-
-        $order = Order::findOrFail($id);
-        $order->update([
+            'user_id' => auth()->id(),
             'supplier_id' => $validated['supplier_id'],
             'date' => $validated['date'],
-            'status' => $validated['status'],
+            'status' => Order::STATUS_PENDING,
+            'type' => 'supplier', // Ajoutez ceci si nécessaire
         ]);
 
-        // Mise à jour des produits associés
-        $order->products()->detach(); // Supprimer les anciens
-        foreach ($validated['items'] as $itemData) {
-            $order->products()->attach($itemData['product_id'], [
-                'quantity' => $itemData['quantity'],
-            ]);
+        // 2. Calculer le total
+        $totalAmount = 0;
+        $productsToAttach = [];
+
+        foreach ($validated['items'] as $item) {
+            $product = Product::find($item['product_id']);
+            $productsToAttach[$item['product_id']] = [
+                'quantity' => $item['quantity'],
+                'price' => $product->price,
+            ];
+            $totalAmount += $product->price * $item['quantity'];
         }
 
-        return redirect()->route('orders.index')->with('success', 'Commande mise à jour avec succès.');
-    }
+        // 3. Attacher les produits à la commande
+        $order->products()->attach($productsToAttach);
 
-    /**
-     * Supprime une commande.
-     */
-    public function destroy($id)
-    {
-        $order = Order::findOrFail($id);
-        $order->products()->detach(); // Supprime les relations pivot
-        $order->delete();
-
-        return redirect()->route('orders.index')->with('success', 'Commande supprimée avec succès.');
-    }
-
-    /**
-     * Met à jour le statut d'une commande et ajuste les stocks si nécessaire.
-     */
-    public function updateStatus(Request $request, $orderId)
-    {
-        $order = Order::findOrFail($orderId);
-        $order->status = $request->input('status');
+        // 4. Mettre à jour le total de la commande
+        $order->total_amount = $totalAmount;
         $order->save();
 
-        if ($order->status === 'arrivé') {
-            $this->updateStock($order, true);
-        }
+        DB::commit();
 
-        return redirect()->route('orders.index')->with('success', 'Statut de la commande mis à jour.');
+        return redirect()->route('admin.orders.index')
+            ->with('success', 'Commande créée avec succès.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Erreur création commande: ' . $e->getMessage());
+        
+        return back()->with('error', 'Erreur: ' . $e->getMessage())
+                     ->withInput();
     }
+}
 
-    /**
-     * Met à jour les stocks pour les produits d'une commande.
-     */
-    private function updateStock(Order $order, $increment = true)
-    {
-        foreach ($order->products as $product) {
-            $quantity = $product->pivot->quantity;
-
-            $stock = Stock::firstOrCreate(
-                ['product_id' => $product->id],
-                ['price' => $product->price, 'quantity' => 0]
-            );
-
-            $stock->quantity += ($increment ? $quantity : -$quantity);
-            $stock->save();
-
-            Log::info('Stock mis à jour', [
-                'product_id' => $product->id,
-                'quantity' => $quantity,
-                'increment' => $increment,
-            ]);
-        }
-    }
-
-    /**
-     * Récupère les produits d'un fournisseur.
-     */
-    public function getProductsBySupplier($supplierId)
-    {
-        $products = Product::where('supplier_id', $supplierId)->get();
-        return response()->json($products);
-    }
-
-    /**
-     * Affiche les détails d'une commande.
-     */
     public function show(Order $order)
     {
-        // Chargement des relations
-        $order->load('user', 'supplier', 'products');
-        
+        $order->load(['user', 'supplier', 'products']);
         return view('orders.show', compact('order'));
+    }
+
+  public function updateStatus(Request $request, Order $order)
+{
+    $request->validate([
+        'status' => 'required|in:' . Order::STATUS_PENDING . ',' . Order::STATUS_ARRIVED
+    ]);
+
+    try {
+        DB::beginTransaction();
+
+        $oldStatus = $order->status;
+        $newStatus = $request->status;
+
+        // Mettre à jour le statut
+        $order->update(['status' => $newStatus]);
+
+        // Si la commande passe de "en attente" à "arrivé"
+        if ($oldStatus === Order::STATUS_PENDING && $newStatus === Order::STATUS_ARRIVED) {
+            foreach ($order->products as $product) {
+                if ($order->type === 'supplier') {
+                    // COMMANDE FOURNISSEUR : AUGMENTE le stock
+                    $product->quantity += $product->pivot->quantity;
+                    Log::info('Commande fournisseur arrivée - Stock augmenté', [
+                        'product' => $product->name,
+                        'ancien_stock' => $product->getOriginal('quantity'),
+                        'ajout' => $product->pivot->quantity,
+                        'nouveau_stock' => $product->quantity
+                    ]);
+                } else {
+                    // COMMANDE CLIENT : DIMINUE le stock
+                    if ($product->quantity < $product->pivot->quantity) {
+                        throw new \Exception("Stock insuffisant pour le produit {$product->name}");
+                    }
+                    $product->quantity -= $product->pivot->quantity;
+                    Log::info('Commande client validée - Stock diminué', [
+                        'product' => $product->name,
+                        'ancien_stock' => $product->getOriginal('quantity'),
+                        'retrait' => $product->pivot->quantity,
+                        'nouveau_stock' => $product->quantity
+                    ]);
+                }
+                
+                $product->save();
+
+                // Mettre à jour la table stocks
+                Stock::updateOrCreate(
+                    ['product_id' => $product->id],
+                    ['quantity' => $product->quantity]
+                );
+            }
+        }
+
+        DB::commit();
+
+        return redirect()->route('admin.orders.index')
+            ->with('success', 'Statut mis à jour avec succès.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Erreur mise à jour statut: ' . $e->getMessage());
+        
+        return back()->with('error', 'Erreur lors de la mise à jour du statut: ' . $e->getMessage());
+    }
+}
+
+    public function destroy(Order $order)
+    {
+        try {
+            DB::beginTransaction();
+
+            if ($order->status === Order::STATUS_ARRIVED) {
+                return back()->with('error', 'Impossible de supprimer une commande déjà arrivée.');
+            }
+
+            $order->products()->detach();
+            $order->delete();
+
+            DB::commit();
+
+            return redirect()->route('admin.orders.index')
+                ->with('success', 'Commande supprimée avec succès.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Erreur: ' . $e->getMessage());
+        }
+    }
+
+    public function getProductsBySupplier($supplierId)
+    {
+        $products = Product::where('supplier_id', $supplierId)
+                          ->select('id', 'name', 'price')
+                          ->get();
+        
+        return response()->json($products);
     }
 }

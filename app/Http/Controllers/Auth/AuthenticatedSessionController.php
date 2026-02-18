@@ -1,4 +1,5 @@
 <?php
+// app/Http/Controllers/Auth/AuthenticatedSessionController.php
 
 namespace App\Http\Controllers\Auth;
 
@@ -14,23 +15,31 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login');
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+   public function store(Request $request)
+{
+    $request->validate([
+        'email' => ['required', 'email'],
+        'password' => ['required'],
+    ]);
 
-        if (Auth::attempt($request->only('email', 'password'), $request->filled('remember'))) {
-            $request->session()->regenerate();
+    if (Auth::attempt($request->only('email', 'password'), $request->filled('remember'))) {
+        $request->session()->regenerate();
 
-            return redirect()->intended('/dashboard');
+        $user = Auth::user();
+        
+        // Redirection basée sur le rôle
+        if ($user->isAdmin()) {
+            return redirect()->intended('/admin/dashboard');
         }
-
-        throw ValidationException::withMessages([
-            'email' => __('auth.failed'),
-        ]);
+        
+        // Pour les utilisateurs normaux, retour à la boutique
+        return redirect()->intended('/');
     }
+
+    throw ValidationException::withMessages([
+        'email' => __('auth.failed'),
+    ]);
+}
 
     public function destroy(Request $request)
     {
