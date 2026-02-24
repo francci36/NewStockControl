@@ -1,11 +1,16 @@
 {{-- resources/views/shop/checkout.blade.php --}}
 @extends('shop.layouts.shop')
 
-@section('title', 'Finaliser la commande - Ma Boutique')
+@section('title', 'Finaliser votre commande - Ma Boutique Animalière')
 
 @section('content')
 <div class="container">
     <h1 class="mb-4">Finaliser votre commande</h1>
+
+    @php
+        $shipping = $total >= 50 ? 0 : 5.99;
+        $finalTotal = $total + $shipping;
+    @endphp
 
     <div class="row">
         <div class="col-md-7">
@@ -43,7 +48,7 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label for="shipping_city" class="form-label">Ville <span class="text-danger">*</span></label>
                                 <input type="text" 
                                        class="form-control @error('shipping_city') is-invalid @enderror" 
@@ -55,7 +60,7 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label for="shipping_zip" class="form-label">Code postal <span class="text-danger">*</span></label>
                                 <input type="text" 
                                        class="form-control @error('shipping_zip') is-invalid @enderror" 
@@ -67,14 +72,30 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label for="shipping_country" class="form-label">Pays <span class="text-danger">*</span></label>
-                                <input type="text" 
-                                       class="form-control @error('shipping_country') is-invalid @enderror" 
-                                       id="shipping_country" 
-                                       name="shipping_country" 
-                                       value="{{ old('shipping_country', 'France') }}" 
-                                       required>
+                                <select class="form-control @error('shipping_country') is-invalid @enderror" 
+                                        id="shipping_country" 
+                                        name="shipping_country" 
+                                        required>
+                                    <option value="">Sélectionnez un pays</option>
+                                    <option value="FR" {{ old('shipping_country', 'FR') == 'FR' ? 'selected' : '' }}>France</option>
+                                    <option value="BE" {{ old('shipping_country') == 'BE' ? 'selected' : '' }}>Belgique</option>
+                                    <option value="CH" {{ old('shipping_country') == 'CH' ? 'selected' : '' }}>Suisse</option>
+                                    <option value="LU" {{ old('shipping_country') == 'LU' ? 'selected' : '' }}>Luxembourg</option>
+                                    <option value="CA" {{ old('shipping_country') == 'CA' ? 'selected' : '' }}>Canada</option>
+                                    <option value="US" {{ old('shipping_country') == 'US' ? 'selected' : '' }}>États-Unis</option>
+                                    <option value="GB" {{ old('shipping_country') == 'GB' ? 'selected' : '' }}>Royaume-Uni</option>
+                                    <option value="DE" {{ old('shipping_country') == 'DE' ? 'selected' : '' }}>Allemagne</option>
+                                    <option value="ES" {{ old('shipping_country') == 'ES' ? 'selected' : '' }}>Espagne</option>
+                                    <option value="IT" {{ old('shipping_country') == 'IT' ? 'selected' : '' }}>Italie</option>
+                                    <option value="PT" {{ old('shipping_country') == 'PT' ? 'selected' : '' }}>Portugal</option>
+                                    <option value="NL" {{ old('shipping_country') == 'NL' ? 'selected' : '' }}>Pays-Bas</option>
+                                    <option value="DK" {{ old('shipping_country') == 'DK' ? 'selected' : '' }}>Danemark</option>
+                                    <option value="SE" {{ old('shipping_country') == 'SE' ? 'selected' : '' }}>Suède</option>
+                                    <option value="NO" {{ old('shipping_country') == 'NO' ? 'selected' : '' }}>Norvège</option>
+                                    <option value="FI" {{ old('shipping_country') == 'FI' ? 'selected' : '' }}>Finlande</option>
+                                </select>
                                 @error('shipping_country')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -105,7 +126,7 @@
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="radio" name="payment_method" id="payment_card" value="card" checked>
                             <label class="form-check-label" for="payment_card">
-                                <i class="fab fa-cc-visa me-2"></i> Carte bancaire
+                                <i class="fab fa-cc-visa me-2"></i> Carte bancaire (Stripe)
                             </label>
                         </div>
                         <div class="form-check mb-2">
@@ -114,12 +135,23 @@
                                 <i class="fas fa-money-bill me-2"></i> Paiement à la livraison
                             </label>
                         </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="payment_method" id="payment_bank" value="bank_transfer">
-                            <label class="form-check-label" for="payment_bank">
-                                <i class="fas fa-university me-2"></i> Virement bancaire
-                            </label>
+                    </div>
+
+                    <!-- Section de paiement Stripe -->
+                    <div id="stripe-payment-section" style="display: none;">
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-lock me-2"></i> Paiement sécurisé par Stripe
                         </div>
+                        
+                        <!-- Stripe Elements va s'insérer ici -->
+                        <div id="stripe-card-element" class="form-control mb-3" style="padding: 12px;">
+                            <!-- Un élément de carte Stripe sera monté ici -->
+                        </div>
+                        <div id="stripe-card-errors" class="text-danger mb-3" role="alert"></div>
+                        
+                        <!-- Champs cachés pour les données Stripe -->
+                        <input type="hidden" name="stripe_payment_method_id" id="stripe_payment_method_id">
+                        <input type="hidden" name="stripe_payment_intent_id" id="stripe_payment_intent_id">
                     </div>
 
                     <div class="alert alert-info" id="cardInfo" style="display: none;">
@@ -154,12 +186,25 @@
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Livraison:</span>
-                        <span class="text-success">Gratuite</span>
+                        @if($shipping > 0)
+                            <span>{{ number_format($shipping, 2) }} €</span>
+                        @else
+                            <span class="text-success">Gratuite</span>
+                        @endif
                     </div>
                     <div class="d-flex justify-content-between mb-3 fw-bold fs-5">
                         <span>Total TTC:</span>
-                        <span class="text-primary">{{ number_format($total, 2) }} €</span>
+                        <span class="text-primary" id="totalAmount">{{ number_format($finalTotal, 2) }} €</span>
                     </div>
+
+                    @if($total < 50)
+                    <div class="alert alert-info py-2 mb-3">
+                        <small>
+                            <i class="fas fa-info-circle me-1"></i>
+                            Plus que {{ number_format(50 - $total, 2) }} € pour la livraison gratuite !
+                        </small>
+                    </div>
+                    @endif
 
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
@@ -169,7 +214,7 @@
                     </div>
 
                     <button type="submit" form="checkoutForm" class="btn btn-success btn-lg w-100" id="submitBtn">
-                        <i class="fas fa-check-circle me-2"></i> Confirmer la commande
+                        <i class="fas fa-check-circle me-2"></i> Confirmer la commande ({{ number_format($finalTotal, 2) }} €)
                     </button>
                 </div>
             </div>
@@ -177,30 +222,135 @@
     </div>
 </div>
 
-@push('scripts')
+<!-- Scripts pour Stripe -->
+<script src="https://js.stripe.com/v3/"></script>
 <script>
-    // Afficher/masquer l'info carte bancaire
-    document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+    // Initialiser Stripe
+    const stripe = Stripe('{{ config('services.stripe.key') }}');
+    const elements = stripe.elements();
+    
+    // Créer l'élément de carte
+    const cardElement = elements.create('card', {
+        style: {
+            base: {
+                fontSize: '16px',
+                color: '#32325d',
+                '::placeholder': {
+                    color: '#aab7c4'
+                }
+            }
+        }
+    });
+
+    // Éléments DOM
+    const stripeSection = document.getElementById('stripe-payment-section');
+    const cardErrors = document.getElementById('stripe-card-errors');
+    const paymentMethodRadios = document.querySelectorAll('input[name="payment_method"]');
+    const checkoutForm = document.getElementById('checkoutForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const finalTotal = parseFloat('{{ $finalTotal }}');
+
+    // Afficher/masquer la section Stripe selon le mode de paiement
+    paymentMethodRadios.forEach(radio => {
         radio.addEventListener('change', function() {
             const cardInfo = document.getElementById('cardInfo');
             if (this.value === 'card') {
-                cardInfo.style.display = 'block';
-            } else {
+                stripeSection.style.display = 'block';
+                cardElement.mount('#stripe-card-element');
                 cardInfo.style.display = 'none';
+            } else {
+                stripeSection.style.display = 'none';
+                cardElement.unmount();
+                cardInfo.style.display = 'block';
             }
         });
     });
 
-    // Activer l'info carte par défaut
+    // Activer Stripe par défaut
     if (document.getElementById('payment_card').checked) {
-        document.getElementById('cardInfo').style.display = 'block';
+        stripeSection.style.display = 'block';
+        cardElement.mount('#stripe-card-element');
     }
 
-    // Empêcher la soumission multiple
-    document.getElementById('checkoutForm').addEventListener('submit', function() {
-        document.getElementById('submitBtn').disabled = true;
-        document.getElementById('submitBtn').innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Traitement en cours...';
+    // Gérer les erreurs de carte en temps réel
+    cardElement.on('change', function(event) {
+        if (event.error) {
+            cardErrors.textContent = event.error.message;
+        } else {
+            cardErrors.textContent = '';
+        }
+    });
+
+    // Gérer la soumission du formulaire
+    checkoutForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        
+        if (paymentMethod === 'card') {
+            // Désactiver le bouton
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Traitement du paiement...';
+            
+            try {
+                // Créer le PaymentIntent côté serveur avec le montant total (incluant livraison)
+                const response = await fetch('{{ route("shop.checkout.create-payment-intent") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        amount: Math.round(finalTotal * 100) // Convertir en centimes
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Confirmer le paiement avec Stripe
+                const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
+                    payment_method: {
+                        card: cardElement,
+                        billing_details: {
+                            name: document.getElementById('shipping_name').value,
+                            email: '{{ auth()->user()->email }}',
+                            phone: document.getElementById('shipping_phone').value,
+                            address: {
+                                line1: document.getElementById('shipping_address').value,
+                                city: document.getElementById('shipping_city').value,
+                                postal_code: document.getElementById('shipping_zip').value,
+                                country: document.getElementById('shipping_country').value
+                            }
+                        }
+                    }
+                });
+                
+                if (error) {
+                    throw new Error(error.message);
+                }
+                
+                if (paymentIntent.status === 'succeeded') {
+                    // Ajouter les IDs Stripe au formulaire
+                    document.getElementById('stripe_payment_intent_id').value = paymentIntent.id;
+                    document.getElementById('stripe_payment_method_id').value = paymentIntent.payment_method;
+                    
+                    // Soumettre le formulaire normalement
+                    checkoutForm.submit();
+                }
+                
+            } catch (error) {
+                cardErrors.textContent = error.message;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i> Confirmer la commande ({{ number_format($finalTotal, 2) }} €)';
+            }
+        } else {
+            // Pour les autres modes de paiement, soumettre directement
+            checkoutForm.submit();
+        }
     });
 </script>
-@endpush
 @endsection

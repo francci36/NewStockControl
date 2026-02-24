@@ -9,7 +9,8 @@
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9",
         "livewire/volt": "*",
-        "psy/psysh": "@stable"
+        "psy/psysh": "@stable",
+        "stripe/stripe-php": "^19.3"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

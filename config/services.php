@@ -1,38 +1,22 @@
 <?php
 
 return [
+    // ... autres services ...
 
-    /*
-    |--------------------------------------------------------------------------
-    | Third Party Services
-    |--------------------------------------------------------------------------
-    |
-    | This file is for storing the credentials for third party services such
-    | as Mailgun, Postmark, AWS and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
-    |
-    */
-
-    'postmark' => [
-        'token' => env('POSTMARK_TOKEN'),
+    'vendor' => [
+        'webhook_secret' => env('VENDOR_WEBHOOK_SECRET', 'your-secret-key-here'),
     ],
 
-    'ses' => [
-        'key' => env('AWS_ACCESS_KEY_ID'),
-        'secret' => env('AWS_SECRET_ACCESS_KEY'),
-        'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
-    ],
-
-    'resend' => [
-        'key' => env('RESEND_KEY'),
-    ],
-
-    'slack' => [
-        'notifications' => [
-            'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
-            'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
+    'carriers' => [
+        'colissimo' => [
+            'api_url' => env('COLISSIMO_API_URL', 'https://api.laposte.fr/ssu/v1/'),
+            'api_key' => env('COLISSIMO_API_KEY'),
+            'webhook_secret' => env('COLISSIMO_WEBHOOK_SECRET'),
+        ],
+        'chronopost' => [
+            'api_url' => env('CHRONOPOST_API_URL', 'https://api.chronopost.fr/tracking/'),
+            'api_key' => env('CHRONOPOST_API_KEY'),
+            'webhook_secret' => env('CHRONOPOST_WEBHOOK_SECRET'),
         ],
     ],
-
 ];

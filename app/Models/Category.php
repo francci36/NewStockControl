@@ -1,4 +1,5 @@
 <?php
+// app/Models/Category.php
 
 namespace App\Models;
 
@@ -9,10 +10,21 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    protected $fillable = [
+        'name',
+        'slug',
+        'description',
+        'image',
+        'is_active',
+    ];
 
-    // Relation avec les produits
-    public function products() {
+    public function products()
+    {
         return $this->hasMany(Product::class);
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'slug';
     }
 }

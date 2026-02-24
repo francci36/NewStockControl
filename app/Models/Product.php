@@ -13,15 +13,20 @@ class Product extends Model
     protected $fillable = [
         'name',
         'description',
+        'short_description',
         'price',
-        'quantity',  // Stock actuel
+        'quantity',
         'supplier_id',
-        'stock_threshold', // Seuil d'alerte
+        'category_id',
+        'image',
+        'stock_threshold',
+        'is_active',
     ];
 
     protected $attributes = [
-        'stock_threshold' => 5, // Valeur par défaut
-        'quantity' => 0, // Stock initial à 0
+        'stock_threshold' => 5,
+        'quantity' => 0,
+        'is_active' => true,
     ];
 
     // Relation avec le fournisseur
@@ -30,7 +35,13 @@ class Product extends Model
         return $this->belongsTo(Supplier::class);
     }
 
-    // Relation avec les commandes (via table pivot)
+    // Relation avec la catégorie (À AJOUTER)
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    // Relation avec les commandes
     public function orders()
     {
         return $this->belongsToMany(Order::class, 'order_items')
@@ -38,13 +49,13 @@ class Product extends Model
                     ->withTimestamps();
     }
 
-    // Relation avec le stock (si vous gardez la table stocks séparée)
+    // Relation avec le stock
     public function stock()
     {
         return $this->hasOne(Stock::class);
     }
 
-    // Obtenir le stock disponible (depuis la colonne quantity)
+    // Obtenir le stock disponible
     public function getStockAttribute()
     {
         return $this->quantity;
@@ -55,4 +66,24 @@ class Product extends Model
     {
         return $this->quantity <= $this->stock_threshold;
     }
+
+    // Scope pour les produits actifs
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    // Scope pour les produits en stock
+    public function scopeInStock($query)
+    {
+        return $query->where('quantity', '>', 0);
+    }
+
+    // Relation avec le vendeur
+    public function vendor()
+    {
+        return $this->belongsTo(Vendor::class);
+    }
+
+
 }

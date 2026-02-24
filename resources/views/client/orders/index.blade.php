@@ -36,8 +36,9 @@
                             <i class="fas fa-receipt me-2 text-primary"></i>
                             Commande #{{ $order->id }}
                         </span>
-                        <span class="badge {{ $order->status === 'en attente' ? 'bg-warning' : 'bg-success' }} fs-6">
-                            {{ $order->status }}
+                        <span class="badge bg-{{ $order->status_color ?? 'secondary' }} fs-6">
+                            <i class="fas {{ $order->status_icon ?? 'fa-clock' }} me-1"></i>
+                            {{ $order->status_label ?? $order->status }}
                         </span>
                     </div>
                     <div class="card-body">
@@ -51,6 +52,28 @@
                                 <p class="fw-bold text-primary">{{ number_format($order->total_amount, 2) }} €</p>
                             </div>
                         </div>
+
+                        <!-- Barre de progression (si commande non annulée) -->
+                        @if($order->status != 'annulé')
+                        @php
+                            $progressSteps = ['en attente', 'en traitement', 'expédiée', 'livrée'];
+                            $currentStep = array_search($order->status, $progressSteps);
+                            $progress = ($currentStep !== false) ? (($currentStep + 1) / count($progressSteps)) * 100 : 0;
+                        @endphp
+                        <div class="mb-3">
+                            <small class="text-muted">Progression</small>
+                            <div class="progress mt-1" style="height: 8px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                                     role="progressbar" 
+                                     style="width: {{ $progress }}%;" 
+                                     aria-valuenow="{{ $progress }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                            <small class="text-muted mt-1 d-block text-end">{{ round($progress) }}%</small>
+                        </div>
+                        @endif
 
                         <div class="mb-3">
                             <small class="text-muted">Produits commandés</small>
@@ -76,11 +99,25 @@
                             <p>{{ $order->shipping_country }}</p>
                         </div>
 
-                        <div class="d-grid">
-                            <a href="{{ route('client.orders.show', $order) }}" class="btn btn-outline-primary">
-                                <i class="fas fa-eye me-2"></i> Voir les détails
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('client.orders.show', $order) }}" 
+                               class="btn btn-outline-primary flex-grow-1">
+                                <i class="fas fa-eye me-2"></i> Détails
+                            </a>
+                            <a href="{{ route('client.orders.tracking', $order) }}" 
+                               class="btn btn-outline-success">
+                                <i class="fas fa-truck me-2"></i> Suivre
                             </a>
                         </div>
+
+                        <!-- Statut du paiement -->
+                        @if($order->payment)
+                        <div class="mt-2 text-end">
+                            <small class="text-success">
+                                <i class="fas fa-check-circle me-1"></i> Paiement effectué
+                            </small>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -94,3 +131,65 @@
     @endif
 </div>
 @endsection
+
+@push('styles')
+<style>
+/* Animation pour les cartes */
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+}
+
+/* Style pour la barre de progression */
+.progress {
+    border-radius: 10px;
+    background-color: #e9ecef;
+}
+
+.dark .progress {
+    background-color: #4a4a6a;
+}
+
+/* Badge pour le statut */
+.badge {
+    padding: 0.5em 0.8em;
+    font-weight: 500;
+}
+
+/* Animation subtile pour les icônes */
+.fa-truck, .fa-eye {
+    transition: transform 0.2s;
+}
+
+.btn:hover .fa-truck {
+    transform: translateX(3px);
+}
+
+.btn:hover .fa-eye {
+    transform: scale(1.1);
+}
+
+/* Mode sombre */
+.dark .card {
+    background-color: #2d2d44;
+    border-color: #4a4a6a;
+}
+
+.dark .card-header {
+    background-color: #1e1e2f !important;
+    border-bottom-color: #4a4a6a;
+}
+
+.dark .card-header .fw-bold {
+    color: #e0e0e0;
+}
+
+.dark .text-muted {
+    color: #a0a0c0 !important;
+}
+</style>
+@endpush

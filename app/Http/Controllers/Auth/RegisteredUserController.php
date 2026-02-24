@@ -43,6 +43,7 @@ class RegisteredUserController extends Controller
         // Connecter automatiquement l'utilisateur après inscription
         auth()->login($user);
 
-        return redirect()->route('dashboard');
+        // Rediriger vers la boutique (page d'accueil) pour les utilisateurs normaux
+        return redirect()->route('shop.home'); // ← CHANGEMENT ICI
     }
 }

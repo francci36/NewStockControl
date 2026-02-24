@@ -1,42 +1,51 @@
 {{-- resources/views/partials/sidebar.blade.php --}}
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="{{ route('admin.dashboard') }}" class="brand-link">
-        <span class="brand-text font-weight-light">NewStockControl</span>
+    <a href="{{ route('admin.dashboard') }}" class="brand-link text-center py-3">
+        <span class="brand-text font-weight-light h5">📦 NewStock</span>
     </a>
-    
+
     <div class="sidebar">
+        <!-- User Info Mini -->
         @auth
-        <!-- User Account -->
-        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
             <div class="image">
-                <img 
-                    src="{{ Auth::user()->profile_photo_url ? asset('storage/' . Auth::user()->profile_photo_url) : asset('images/default-profile.png') }}" 
-                    class="img-circle elevation-2" 
-                    alt="{{ Auth::user()->name }}">
+                @php
+                    $userPhoto = Auth::user()->profile_photo_url 
+                        ? (file_exists(public_path('storage/' . Auth::user()->profile_photo_url)) 
+                            ? asset('storage/' . Auth::user()->profile_photo_url) 
+                            : null)
+                        : null;
+                @endphp
+                
+                @if($userPhoto)
+                    <img src="{{ $userPhoto }}" 
+                         class="img-circle elevation-2" 
+                         alt="{{ Auth::user()->name }}"
+                         style="width: 40px; height: 40px; object-fit: cover;">
+                @else
+                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white img-circle elevation-2"
+                         style="width: 40px; height: 40px;">
+                        <span class="font-weight-bold">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                    </div>
+                @endif
             </div>
-            <div class="info">
-                <a href="{{ route('admin.profile.edit') }}" class="d-block">{{ Auth::user()->name }}</a>
+            <div class="info ml-3">
+                <a href="{{ route('admin.profile.edit') }}" class="d-block text-white font-weight-bold">{{ Auth::user()->name }}</a>
                 <span class="text-white-50 small">
-                    @if(isset(Auth::user()->role) && Auth::user()->role === 'admin')
-                        <i class="fas fa-crown text-warning"></i> Administrateur
+                    @if(Auth::user()->isAdmin())
+                        <i class="fas fa-crown text-warning mr-1"></i> Administrateur
                     @else
-                        <i class="fas fa-user text-info"></i> Utilisateur
+                        <i class="fas fa-user text-info mr-1"></i> Utilisateur
                     @endif
                 </span>
-                <form method="POST" action="{{ route('logout') }}" class="mt-2">
-                    @csrf
-                    <button type="submit" class="btn btn-danger btn-sm w-100">
-                        <i class="fas fa-sign-out-alt mr-1"></i> Déconnexion
-                    </button>
-                </form>
             </div>
         </div>
         @endauth
 
         <!-- Navigation Menu -->
-        <nav class="mt-2">
-            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+        <nav class="mt-3">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
                 <!-- Dashboard -->
                 <li class="nav-item">
                     <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -44,48 +53,77 @@
                         <p>Dashboard</p>
                     </a>
                 </li>
+
+                <!-- Groupe Gestion Stock -->
+                <li class="nav-header text-uppercase small text-white-50">Gestion</li>
                 
-                <!-- Stocks -->
                 <li class="nav-item">
                     <a href="{{ route('admin.stocks.index') }}" class="nav-link {{ request()->routeIs('admin.stocks*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-box"></i>
                         <p>Stocks</p>
                     </a>
                 </li>
-                
-                <!-- Commandes -->
-                <li class="nav-item">
-                    <a href="{{ route('admin.orders.index') }}" class="nav-link {{ request()->routeIs('admin.orders*') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-shopping-cart"></i>
-                        <p>Commandes</p>
-                    </a>
-                </li>
-                
-                <!-- Fournisseurs -->
-                <li class="nav-item">
-                    <a href="{{ route('admin.suppliers.index') }}" class="nav-link {{ request()->routeIs('admin.suppliers*') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-truck"></i>
-                        <p>Fournisseurs</p>
-                    </a>
-                </li>
-                
-                <!-- Produits -->
+
                 <li class="nav-item">
                     <a href="{{ route('admin.products.index') }}" class="nav-link {{ request()->routeIs('admin.products*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-cubes"></i>
                         <p>Produits</p>
                     </a>
                 </li>
-                
-                <!-- Rapports -->
+
                 <li class="nav-item">
-                    <a href="{{ route('admin.rapports.index') }}" class="nav-link {{ request()->routeIs('admin.rapports*') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-chart-line"></i>
-                        <p>Rapports</p>
+                    <a href="{{ route('admin.suppliers.index') }}" class="nav-link {{ request()->routeIs('admin.suppliers*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-truck"></i>
+                        <p>Fournisseurs</p>
                     </a>
                 </li>
-                
-                <!-- Transactions -->
+
+                <!-- NOUVEAU LIEN VENDEURS -->
+                <li class="nav-item">
+                    <a href="{{ route('admin.vendors.index') }}" class="nav-link {{ request()->routeIs('admin.vendors*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-store"></i>
+                        <p>Vendeurs</p>
+                        @php
+                            $pendingVendors = App\Models\Vendor::where('status', 'pending')->count();
+                        @endphp
+                        @if($pendingVendors > 0)
+                            <span class="badge bg-warning right">{{ $pendingVendors }}</span>
+                        @endif
+                    </a>
+                </li>
+
+                <!-- Groupe Commandes -->
+                <li class="nav-header text-uppercase small text-white-50 mt-3">Commandes</li>
+
+                <li class="nav-item has-treeview {{ request()->routeIs('admin.orders*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-shopping-cart"></i>
+                        <p>
+                            Commandes
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('admin.orders.index', ['type' => 'supplier']) }}" 
+                               class="nav-link {{ request()->fullUrlIs('*orders*type=supplier*') ? 'active' : '' }}">
+                                <i class="fas fa-truck nav-icon"></i>
+                                <p>Fournisseurs</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.orders.index', ['type' => 'client']) }}" 
+                               class="nav-link {{ request()->fullUrlIs('*orders*type=client*') ? 'active' : '' }}">
+                                <i class="fas fa-user nav-icon"></i>
+                                <p>Clients</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Groupe Finances -->
+                <li class="nav-header text-uppercase small text-white-50 mt-3">Finances</li>
+
                 <li class="nav-item">
                     <a href="{{ route('admin.transactions.index') }}" class="nav-link {{ request()->routeIs('admin.transactions*') && !request()->routeIs('admin.transactions.create') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-exchange-alt"></i>
@@ -93,165 +131,69 @@
                     </a>
                 </li>
 
-                <!-- Nouvelle Transaction -->
                 <li class="nav-item">
                     <a href="{{ route('admin.transactions.create') }}" class="nav-link {{ request()->routeIs('admin.transactions.create') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-plus"></i>
-                        <p>Nouvelle Transaction</p>
+                        <i class="nav-icon fas fa-plus-circle"></i>
+                        <p>Nouvelle transaction</p>
                     </a>
                 </li>
 
-                <!-- Lien vers la Boutique (pour les admins) -->
-                <li class="nav-header mt-3">BOUTIQUE</li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.rapports.index') }}" class="nav-link {{ request()->routeIs('admin.rapports*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-chart-bar"></i>
+                        <p>Rapports</p>
+                    </a>
+                </li>
+
+                <!-- Boutique -->
+                <li class="nav-header text-uppercase small text-white-50 mt-3">Boutique</li>
                 <li class="nav-item">
                     <a href="{{ route('shop.home') }}" class="nav-link" target="_blank">
                         <i class="nav-icon fas fa-store"></i>
-                        <p>Voir la boutique</p>
+                        <p>Voir la boutique <i class="fas fa-external-link-alt ml-1 small"></i></p>
                     </a>
+                </li>
+
+                <!-- Mode sombre -->
+                <li class="nav-item mt-4">
+                    <div class="px-3">
+                        <button id="darkModeToggle" class="btn btn-outline-light btn-sm w-100 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-moon mr-2"></i>
+                            <span id="darkModeText">Mode Sombre</span>
+                        </button>
+                    </div>
                 </li>
             </ul>
         </nav>
-
-        <!-- Bouton Mode Sombre -->
-        <div class="mt-4 p-3 d-flex justify-content-center">
-            <button id="darkModeToggle" class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center">
-                <i class="fas fa-moon mr-2"></i>
-                <span id="darkModeText">Mode Sombre</span>
-            </button>
-        </div>
     </div>
 </aside>
 
-<!-- Script pour le mode sombre -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const darkModeToggle = document.getElementById('darkModeToggle');
-    
-    if (!darkModeToggle) {
-        console.error('Bouton mode sombre non trouvé');
-        return;
-    }
+    if (!darkModeToggle) return;
     
     const darkModeText = document.getElementById('darkModeText');
     const icon = darkModeToggle.querySelector('i');
 
-    // Fonction pour mettre à jour l'interface selon le thème
     function updateThemeUI(isDark) {
         if (isDark) {
             document.documentElement.classList.add('dark');
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
+            icon.classList.replace('fa-moon', 'fa-sun');
             darkModeText.textContent = 'Mode Clair';
         } else {
             document.documentElement.classList.remove('dark');
-            icon.classList.remove('fa-sun');
-            icon.classList.add('fa-moon');
+            icon.classList.replace('fa-sun', 'fa-moon');
             darkModeText.textContent = 'Mode Sombre';
         }
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
     }
 
-    // Vérifier le thème sauvegardé
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        updateThemeUI(true);
-    } else {
-        updateThemeUI(false);
-    }
+    updateThemeUI(savedTheme === 'dark');
 
-    // Écouter le changement de thème système (optionnel)
-    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-    prefersDarkScheme.addEventListener('change', (e) => {
-        if (!localStorage.getItem('theme')) {
-            updateThemeUI(e.matches);
-        }
+    darkModeToggle.addEventListener('click', () => {
+        updateThemeUI(!document.documentElement.classList.contains('dark'));
     });
-
-    // Fonction pour activer/désactiver le mode sombre
-    const toggleDarkMode = () => {
-        const isDark = !document.documentElement.classList.contains('dark');
-        updateThemeUI(isDark);
-    };
-
-    if (darkModeToggle) {
-        darkModeToggle.addEventListener('click', toggleDarkMode);
-    }
 });
 </script>
-
-<!-- Style additionnel pour le mode sombre -->
-<style>
-    /* Mode sombre pour les éléments AdminLTE */
-    .dark .main-sidebar,
-    .dark .navbar {
-        background-color: #1e1e2f !important;
-    }
-    
-    .dark .content-wrapper {
-        background-color: #2d2d44 !important;
-    }
-    
-    .dark .card {
-        background-color: #252537 !important;
-        border-color: #3a3a5a !important;
-    }
-    
-    .dark .table {
-        color: #e0e0e0 !important;
-    }
-    
-    .dark .breadcrumb {
-        background-color: #2d2d44 !important;
-    }
-    
-    .dark .breadcrumb-item a {
-        color: #8ab4f8 !important;
-    }
-    
-    .dark .breadcrumb-item.active {
-        color: #e0e0e0 !important;
-    }
-    
-    .dark .form-control,
-    .dark .form-select {
-        background-color: #2d2d44 !important;
-        border-color: #4a4a6a !important;
-        color: #e0e0e0 !important;
-    }
-    
-    .dark .form-control:focus,
-    .dark .form-select:focus {
-        background-color: #35354a !important;
-        border-color: #6a6a9a !important;
-        color: #ffffff !important;
-    }
-    
-    .dark .alert-success {
-        background-color: #1e3a2e !important;
-        border-color: #2a6b4e !important;
-        color: #c3e6cb !important;
-    }
-    
-    .dark .alert-danger {
-        background-color: #4a1e2e !important;
-        border-color: #8b3a4e !important;
-        color: #f8d7da !important;
-    }
-    
-    .dark .alert-warning {
-        background-color: #4a3a1e !important;
-        border-color: #8b6a2e !important;
-        color: #fff3cd !important;
-    }
-    
-    .dark .alert-info {
-        background-color: #1e3a4a !important;
-        border-color: #2a6a8b !important;
-        color: #d1ecf1 !important;
-    }
-    
-    .dark,
-    .dark * {
-        transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-    }
-</style>

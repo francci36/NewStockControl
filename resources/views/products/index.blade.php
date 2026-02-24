@@ -74,82 +74,91 @@
 
             <!-- Tableau des produits -->
             <div class="overflow-x-auto">
-                <table class="table-auto w-full bg-gray-50 dark:bg-gray-700 border-collapse border border-gray-200 dark:border-gray-600 text-sm shadow-lg rounded-lg">
+                <table class="min-w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-sm shadow-lg rounded-lg">
                     <thead class="bg-blue-50 dark:bg-blue-900">
                         <tr>
-                            <th class="border px-4 py-2 text-gray-700 dark:text-gray-200 font-medium text-left">Produit</th>
-                            <th class="border px-4 py-2 text-gray-700 dark:text-gray-200 font-medium text-left">Description</th>
+                            <th class="border px-4 py-2 text-gray-700 dark:text-gray-200 font-medium text-left">Image</th>
+                            <th class="border px-4 py-2 text-gray-700 dark:text-gray-200 font-medium text-left">Nom</th>
+                            <th class="border px-4 py-2 text-gray-700 dark:text-gray-200 font-medium text-left">Catégorie</th>
                             <th class="border px-4 py-2 text-gray-700 dark:text-gray-200 font-medium text-left">Prix</th>
                             <th class="border px-4 py-2 text-gray-700 dark:text-gray-200 font-medium text-left">Stock</th>
-                            <th class="border px-4 py-2 text-gray-700 dark:text-gray-200 font-medium text-left">Fournisseur</th>
+                            <th class="border px-4 py-2 text-gray-700 dark:text-gray-200 font-medium text-left">Statut</th>
                             <th class="border px-4 py-2 text-gray-700 dark:text-gray-200 font-medium text-left">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
-                        @forelse ($products as $product)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-200">
+                    <tbody>
+                        @forelse($products as $product)
+                        <tr class="hover:bg-gray-100 dark:hover:bg-gray-600">
                             <td class="border px-4 py-2">
-                                <div class="font-medium text-gray-800 dark:text-gray-200">{{ $product->name }}</div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">ID: {{ $product->id }}</div>
+                                @if($product->image)
+                                    @php
+                                        // Vérifier le type de chemin d'image
+                                        $imagePath = $product->image;
+                                        // Si le chemin contient déjà 'products/', on l'utilise tel quel
+                                        if (str_contains($imagePath, 'products/')) {
+                                            $imageUrl = asset('storage/' . $imagePath);
+                                        } else {
+                                            // Sinon, on suppose que c'est juste le nom du fichier
+                                            $imageUrl = asset('storage/products/' . $imagePath);
+                                        }
+                                    @endphp
+                                    <img src="{{ $imageUrl }}" 
+                                         alt="{{ $product->name }}" 
+                                         class="w-12 h-12 object-cover rounded"
+                                         onerror="this.onerror=null; this.src='{{ asset('images/placeholder.png') }}'; this.classList.add('opacity-50');">
+                                @else
+                                    <div class="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
+                                        <i class="fas fa-box text-gray-400 text-2xl"></i>
+                                    </div>
+                                @endif
                             </td>
-                            <td class="border px-4 py-2 text-gray-800 dark:text-gray-200">
-                                {{ Str::limit($product->description, 50) ?? 'Aucune description' }}
-                            </td>
+                            <td class="border px-4 py-2 font-medium">{{ $product->name }}</td>
+                            <td class="border px-4 py-2">{{ $product->category->name ?? 'N/A' }}</td>
+                            <td class="border px-4 py-2 font-semibold text-blue-600 dark:text-blue-400">{{ number_format($product->price, 2) }} €</td>
                             <td class="border px-4 py-2">
-                                <span class="font-semibold text-green-600 dark:text-green-400">
-                                    {{ number_format($product->price, 2, ',', ' ') }} €
+                                <span class="px-2 py-1 rounded-full text-xs font-semibold
+                                    @if($product->quantity > 10) bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                    @elseif($product->quantity > 0) bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                    @else bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                    @endif">
+                                    {{ $product->quantity }}
                                 </span>
                             </td>
                             <td class="border px-4 py-2">
-                                @if($product->quantity <= 0)
-                                    <span class="px-2 py-1 text-xs rounded-full bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-100">
-                                        Rupture
-                                    </span>
-                                @elseif($product->quantity <= ($product->stock_threshold ?? 5))
-                                    <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-100">
-                                        {{ $product->quantity }} (bas)
-                                    </span>
-                                @else
-                                    <span class="px-2 py-1 text-xs rounded-full bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100">
-                                        {{ $product->quantity }}
-                                    </span>
-                                @endif
+                                <span class="px-2 py-1 rounded-full text-xs font-semibold
+                                    @if($product->is_active) bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                    @else bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-200
+                                    @endif">
+                                    {{ $product->is_active ? 'Actif' : 'Inactif' }}
+                                </span>
                             </td>
                             <td class="border px-4 py-2">
-                                <div class="flex items-center">
-                                    <i class="fas fa-truck text-gray-400 mr-2"></i>
-                                    <span class="text-gray-800 dark:text-gray-200">
-                                        {{ optional($product->supplier)->name ?? 'Non assigné' }}
-                                    </span>
-                                </div>
-                            </td>
-                            <td class="border px-4 py-2">
-                                <div class="flex gap-2">
-                                    <a href="{{ route('admin.products.edit', $product->id) }}" 
-                                       class="bg-blue-500 hover:bg-blue-700 text-white text-sm font-bold py-1 px-3 rounded flex items-center">
+                                <div class="flex space-x-2">
+                                    <a href="{{ route('admin.products.edit', $product) }}" 
+                                       class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-xs flex items-center">
                                         <i class="fas fa-edit mr-1"></i> Modifier
                                     </a>
-                                    <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');">
+                                    <form action="{{ route('admin.products.destroy', $product) }}" 
+                                          method="POST" 
+                                          class="inline"
+                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="bg-red-500 hover:bg-red-700 text-white text-sm font-bold py-1 px-3 rounded flex items-center">
+                                        <button type="submit" 
+                                                class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-xs flex items-center">
                                             <i class="fas fa-trash mr-1"></i> Supprimer
                                         </button>
                                     </form>
-                                    <a href="{{ route('admin.orders.create', ['supplier_id' => $product->supplier_id]) }}" 
-                                       class="bg-green-500 hover:bg-green-700 text-white text-sm font-bold py-1 px-3 rounded flex items-center">
-                                        <i class="fas fa-shopping-cart mr-1"></i> Commander
-                                    </a>
                                 </div>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="border px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                            <td colspan="7" class="text-center py-8">
                                 <div class="flex flex-col items-center">
-                                    <i class="fas fa-box-open text-4xl text-gray-400 mb-4"></i>
-                                    <p class="text-lg">Aucun produit disponible</p>
-                                    <a href="{{ route('admin.products.create') }}" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                                    <i class="fas fa-box-open text-gray-400 text-5xl mb-3"></i>
+                                    <p class="text-gray-500 dark:text-gray-400 text-lg mb-3">Aucun produit trouvé</p>
+                                    <a href="{{ route('admin.products.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
                                         <i class="fas fa-plus mr-2"></i> Ajouter un produit
                                     </a>
                                 </div>
@@ -166,7 +175,7 @@
                 <div class="text-sm text-gray-700 dark:text-gray-300">
                     Affichage de {{ $products->firstItem() }} à {{ $products->lastItem() }} sur {{ $products->total() }} produits
                 </div>
-                <div>
+                <div class="pagination-wrapper">
                     {{ $products->links() }}
                 </div>
             </div>
@@ -207,4 +216,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<style>
+/* Styles pour la pagination si nécessaire */
+.pagination-wrapper svg {
+    width: 16px;
+    height: 16px;
+}
+</style>
 @endsection

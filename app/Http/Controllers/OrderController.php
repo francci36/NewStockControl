@@ -102,10 +102,19 @@ class OrderController extends Controller
         return view('orders.show', compact('order'));
     }
 
-  public function updateStatus(Request $request, Order $order)
+public function updateStatus(Request $request, Order $order)
 {
+    // Valider que le statut est dans la liste des statuts autorisés
     $request->validate([
-        'status' => 'required|in:' . Order::STATUS_PENDING . ',' . Order::STATUS_ARRIVED
+        'status' => 'required|in:' . implode(',', [
+            Order::STATUS_PENDING,
+            Order::STATUS_PROCESSING,
+            Order::STATUS_SHIPPED,
+            Order::STATUS_DELIVERED,
+            Order::STATUS_ARRIVED,
+            Order::STATUS_CANCELLED
+        ]),
+        'comment' => 'nullable|string|max:500',
     ]);
 
     try {
@@ -114,49 +123,54 @@ class OrderController extends Controller
         $oldStatus = $order->status;
         $newStatus = $request->status;
 
-        // Mettre à jour le statut
-        $order->update(['status' => $newStatus]);
+        // Utiliser la méthode avec historique
+        $order->updateStatusWithHistory(
+            $newStatus, 
+            $request->comment ?? 'Mise à jour du statut',
+            auth()->id()
+        );
 
-        // Si la commande passe de "en attente" à "arrivé"
-        if ($oldStatus === Order::STATUS_PENDING && $newStatus === Order::STATUS_ARRIVED) {
-            foreach ($order->products as $product) {
-                if ($order->type === 'supplier') {
-                    // COMMANDE FOURNISSEUR : AUGMENTE le stock
+        // Gestion des stocks selon le type de commande
+        if ($order->type === 'supplier') {
+            // Pour les commandes fournisseurs
+            if ($oldStatus === Order::STATUS_PENDING && $newStatus === Order::STATUS_ARRIVED) {
+                foreach ($order->products as $product) {
                     $product->quantity += $product->pivot->quantity;
-                    Log::info('Commande fournisseur arrivée - Stock augmenté', [
-                        'product' => $product->name,
-                        'ancien_stock' => $product->getOriginal('quantity'),
-                        'ajout' => $product->pivot->quantity,
-                        'nouveau_stock' => $product->quantity
-                    ]);
-                } else {
-                    // COMMANDE CLIENT : DIMINUE le stock
-                    if ($product->quantity < $product->pivot->quantity) {
-                        throw new \Exception("Stock insuffisant pour le produit {$product->name}");
-                    }
-                    $product->quantity -= $product->pivot->quantity;
-                    Log::info('Commande client validée - Stock diminué', [
-                        'product' => $product->name,
-                        'ancien_stock' => $product->getOriginal('quantity'),
-                        'retrait' => $product->pivot->quantity,
-                        'nouveau_stock' => $product->quantity
-                    ]);
+                    $product->save();
+                    
+                    Stock::updateOrCreate(
+                        ['product_id' => $product->id],
+                        ['quantity' => $product->quantity]
+                    );
                 }
-                
-                $product->save();
-
-                // Mettre à jour la table stocks
-                Stock::updateOrCreate(
-                    ['product_id' => $product->id],
-                    ['quantity' => $product->quantity]
-                );
+                Log::info('Stock augmenté pour commande fournisseur', ['order_id' => $order->id]);
+            }
+        } else {
+            // Pour les commandes clients
+            // Si la commande est annulée, on pourrait remettre le stock
+            if ($newStatus === Order::STATUS_CANCELLED) {
+                foreach ($order->products as $product) {
+                    $product->quantity += $product->pivot->quantity;
+                    $product->save();
+                    
+                    Stock::updateOrCreate(
+                        ['product_id' => $product->id],
+                        ['quantity' => $product->quantity]
+                    );
+                }
+                Log::info('Stock remis pour commande client annulée', ['order_id' => $order->id]);
             }
         }
 
         DB::commit();
 
-        return redirect()->route('admin.orders.index')
-            ->with('success', 'Statut mis à jour avec succès.');
+        // Message personnalisé selon le type
+        $message = $order->type === 'client' 
+            ? 'Statut de la commande client mis à jour avec succès.'
+            : 'Statut de la commande fournisseur mis à jour avec succès.';
+
+        return redirect()->route('admin.orders.show', $order->id)
+            ->with('success', $message);
 
     } catch (\Exception $e) {
         DB::rollBack();

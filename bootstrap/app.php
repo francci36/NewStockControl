@@ -12,10 +12,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Enregistrer le middleware avec un alias 'admin'
+        // Enregistrer les alias de middleware
         $middleware->alias([
             'admin' => AdminMiddleware::class,
+            'vendor' => \App\Http\Middleware\VendorMiddleware::class,
             'share.cart' => \App\Http\Middleware\ShareCartCount::class,
+        ]);
+        
+        // AJOUT : Exclure les routes webhook de la validation CSRF
+        $middleware->validateCsrfTokens(except: [
+            'api/webhooks/*',
+            'webhooks/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

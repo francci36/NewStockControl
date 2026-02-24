@@ -9,7 +9,22 @@ class OrderItem extends Model
 {
     protected $table = 'order_items';
     
-    protected $fillable = ['order_id', 'product_id', 'quantity', 'price'];
+     protected $fillable = [
+        'order_id',
+        'product_id',
+        'vendor_id',
+        'quantity',
+        'price',
+        'shipped_at',
+        'tracking_number',
+        'carrier',
+        'status'
+    ];
+
+        protected $casts = [
+        'shipped_at' => 'datetime',
+        'price' => 'decimal:2'
+    ];
 
     // Relation avec une commande
     public function order()
@@ -21,6 +36,12 @@ class OrderItem extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    // Relation avec un vendeur
+    public function vendor()
+    {
+        return $this->belongsTo(Vendor::class);
     }
 
     // Accessoire pour le prix total (quantité x prix unitaire)

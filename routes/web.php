@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 
 // Contrôleurs principaux (backend)
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\SupplierController;
@@ -15,60 +14,17 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TransactionController;
-
-// Contrôleurs de la boutique (avec alias)
-use App\Http\Controllers\Shop\HomeController as ShopHomeController;
-use App\Http\Controllers\Shop\ProductController as ShopProductController;
-use App\Http\Controllers\Shop\CartController as ShopCartController;
-use App\Http\Controllers\Shop\CheckoutController as ShopCheckoutController;
+use App\Http\Controllers\Client\OrderController as ClientOrderController;
+use App\Http\Controllers\Client\ProfileController as ClientProfileController;
+use App\Http\Controllers\Admin\VendorController; // ← AJOUTER CET IMPORT
 
 // ===========================================
-// ROUTES PUBLIQUES - BOUTIQUE (page d'accueil)
+// CHARGEMENT DES ROUTES DE LA BOUTIQUE ET VENDEUR
 // ===========================================
-Route::get('/', [ShopHomeController::class, 'index'])->name('shop.home');
-
-// Routes de la boutique
-Route::prefix('shop')->name('shop.')->group(function () {
-    // Page d'accueil (redirige vers la racine)
-    Route::get('/', function() {
-        return redirect('/');
-    })->name('home');
-    
-    // Produits
-    Route::prefix('products')->name('products.')->group(function () {
-        Route::get('/', [ShopProductController::class, 'index'])->name('index');
-        Route::get('/{product}', [ShopProductController::class, 'show'])->name('show');
-    });
-    
-    // Panier (accessible à tous)
-    Route::prefix('cart')->name('cart.')->group(function () {
-        Route::get('/', [ShopCartController::class, 'index'])->name('index');
-        Route::post('/add', [ShopCartController::class, 'add'])->name('add');
-        Route::patch('/{cart}', [ShopCartController::class, 'update'])->name('update');
-        Route::delete('/{cart}', [ShopCartController::class, 'remove'])->name('remove');
-        Route::delete('/', [ShopCartController::class, 'clear'])->name('clear');
-    });
-    
-    // Checkout (nécessite un compte)
-    Route::middleware(['auth'])->prefix('checkout')->name('checkout.')->group(function () {
-        Route::get('/', [ShopCheckoutController::class, 'index'])->name('index');
-        Route::post('/', [ShopCheckoutController::class, 'process'])->name('process');
-        Route::get('/confirmation/{order}', [ShopCheckoutController::class, 'confirmation'])->name('confirmation');
-    });
-});
-
-// Routes pour les clients
-Route::middleware(['auth'])->prefix('client')->name('client.')->group(function () {
-    // Historique des commandes
-    Route::get('/orders', [App\Http\Controllers\Client\OrderController::class, 'index'])->name('orders.index');
-    Route::get('/orders/{order}', [App\Http\Controllers\Client\OrderController::class, 'show'])->name('orders.show');
-    
-    // Profil client
-    Route::get('/profile', [App\Http\Controllers\Client\ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [App\Http\Controllers\Client\ProfileController::class, 'update'])->name('profile.update');
-    Route::put('/profile/password', [App\Http\Controllers\Client\ProfileController::class, 'updatePassword'])->name('profile.password');
-});
+require __DIR__.'/shop.php';
+require __DIR__.'/vendor.php';   
 
 // ===========================================
 // ROUTES D'AUTHENTIFICATION (communes)
@@ -81,6 +37,22 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+// ===========================================
+// ROUTES CLIENTS (utilisateurs connectés)
+// ===========================================
+Route::middleware(['auth'])->prefix('client')->name('client.')->group(function () {
+    
+    // Historique des commandes
+    Route::get('/orders', [ClientOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [ClientOrderController::class, 'show'])->name('orders.show');
+    Route::get('/orders/{order}/tracking', [ClientOrderController::class, 'tracking'])->name('orders.tracking');
+    
+    // Profil client
+    Route::get('/profile', [ClientProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ClientProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ClientProfileController::class, 'updatePassword'])->name('profile.password');
+});
 
 // ===========================================
 // ROUTES BACKEND (protégées, réservées aux admins)
@@ -109,6 +81,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::put('/{product}', [ProductController::class, 'update'])->name('update');
         Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
     });
+
+    // categories
+       Route::prefix('categories')->name('categories.')->group(function () {
+        Route::post('/quick-create', [CategoryController::class, 'quickCreate'])->name('quick-create');
+        // Vous pouvez ajouter d'autres routes pour les catégories ici plus tard
+    });
+    
     
     // Fournisseurs
     Route::prefix('suppliers')->name('suppliers.')->group(function () {
@@ -145,11 +124,27 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/', [RapportController::class, 'index'])->name('index');
     });
     
+    // ===========================================
+    // ROUTES ADMIN POUR LES VENDEURS (AJOUTÉES ICI)
+    // ===========================================
+    Route::prefix('vendors')->name('vendors.')->group(function () {
+        Route::get('/', [VendorController::class, 'index'])->name('index');
+        Route::get('/{vendor}', [VendorController::class, 'show'])->name('show');
+        Route::post('/{vendor}/approve', [VendorController::class, 'approve'])->name('approve');
+        Route::post('/{vendor}/reject', [VendorController::class, 'reject'])->name('reject');
+        Route::post('/{vendor}/suspend', [VendorController::class, 'suspend'])->name('suspend');
+        Route::post('/{vendor}/commission', [VendorController::class, 'updateCommission'])->name('commission');
+    });
+    
     // API interne
     Route::prefix('api')->name('api.')->group(function () {
         Route::get('/products/{supplier}', [OrderController::class, 'getProductsBySupplier'])->name('products.by-supplier');
         Route::get('/stock-data', [DashboardController::class, 'getStockData'])->name('stock.data');
         Route::get('/transactions-data', [DashboardController::class, 'transactionsData'])->name('transactions.data');
+        Route::get('/api/categories', function() {
+                    return App\Models\Category::where('is_active', true)->get(['id', 'name']);
+                })->middleware('auth');
+                
     });
     
     // Profile admin
@@ -157,11 +152,29 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/', [ProfileController::class, 'edit'])->name('edit');
         Route::patch('/', [ProfileController::class, 'update'])->name('update');
         Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password');
+        Route::patch('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo');
         Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
     });
 });
 
-// Routes de test (admin uniquement)
+// ===========================================
+// ROUTES POUR LES NOTIFICATIONS
+// ===========================================
+Route::middleware(['auth'])->prefix('notifications')->name('notifications.')->group(function () {
+    Route::post('/read-all', function() {
+        auth()->user()->unreadNotifications->markAsRead();
+        return redirect()->back()->with('success', 'Toutes les notifications ont été marquées comme lues.');
+    })->name('read-all');
+    
+    Route::post('/{id}/read', function($id) {
+        auth()->user()->notifications()->where('id', $id)->first()->markAsRead();
+        return redirect()->back()->with('success', 'Notification marquée comme lue.');
+    })->name('read');
+});
+
+// ===========================================
+// ROUTES DE TEST (admin uniquement)
+// ===========================================
 if (app()->environment('local')) {
     Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/list-tables', function () {

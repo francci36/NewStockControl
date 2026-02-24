@@ -36,4 +36,37 @@ class User extends Authenticatable
     {
         return $this->role === 'admin';
     }
+
+        /**
+     * Relation avec le vendeur
+     */
+    public function vendor()
+    {
+        return $this->hasOne(Vendor::class);
+    }
+
+    /**
+     * Vérifie si l'utilisateur est un vendeur approuvé
+     */
+    public function isVendor()
+    {
+        return $this->role === 'vendor' && $this->vendor && $this->vendor->status === 'active';
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut devenir vendeur
+     */
+    public function canBecomeVendor()
+    {
+        return !$this->vendor && $this->role !== 'admin';
+    }
+
+    /**
+     * Met à jour le rôle de l'utilisateur en vendeur
+     */
+    public function setAsVendor()
+    {
+        $this->role = 'vendor';
+        $this->save();
+    }
 }

@@ -19,44 +19,69 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function update(Request $request)
+  public function update(Request $request)
 {
-    $user = Auth::user();
-
-    // Log incoming request data
-    Log::info('Update request data:', $request->all());
+    $user = $request->user();
 
     $request->validate([
         'name' => ['required', 'string', 'max:255'],
-        'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
-        'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-        'profile_photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+        'email' => ['required', 'email', 'unique:users,email,' . $user->id],
+        'profile_photo' => ['nullable', 'image', 'max:2048', 'mimes:jpeg,png,jpg,gif'], // max 2MB
     ]);
 
-    $user->name = $request->name;
-    $user->email = $request->email;
+    $data = [
+        'name' => $request->name,
+        'email' => $request->email,
+    ];
 
-    // Handle password update if provided
-    if ($request->filled('password')) {
-        $user->password = Hash::make($request->password);
-    }
-
-    // Handle profile photo upload
+    // Gestion de la photo de profil
     if ($request->hasFile('profile_photo')) {
-        $path = $request->file('profile_photo')->store('profile_photos', 'public');
-        $user->profile_photo_url = $path;
+        // Vérifier que le fichier est valide
+        if (!$request->file('profile_photo')->isValid()) {
+            return back()->with('error', 'Le fichier est corrompu ou invalide.');
+        }
 
-        // Log the uploaded file path
-        Log::info('Profile photo uploaded to: ' . $path);
-    } else {
-        Log::info('No profile photo uploaded.');
+        try {
+            // Supprimer l'ancienne photo si elle existe
+            if ($user->profile_photo_url) {
+                Storage::disk('public')->delete($user->profile_photo_url);
+            }
+            
+            // Sauvegarder la nouvelle photo
+            $path = $request->file('profile_photo')->store('profile-photos', 'public');
+            $data['profile_photo_url'] = $path;
+            
+        } catch (\Exception $e) {
+            return back()->with('error', 'Erreur lors du téléchargement de la photo: ' . $e->getMessage());
+        }
     }
 
-    $user->save();
+    $user->update($data);
 
-    return redirect()->route('profile.edit')->with('status', 'Profile updated successfully.');
+    return redirect()->route('admin.profile.edit')->with('success', 'Profil mis à jour avec succès !');
 }
 
+public function updatePhoto(Request $request)
+{
+    $request->validate([
+        'profile_photo' => 'required|image|max:2048', // max 2MB
+    ]);
+
+    $user = $request->user();
+
+    // Supprimer l'ancienne photo si elle existe
+    if ($user->profile_photo_url) {
+        Storage::disk('public')->delete($user->profile_photo_url);
+    }
+
+    // Sauvegarder la nouvelle photo
+    $path = $request->file('profile_photo')->store('profile-photos', 'public');
+    $user->profile_photo_url = $path;
+    $user->save();
+
+    return redirect()->route('admin.profile.edit')
+        ->with('photo_success', 'Photo de profil mise à jour avec succès !');
+}
 
     public function destroy(Request $request)
     {

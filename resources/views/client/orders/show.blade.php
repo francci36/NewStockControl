@@ -1,7 +1,7 @@
 {{-- resources/views/client/orders/show.blade.php --}}
 @extends('shop.layouts.shop')
 
-@section('title', 'Détails de la commande - Ma Boutique')
+@section('title', 'Détails de la commande #' . $order->id . ' - Ma Boutique')
 
 @section('content')
 <div class="container">
@@ -31,8 +31,9 @@
                         <div class="col-sm-6">
                             <strong>Statut</strong>
                             <p>
-                                <span class="badge {{ $order->status === 'en attente' ? 'bg-warning' : 'bg-success' }} fs-6">
-                                    {{ $order->status }}
+                                <span class="badge bg-{{ $order->status_color ?? 'warning' }} fs-6">
+                                    <i class="fas {{ $order->status_icon ?? 'fa-clock' }} me-1"></i>
+                                    {{ $order->status_label ?? $order->status }}
                                 </span>
                             </p>
                         </div>
@@ -53,12 +54,30 @@
                                 @foreach($order->products as $product)
                                 <tr>
                                     <td>
-                                        {{ $product->name }}
-                                        <small class="d-block text-muted">{{ Str::limit($product->description, 50) }}</small>
+                                        <div class="d-flex align-items-center">
+                                            @if($product->image)
+                                                @php
+                                                    $imagePath = str_contains($product->image, 'products/') 
+                                                        ? $product->image 
+                                                        : 'products/' . $product->image;
+                                                @endphp
+                                                <img src="{{ asset('storage/' . $imagePath) }}" 
+                                                     alt="{{ $product->name }}" 
+                                                     class="rounded me-2"
+                                                     style="width: 40px; height: 40px; object-fit: cover;"
+                                                     onerror="this.onerror=null; this.src='{{ asset('images/placeholder.png') }}';">
+                                            @endif
+                                            <div>
+                                                {{ $product->name }}
+                                                @if($product->category)
+                                                    <small class="d-block text-muted">{{ $product->category->name }}</small>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </td>
-                                    <td class="text-center">{{ $product->pivot->quantity }}</td>
-                                    <td class="text-end">{{ number_format($product->pivot->price, 2) }} €</td>
-                                    <td class="text-end">{{ number_format($product->pivot->price * $product->pivot->quantity, 2) }} €</td>
+                                    <td class="text-center align-middle">{{ $product->pivot->quantity }}</td>
+                                    <td class="text-end align-middle">{{ number_format($product->pivot->price, 2) }} €</td>
+                                    <td class="text-end align-middle">{{ number_format($product->pivot->price * $product->pivot->quantity, 2) }} €</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -69,11 +88,23 @@
                                 </tr>
                                 <tr>
                                     <th colspan="3" class="text-end">Livraison :</th>
-                                    <th class="text-end">Gratuite</th>
+                                    <th class="text-end">
+                                        @if($order->total_amount >= 50)
+                                            <span class="text-success">Gratuite</span>
+                                        @else
+                                            {{ number_format(5.99, 2) }} €
+                                        @endif
+                                    </th>
                                 </tr>
                                 <tr>
                                     <th colspan="3" class="text-end">Total TTC :</th>
-                                    <th class="text-end text-primary fs-5">{{ number_format($order->total_amount, 2) }} €</th>
+                                    <th class="text-end text-primary fs-5">
+                                        @php
+                                            $shipping = $order->total_amount >= 50 ? 0 : 5.99;
+                                            $finalTotal = $order->total_amount + $shipping;
+                                        @endphp
+                                        {{ number_format($finalTotal, 2) }} €
+                                    </th>
                                 </tr>
                             </tfoot>
                         </table>
@@ -124,8 +155,19 @@
                             @case('bank_transfer')
                                 <i class="fas fa-university me-2"></i> Virement bancaire
                                 @break
+                            @default
+                                <i class="fas fa-credit-card me-2"></i> {{ $order->payment_method }}
                         @endswitch
                     </p>
+                    @if($order->payment)
+                        <p class="text-success">
+                            <i class="fas fa-check-circle me-1"></i> Paiement effectué
+                        </p>
+                    @else
+                        <p class="text-warning">
+                            <i class="fas fa-clock me-1"></i> Paiement en attente
+                        </p>
+                    @endif
                 </div>
             </div>
 

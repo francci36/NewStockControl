@@ -38,4 +38,15 @@ class OrderController extends Controller
         
         return view('client.orders.show', compact('order'));
     }
+    // Affiche le suivi d'une commande spécifique
+    public function tracking(Order $order)
+    {
+        if ($order->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $order->load(['statusHistory.user', 'products', 'payment']);
+        
+        return view('client.orders.tracking', compact('order'));
+    }
 }
