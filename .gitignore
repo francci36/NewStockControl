@@ -20,3 +20,10 @@ yarn-error.log
 /.idea
 /.vscode
 /.zed
+# Fichiers générés
+curl
+download_images.php
+structure.txt
+
+# Dossiers d'assets
+public/images/
