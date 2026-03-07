@@ -45,6 +45,7 @@ class OrderConfirmation extends Mailable
                 'order' => $this->order,
                 'total' => $this->order->total_amount,
                 'items' => $this->order->products,
+                'locale' => $this->order->client->preferred_locale ?? 'fr',
             ],
         );
     }

@@ -6,6 +6,37 @@ use App\Http\Controllers\Shop\HomeController as ShopHomeController;
 use App\Http\Controllers\Shop\ProductController as ShopProductController;
 use App\Http\Controllers\Shop\CartController as ShopCartController;
 use App\Http\Controllers\Shop\CheckoutController as ShopCheckoutController;
+use App\Http\Controllers\LanguageController;
+
+// ===========================================
+// ROUTES PUBLIQUES (HORS GROUPE SHOP)
+// ===========================================
+
+// ✅ ROUTE DE CHANGEMENT DE LANGUE (accessible partout)
+
+
+
+// Ajoutez temporairement dans routes/shop.php
+Route::get('/debug-translations', function() {
+    return [
+        'categories' => \App\Models\Category::with('translations')->get()->map(function($cat) {
+            return [
+                'id' => $cat->id,
+                'name_fr' => $cat->name,
+                'translations' => $cat->translations
+            ];
+        }),
+        'products' => \App\Models\Product::with('translations')->take(5)->get()->map(function($prod) {
+            return [
+                'id' => $prod->id,
+                'name_fr' => $prod->name,
+                'translations' => $prod->translations
+            ];
+        })
+    ];
+});
+
+Route::get('language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
 
 // ===========================================
 // ROUTES DE LA BOUTIQUE

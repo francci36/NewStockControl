@@ -25,69 +25,119 @@ class DashboardController extends Controller
      * Récupère toutes les données du dashboard en une seule requête AJAX
      */
     public function getDashboardData()
-{
-    $pendingOrders = Order::where('status', Order::STATUS_PENDING)->count();
-    $completedOrders = Order::where('status', Order::STATUS_ARRIVED)->count();
-    $totalProducts = Product::count();
-    $totalStockQuantity = Product::sum('quantity');
-    
-    $lowStockCount = Product::whereNotNull('stock_threshold')
-        ->whereColumn('quantity', '<', 'stock_threshold')
-        ->count();
+    {
+        $pendingOrders = Order::where('status', Order::STATUS_PENDING)->count();
+        $completedOrders = Order::where('status', Order::STATUS_ARRIVED)->count();
+        $totalProducts = Product::count();
+        $totalStockQuantity = Product::sum('quantity');
+        
+        $lowStockCount = Product::whereNotNull('stock_threshold')
+            ->whereColumn('quantity', '<', 'stock_threshold')
+            ->count();
 
-    $lowStockProducts = Product::whereNotNull('stock_threshold')
-        ->where(function ($query) {
-            $query->whereColumn('quantity', '<', 'stock_threshold')
-                ->orWhere('quantity', '<=', 0);
-        })
-        ->with('supplier')
-        ->get()
-        ->map(function ($product) {
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'quantity' => $product->quantity,
-                'threshold' => $product->stock_threshold,
-                'supplier_id' => $product->supplier_id,
-                'supplier_name' => $product->supplier->name ?? 'N/A',
-            ];
+        // 🔥 CORRECTION : Charger les relations et utiliser les accesseurs admin
+        $lowStockProducts = Product::with(['supplier', 'category', 'vendor'])
+            ->whereNotNull('stock_threshold')
+            ->where(function ($query) {
+                $query->whereColumn('quantity', '<', 'stock_threshold')
+                    ->orWhere('quantity', '<=', 0);
+            })
+            ->get()
+            ->map(function ($product) {
+                // Traitement du nom du produit
+                $productName = $product->admin_name;
+                
+                // Traitement du fournisseur
+                $supplierName = 'N/A';
+                $supplierData = null;
+                
+                if ($product->supplier) {
+                    $supplierName = $product->supplier->admin_name ?? $product->supplier->name;
+                    $supplierData = [
+                        'id' => $product->supplier->id,
+                        'name' => $supplierName,
+                        'admin_name' => $product->supplier->admin_name ?? null
+                    ];
+                } elseif ($product->vendor) {
+                    $supplierName = $product->vendor->admin_name ?? $product->vendor->shop_name;
+                    $supplierData = [
+                        'id' => $product->vendor->id,
+                        'name' => $supplierName,
+                        'admin_name' => $product->vendor->admin_name ?? null,
+                        'type' => 'vendor'
+                    ];
+                }
+                
+                return [
+                    'id' => $product->id,
+                    'name' => $productName,
+                    'admin_name' => $productName, // Ajout pour compatibilité
+                    'quantity' => $product->quantity,
+                    'stock_threshold' => $product->stock_threshold,
+                    'supplier_id' => $product->supplier_id ?? $product->vendor_id,
+                    'supplier_name' => $supplierName,
+                    'supplier' => $supplierData,
+                ];
+            });
+
+        // 🔥 CORRECTION : Commandes récentes avec noms traduits
+        $recentOrders = Order::with(['supplier', 'client'])
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(function ($order) {
+                $supplierName = null;
+                if ($order->supplier) {
+                    $supplierName = $order->supplier->admin_name ?? $order->supplier->name;
+                }
+                
+                return [
+                    'id' => $order->id,
+                    'type' => $order->type,
+                    'supplier' => $order->supplier ? [
+                        'id' => $order->supplier->id,
+                        'name' => $supplierName,
+                        'admin_name' => $order->supplier->admin_name ?? null
+                    ] : null,
+                    'supplier_name' => $supplierName,
+                    'client_name' => $order->client->name ?? null,
+                    'date' => $order->date->format('d/m/Y'),
+                    'products_count' => $order->products->count(),
+                    'status' => $order->status,
+                ];
+            });
+
+        // 🔥 CORRECTION : Données du graphique avec noms traduits
+        $topProducts = Product::with(['supplier', 'vendor'])
+            ->where('quantity', '>', 0)
+            ->orderBy('quantity', 'desc')
+            ->limit(10)
+            ->get();
+            
+        $stockChartLabels = $topProducts->map(function ($product) {
+            return $product->admin_name;
         });
+        
+        $stockChartQuantities = $topProducts->pluck('quantity');
 
-    // Commandes récentes (mélange des deux types)
-    $recentOrders = Order::with(['supplier', 'client'])
-        ->latest()
-        ->take(5)
-        ->get()
-        ->map(function ($order) {
-            return [
-                'id' => $order->id,
-                'type' => $order->type,
-                'supplier_name' => $order->supplier->name ?? null,
-                'client_name' => $order->client->name ?? null,
-                'date' => $order->date->format('d/m/Y'),
-                'products_count' => $order->products->count(),
-                'status' => $order->status,
-            ];
-        });
-
-    return response()->json([
-        'stats' => [
-            'totalSuppliers' => Supplier::count(),
-            'totalProducts' => $totalProducts,
-            'totalStockQuantity' => $totalStockQuantity,
-            'pendingOrders' => $pendingOrders,
-            'completedOrders' => $completedOrders,
-            'lowStockCount' => $lowStockCount,
-        ],
-        'lowStockProducts' => $lowStockProducts,
-        'recentOrders' => $recentOrders,
-        'stockChart' => [
-            'labels' => Product::where('quantity', '>', 0)->orderBy('quantity', 'desc')->limit(10)->pluck('name'),
-            'quantities' => Product::where('quantity', '>', 0)->orderBy('quantity', 'desc')->limit(10)->pluck('quantity'),
-        ],
-        'lastUpdate' => now()->format('H:i:s'),
-    ]);
-}
+        return response()->json([
+            'stats' => [
+                'totalSuppliers' => Supplier::count(),
+                'totalProducts' => $totalProducts,
+                'totalStockQuantity' => $totalStockQuantity,
+                'pendingOrders' => $pendingOrders,
+                'completedOrders' => $completedOrders,
+                'lowStockCount' => $lowStockCount,
+            ],
+            'lowStockProducts' => $lowStockProducts,
+            'recentOrders' => $recentOrders,
+            'stockChart' => [
+                'labels' => $stockChartLabels,
+                'quantities' => $stockChartQuantities,
+            ],
+            'lastUpdate' => now()->format('H:i:s'),
+        ]);
+    }
 
     /**
      * Renvoie les données des transactions pour les graphiques
@@ -116,7 +166,9 @@ class DashboardController extends Controller
             ->count();
 
         return response()->json([
-            'labels' => $transactions->pluck('date'),
+            'labels' => $transactions->pluck('date')->map(function($date) {
+                return \Carbon\Carbon::parse($date)->format('d/m');
+            }),
             'counts' => $transactions->pluck('count'),
             'entries' => $transactions->pluck('entries'),
             'exits' => $transactions->pluck('exits'),
@@ -133,14 +185,16 @@ class DashboardController extends Controller
      */
     public function getStockData(Request $request)
     {
-        $products = Product::select('name', 'quantity')
+        $products = Product::with(['supplier', 'vendor'])
             ->where('quantity', '>', 0)
             ->orderBy('quantity', 'desc')
             ->limit(10)
             ->get();
 
         return response()->json([
-            'labels' => $products->pluck('name'),
+            'labels' => $products->map(function ($product) {
+                return $product->admin_name;
+            }),
             'quantities' => $products->pluck('quantity'),
         ]);
     }

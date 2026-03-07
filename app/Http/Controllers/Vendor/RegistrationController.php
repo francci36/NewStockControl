@@ -42,9 +42,13 @@ class RegistrationController extends Controller
      public function store(Request $request)
     {
         $request->validate([
-            'shop_name' => 'required|string|max:255|unique:vendors',
+             'shop_name' => 'required|string|max:255|unique:vendors',
             'description' => 'nullable|string|max:1000',
             'address' => 'required|string|max:500',
+            'city' => 'nullable|string|max:100',
+            'postal_code' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:100',
+            'website' => 'nullable|url|max:255',
             'phone' => 'required|string|max:20',
             'business_number' => 'required|string|max:50',
             'bank_account' => 'required|string|max:50',
@@ -61,10 +65,14 @@ class RegistrationController extends Controller
                 'slug' => Vendor::generateUniqueSlug($request->shop_name),
                 'description' => $request->description,
                 'address' => $request->address,
+                'city' => $request->city,
+                'postal_code' => $request->postal_code,
+                'country' => $request->country,
+                'website' => $request->website,
                 'phone' => $request->phone,
                 'business_number' => $request->business_number,
                 'bank_account' => $request->bank_account,
-                'commission_rate' => 10.00,
+                'commission_rate' => 10.00, // Commission par défaut
                 'status' => 'pending',
             ]);
 

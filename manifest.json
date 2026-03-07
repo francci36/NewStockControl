@@ -1,0 +1,44 @@
+{
+    "name": "Carioca & Coquelicot",
+    "short_name": "C&C",
+    "start_url": "/",
+    "scope": "/",
+    "description": "Boutique en ligne pour animaux de compagnie - Alimentation, accessoires, soins et bien plus",
+    "orientation": "portrait",
+    "dir": "auto",
+    "lang": "fr",
+    "display": "standalone",
+    "theme_color": "#1a1a2e",
+    "background_color": "#f8f9fa",
+    "icons": [
+        {
+            "src": "images/logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "images/logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+    ,
+    "screenshots": [
+        {
+            "src": "screenshots/mobile.jpg",
+            "sizes": "375x667",
+            "type": "image/jpeg",
+            "form_factor": "narrow",
+            "label": "Accueil mobile"
+        },
+        {
+            "src": "screenshots/desktop.jpg",
+            "sizes": "1280x720",
+            "type": "image/jpeg",
+            "form_factor": "wide",
+            "label": "Accueil desktop"
+        }
+    ]
+}

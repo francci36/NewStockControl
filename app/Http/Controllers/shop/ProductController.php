@@ -6,54 +6,41 @@ namespace App\Http\Controllers\Shop;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Category;
-use App\Models\Supplier;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['supplier', 'category', 'vendor'])
-            ->where('quantity', '>', 0) // Seulement les produits en stock
-            ->where('is_active', true); // Seulement les produits actifs
-            
+        $query = Product::with(['category', 'vendor', 'supplier'])
+            ->where('is_active', true)
+            ->where('quantity', '>', 0);
 
-        // 🔍 FILTRE PAR RECHERCHE
-        if ($request->has('search') && !empty($request->search)) {
+        // Filtre par catégorie (slug)
+        if ($request->filled('category')) {
+            $category = Category::where('slug', $request->category)->first();
+            if ($category) {
+                // Si c'est une catégorie principale, montrer aussi ses sous-catégories
+                if ($category->children->isNotEmpty()) {
+                    $categoryIds = $category->children->pluck('id')->push($category->id);
+                    $query->whereIn('category_id', $categoryIds);
+                } else {
+                    $query->where('category_id', $category->id);
+                }
+            }
+        }
+
+        // Filtre par recherche
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('description', 'like', '%' . $search . '%')
-                  ->orWhere('short_description', 'like', '%' . $search . '%');
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
-        // 📁 FILTRE PAR CATÉGORIE
-        if ($request->has('category') && !empty($request->category)) {
-            $query->whereHas('category', function($q) use ($request) {
-                $q->where('slug', $request->category);
-            });
-        }
-
-        // 🏭 FILTRE PAR FOURNISSEUR OU VENDEUR
-        if ($request->has('vendor') && !empty($request->vendor)) {
-            $query->where('vendor_id', $request->vendor);
-        }
-
-        if ($request->has('supplier') && !empty($request->supplier)) {
-            $query->where('supplier_id', $request->supplier);
-        }
-
-        // 💰 FILTRE PAR PRIX
-        if ($request->has('min_price') && $request->min_price !== null) {
-            $query->where('price', '>=', $request->min_price);
-        }
-        if ($request->has('max_price') && $request->max_price !== null) {
-            $query->where('price', '<=', $request->max_price);
-        }
-
-        // 📊 TRI
-        $sort = $request->get('sort', 'latest');
+        // Tri
+        $sort = $request->get('sort', 'newest');
         switch ($sort) {
             case 'price_asc':
                 $query->orderBy('price', 'asc');
@@ -67,45 +54,40 @@ class ProductController extends Controller
             case 'name_desc':
                 $query->orderBy('name', 'desc');
                 break;
-            default: // 'latest'
-                $query->latest();
+            default: // 'newest'
+                $query->orderBy('created_at', 'desc');
+                break;
         }
 
-        $products = $query->paginate(12)->withQueryString();
-
+        $products = $query->paginate(12);
+        
         // Récupérer les catégories pour le filtre
-        $categories = Category::where('is_active', true)
-            ->withCount('products')
+        $categories = Category::whereNull('parent_id')
+            ->with('children')
+            ->whereHas('products', function($q) {
+                $q->where('is_active', true)->where('quantity', '>', 0);
+            })
             ->get();
 
-        // Récupérer les vendeurs pour le filtre (optionnel)
-        $vendors = \App\Models\Vendor::where('status', 'active')->get();
-
-        return view('shop.products.index', compact('products', 'categories', 'vendors'));
+        return view('shop.products.index', compact('products', 'categories'));
     }
 
     public function show(Product $product)
     {
-        // Vérifier que le produit est disponible
-        if ($product->quantity <= 0 || !$product->is_active) {
-            return redirect()->route('shop.products.index')
-                ->with('error', 'Ce produit n\'est pas disponible.');
+        // Vérifier que le produit est actif et en stock
+        if (!$product->is_active || $product->quantity <= 0) {
+            abort(404);
         }
 
-        // Charger les relations
-        $product->load(['supplier', 'category', 'vendor']);
-
-        // Produits similaires (même catégorie ou même vendeur)
-        $relatedProducts = Product::where('id', '!=', $product->id)
+        // Produits similaires
+        $similarProducts = Product::with(['category'])
+            ->where('category_id', $product->category_id)
+            ->where('id', '!=', $product->id)
             ->where('is_active', true)
             ->where('quantity', '>', 0)
-            ->where(function($q) use ($product) {
-                $q->where('category_id', $product->category_id)
-                  ->orWhere('vendor_id', $product->vendor_id);
-            })
-            ->take(4)
+            ->limit(4)
             ->get();
 
-        return view('shop.products.show', compact('product', 'relatedProducts'));
+        return view('shop.products.show', compact('product', 'similarProducts'));
     }
 }

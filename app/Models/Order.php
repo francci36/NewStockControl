@@ -11,6 +11,116 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends Model
 {
+    // Définir les constantes de statut (en codes, indépendants de la langue)
+    const STATUS_PENDING = 'pending';
+    const STATUS_PAID = 'paid';
+    const STATUS_PROCESSING = 'processing';
+    const STATUS_SHIPPED = 'shipped';
+    const STATUS_DELIVERED = 'delivered';
+    const STATUS_ARRIVED = 'arrived';
+    const STATUS_CANCELLED = 'cancelled';
+    const STATUS_REFUNDED = 'refunded';
+
+    // Liste des statuts disponibles
+    public static function getAvailableStatuses()
+    {
+        return [
+            self::STATUS_PENDING,
+            self::STATUS_PAID,
+            self::STATUS_PROCESSING,
+            self::STATUS_SHIPPED,
+            self::STATUS_DELIVERED,
+            self::STATUS_ARRIVED,
+            self::STATUS_CANCELLED,
+            self::STATUS_REFUNDED,
+        ];
+    }
+
+    // Obtenir le libellé du statut pour la langue courante
+    public function getStatusLabelAttribute()
+    {
+        $locale = app()->getLocale();
+        
+        $statusLabels = [
+            'pending' => [
+                'fr' => 'En attente de confirmation',
+                'en' => 'Pending confirmation',
+                'pt_BR' => 'Aguardando confirmação',
+            ],
+            'paid' => [
+                'fr' => 'Payée',
+                'en' => 'Paid',
+                'pt_BR' => 'Pago',
+            ],
+            'processing' => [
+                'fr' => 'En traitement',
+                'en' => 'Processing',
+                'pt_BR' => 'Em processamento',
+            ],
+            'shipped' => [
+                'fr' => 'Expédiée',
+                'en' => 'Shipped',
+                'pt_BR' => 'Enviado',
+            ],
+            'delivered' => [
+                'fr' => 'Livrée',
+                'en' => 'Delivered',
+                'pt_BR' => 'Entregue',
+            ],
+            'arrived' => [
+                'fr' => 'Arrivée',
+                'en' => 'Arrived',
+                'pt_BR' => 'Chegou',
+            ],
+            'cancelled' => [
+                'fr' => 'Annulée',
+                'en' => 'Cancelled',
+                'pt_BR' => 'Cancelado',
+            ],
+            'refunded' => [
+                'fr' => 'Remboursée',
+                'en' => 'Refunded',
+                'pt_BR' => 'Reembolsado',
+            ],
+        ];
+
+        return $statusLabels[$this->status][$locale] ?? $statusLabels[$this->status]['fr'] ?? $this->status;
+    }
+
+    // Couleurs associées aux statuts (indépendantes de la langue)
+    public function getStatusColorAttribute()
+    {
+        $colors = [
+            'pending' => 'warning',
+            'paid' => 'success',
+            'processing' => 'info',
+            'shipped' => 'primary',
+            'delivered' => 'success',
+            'arrived' => 'success',
+            'cancelled' => 'danger',
+            'refunded' => 'secondary',
+        ];
+
+        return $colors[$this->status] ?? 'secondary';
+    }
+
+    // Icônes associées aux statuts
+    public function getStatusIconAttribute()
+    {
+        $icons = [
+            'pending' => 'fa-clock',
+            'paid' => 'fa-credit-card',
+            'processing' => 'fa-cog',
+            'shipped' => 'fa-truck',
+            'delivered' => 'fa-check-circle',
+            'arrived' => 'fa-check-circle',
+            'cancelled' => 'fa-times-circle',
+            'refunded' => 'fa-undo',
+        ];
+
+        return $icons[$this->status] ?? 'fa-info-circle';
+    }
+
     protected $fillable = [
         'user_id',
         'supplier_id',
@@ -26,169 +136,154 @@ class Order extends Model
         'shipping_phone',
         'payment_method',
         'total_amount',
+        'tracking_number',
+        'carrier',
+        'shipped_at',
+        'delivered_at',
+        'tracking_events',
+        'payment_reference',
+        'paid_at',
+        'commission_total',
+        'reference',
     ];
 
     protected $casts = [
         'date' => 'date',
+        'shipped_at' => 'datetime',
+        'delivered_at' => 'datetime',
+        'paid_at' => 'datetime',
+        'tracking_events' => 'array',
+        'total_amount' => 'decimal:2',
+        'commission_total' => 'decimal:2',
     ];
 
-    // Statuts possibles
-    const STATUS_PENDING = 'en attente';
-    const STATUS_PROCESSING = 'en traitement';
-    const STATUS_SHIPPED = 'expédiée';
-    const STATUS_DELIVERED = 'livrée';
-    const STATUS_ARRIVED = 'arrivé';
-    const STATUS_CANCELLED = 'annulé';
-
-    // Statuts pour les commandes clients (suivi)
-    const TRACKING_STATUSES = [
-        'en attente' => 'En attente de confirmation',
-        'en traitement' => 'Commande en cours de préparation',
-        'expédiée' => 'Commande expédiée',
-        'livrée' => 'Commande livrée',
-        'arrivé' => 'Commande arrivée',
-        'annulé' => 'Commande annulée'
-    ];
-
-    // Couleurs associées aux statuts
-    const STATUS_COLORS = [
-        'en attente' => 'warning',
-        'en traitement' => 'info',
-        'expédiée' => 'primary',
-        'livrée' => 'success',
-        'arrivé' => 'success',
-        'annulé' => 'danger'
-    ];
-
-    // Relation avec les produits
+    // Relations existantes
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'order_items')
-                    ->withPivot('quantity', 'price')
+                    ->withPivot('quantity', 'price', 'vendor_id', 'status')
                     ->withTimestamps();
     }
 
-    // Relation avec l'utilisateur
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    // Relation avec le fournisseur
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
     }
 
-    // Relation avec le client (pour les commandes clients)
     public function client(): BelongsTo
     {
         return $this->belongsTo(User::class, 'client_id');
     }
 
-    // Relation avec les items de commande
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
 
-    // Relation avec le paiement
+    public function items()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
     public function payment(): HasOne
     {
         return $this->hasOne(Payment::class);
     }
 
-    // Relation avec les transactions
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
     }
 
-    // Relation avec l'historique des statuts (NOUVEAU)
     public function statusHistory(): HasMany
     {
         return $this->hasMany(OrderStatusHistory::class)->orderBy('created_at', 'desc');
     }
 
-    // Vérifier si la commande est en attente
-    public function isPending()
+    public function vendors()
+    {
+        return $this->belongsToMany(Vendor::class, 'order_items')
+                    ->distinct();
+    }
+
+    // ===== NOUVELLES RELATIONS FINANCIÈRES =====
+    
+    /**
+     * Transactions financières liées à cette commande
+     */
+    public function financialTransactions(): HasMany
+    {
+        return $this->hasMany(FinancialTransaction::class, 'order_id');
+    }
+
+    /**
+     * Commissions générées par cette commande
+     */
+    public function commissions(): HasMany
+    {
+        return $this->hasMany(Commission::class);
+    }
+
+    // Méthodes de vérification
+    public function isPending(): bool
     {
         return $this->status === self::STATUS_PENDING;
     }
 
-    // Vérifier si la commande est arrivée
-    public function isArrived()
+    public function isPaid(): bool
     {
-        return $this->status === self::STATUS_ARRIVED;
+        return $this->status === self::STATUS_PAID;
     }
 
-    // Vérifier si la commande est annulée
-    public function isCancelled()
-    {
-        return $this->status === self::STATUS_CANCELLED;
-    }
-
-    // Vérifier si la commande est expédiée
-    public function isShipped()
-    {
-        return $this->status === self::STATUS_SHIPPED;
-    }
-
-    // Vérifier si la commande est livrée
-    public function isDelivered()
-    {
-        return $this->status === self::STATUS_DELIVERED;
-    }
-
-    // Vérifier si la commande est en traitement
-    public function isProcessing()
+    public function isProcessing(): bool
     {
         return $this->status === self::STATUS_PROCESSING;
     }
 
-    // Obtenir le libellé du statut
-    public function getStatusLabelAttribute()
+    public function isShipped(): bool
     {
-        return self::TRACKING_STATUSES[$this->status] ?? $this->status;
+        return $this->status === self::STATUS_SHIPPED;
     }
 
-    // Obtenir la couleur du statut
-    public function getStatusColorAttribute()
+    public function isDelivered(): bool
     {
-        return self::STATUS_COLORS[$this->status] ?? 'secondary';
+        return $this->status === self::STATUS_DELIVERED;
     }
 
-    // Obtenir l'icône du statut
-    public function getStatusIconAttribute()
+    public function isArrived(): bool
     {
-        switch ($this->status) {
-            case self::STATUS_PENDING:
-                return 'fa-clock';
-            case self::STATUS_PROCESSING:
-                return 'fa-cog';
-            case self::STATUS_SHIPPED:
-                return 'fa-truck';
-            case self::STATUS_DELIVERED:
-            case self::STATUS_ARRIVED:
-                return 'fa-check-circle';
-            case self::STATUS_CANCELLED:
-                return 'fa-times-circle';
-            default:
-                return 'fa-info-circle';
-        }
+        return $this->status === self::STATUS_ARRIVED;
     }
 
-    // Méthode pour mettre à jour le statut avec historique (NOUVEAU)
+    public function isCancelled(): bool
+    {
+        return $this->status === self::STATUS_CANCELLED;
+    }
+
+    public function isRefunded(): bool
+    {
+        return $this->status === self::STATUS_REFUNDED;
+    }
+
+    // Mise à jour du statut avec historique
     public function updateStatusWithHistory($newStatus, $comment = null, $userId = null)
     {
         $oldStatus = $this->status;
         
         if ($oldStatus !== $newStatus) {
-            // Mettre à jour le statut
             $this->status = $newStatus;
             $this->save();
             
-            // Créer l'historique si la table existe
             if (class_exists(OrderStatusHistory::class)) {
                 $this->statusHistory()->create([
                     'status' => $newStatus,
@@ -201,32 +296,73 @@ class Order extends Model
         return $this;
     }
 
-    // Calculer le nombre de jours depuis la commande (NOUVEAU)
-    public function getDaysSinceOrderAttribute()
+    // Calculer le nombre de jours depuis la commande
+    public function getDaysSinceOrderAttribute(): int
     {
         return $this->created_at->diffInDays(now());
     }
 
-    // Vérifier si la commande est en retard (NOUVEAU)
-    public function isDelayed()
+    // Vérifier si la commande est en retard
+    public function isDelayed(): bool
     {
         if ($this->status === self::STATUS_SHIPPED) {
-            return $this->days_since_order > 5; // Plus de 5 jours en statut expédié
+            return $this->days_since_order > 5;
         }
         return false;
     }
 
-    // Dans app/Models/Order.php
+    // Générer une référence de commande
+    public function getReferenceAttribute(): string
+    {
+        return $this->attributes['reference'] ?? 'CMD-' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
+    }
 
-public function items()
-{
-    return $this->hasMany(OrderItem::class);
-}
+    // Calculer le total (si nécessaire)
+    public function getTotalAttribute()
+    {
+        return $this->total_amount;
+    }
 
+    public function canBeTracked()
+    {
+        return in_array($this->status, [
+            self::STATUS_PROCESSING,
+            self::STATUS_SHIPPED,
+            self::STATUS_DELIVERED,
+            self::STATUS_ARRIVED,
+        ]);
+    }
 
+    /**
+ * Générer les commissions après validation d'une commande client
+ */
+    public function generateCommissions()
+    {
+        if ($this->type !== 'client') {
+            return false;
+        }
 
-public function getReferenceAttribute()
-{
-    return $this->attributes['reference'] ?? 'CMD-' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
-}
+        foreach ($this->items as $item) {
+            // Vérifier si le produit appartient à un vendeur marketplace
+            if ($item->vendor_id) {
+                $vendor = Vendor::find($item->vendor_id);
+                
+                if ($vendor && $vendor->commission_rate > 0) {
+                    // Calculer la commission (pourcentage du prix de vente)
+                    $commissionAmount = ($item->price * $item->quantity) * ($vendor->commission_rate / 100);
+                    
+                    Commission::create([
+                        'vendor_id' => $vendor->id,
+                        'order_id' => $this->id,
+                        'order_item_id' => $item->id,
+                        'amount' => $commissionAmount,
+                        'rate' => $vendor->commission_rate,
+                        'status' => 'pending',
+                    ]);
+                }
+            }
+        }
+        
+        return true;
+    }
 }

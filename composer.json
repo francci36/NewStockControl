@@ -6,10 +6,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^3.1",
+        "devrabiul/laravel-pwa-kit": "^1.1",
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9",
         "livewire/volt": "*",
         "psy/psysh": "@stable",
+        "spatie/laravel-translatable": "^6.13",
         "stripe/stripe-php": "^19.3"
     },
     "require-dev": {

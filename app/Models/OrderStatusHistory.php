@@ -3,16 +3,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderStatusHistory extends Model
 {
-    use HasFactory;
-
+    /**
+     * Spécifiez le nom de la table explicitement
+     * car Laravel cherche "order_status_histories" par défaut
+     */
     protected $table = 'order_status_history';
-    
+
     protected $fillable = [
         'order_id',
         'status',
@@ -22,6 +23,7 @@ class OrderStatusHistory extends Model
 
     protected $casts = [
         'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -41,19 +43,56 @@ class OrderStatusHistory extends Model
     }
 
     /**
-     * Accesseur pour la date formatée
-     */
-    public function getFormattedDateAttribute(): string
-    {
-        return $this->created_at->format('d/m/Y H:i');
-    }
-
-    /**
-     * Accesseur pour le libellé du statut
+     * Accesseur pour le libellé du statut (multilingue)
      */
     public function getStatusLabelAttribute(): string
     {
-        return Order::TRACKING_STATUSES[$this->status] ?? $this->status;
+        $statusLabels = [
+            'pending' => [
+                'fr' => 'En attente',
+                'en' => 'Pending',
+                'pt_BR' => 'Pendente',
+            ],
+            'paid' => [
+                'fr' => 'Payée',
+                'en' => 'Paid',
+                'pt_BR' => 'Pago',
+            ],
+            'processing' => [
+                'fr' => 'En traitement',
+                'en' => 'Processing',
+                'pt_BR' => 'Em processamento',
+            ],
+            'shipped' => [
+                'fr' => 'Expédiée',
+                'en' => 'Shipped',
+                'pt_BR' => 'Enviado',
+            ],
+            'delivered' => [
+                'fr' => 'Livrée',
+                'en' => 'Delivered',
+                'pt_BR' => 'Entregue',
+            ],
+            'arrived' => [
+                'fr' => 'Arrivée',
+                'en' => 'Arrived',
+                'pt_BR' => 'Chegou',
+            ],
+            'cancelled' => [
+                'fr' => 'Annulée',
+                'en' => 'Cancelled',
+                'pt_BR' => 'Cancelado',
+            ],
+            'refunded' => [
+                'fr' => 'Remboursée',
+                'en' => 'Refunded',
+                'pt_BR' => 'Reembolsado',
+            ],
+        ];
+
+        $locale = app()->getLocale();
+        
+        return $statusLabels[$this->status][$locale] ?? $statusLabels[$this->status]['fr'] ?? $this->status;
     }
 
     /**
@@ -61,7 +100,18 @@ class OrderStatusHistory extends Model
      */
     public function getStatusColorAttribute(): string
     {
-        return Order::STATUS_COLORS[$this->status] ?? 'secondary';
+        $colors = [
+            'pending' => 'warning',
+            'paid' => 'success',
+            'processing' => 'info',
+            'shipped' => 'primary',
+            'delivered' => 'success',
+            'arrived' => 'success',
+            'cancelled' => 'danger',
+            'refunded' => 'secondary',
+        ];
+
+        return $colors[$this->status] ?? 'secondary';
     }
 
     /**
@@ -69,20 +119,25 @@ class OrderStatusHistory extends Model
      */
     public function getStatusIconAttribute(): string
     {
-        switch ($this->status) {
-            case Order::STATUS_PENDING:
-                return 'fa-clock';
-            case Order::STATUS_PROCESSING:
-                return 'fa-cog';
-            case Order::STATUS_SHIPPED:
-                return 'fa-truck';
-            case Order::STATUS_DELIVERED:
-            case Order::STATUS_ARRIVED:
-                return 'fa-check-circle';
-            case Order::STATUS_CANCELLED:
-                return 'fa-times-circle';
-            default:
-                return 'fa-info-circle';
-        }
+        $icons = [
+            'pending' => 'fa-clock',
+            'paid' => 'fa-credit-card',
+            'processing' => 'fa-cog',
+            'shipped' => 'fa-truck',
+            'delivered' => 'fa-check-circle',
+            'arrived' => 'fa-check-circle',
+            'cancelled' => 'fa-times-circle',
+            'refunded' => 'fa-undo',
+        ];
+
+        return $icons[$this->status] ?? 'fa-info-circle';
+    }
+
+    /**
+     * Accesseur pour la date formatée
+     */
+    public function getFormattedDateAttribute(): string
+    {
+        return $this->created_at->format('d/m/Y H:i');
     }
 }

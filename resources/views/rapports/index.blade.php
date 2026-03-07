@@ -3,263 +3,402 @@
 @section('title', 'Rapports et Analyses')
 
 @section('content')
-<div class="container mx-auto py-6">
-    <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg">
+<div class="container-fluid py-3 py-md-4">
+    <div class="card shadow-lg border-0" style="background: #ffffff;">
         <!-- En-tête -->
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-blue-100 dark:bg-blue-900 rounded-t-lg">
-            <h3 class="text-xl font-semibold text-blue-700 dark:text-blue-400 flex items-center">
+        <div class="card-header bg-gradient-primary text-white py-3">
+            <h5 class="mb-0">
                 <i class="fas fa-chart-bar mr-2"></i> Rapports et Analyses
-            </h3>
+            </h5>
         </div>
 
-        <!-- Contenu -->
-        <div class="px-6 py-4">
+        <div class="card-body">
             <!-- Messages de notification -->
             @if(session('success'))
-                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded-lg">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle mr-2"></i>
                     {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
 
             @if(session('error'))
-                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-lg">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
                     {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
 
-            <!-- Première ligne d'indicateurs -->
-            <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-                <!-- Chiffre d'affaires mensuel -->
-                <div class="bg-gradient-to-br from-green-400 to-green-600 text-white p-4 rounded-lg shadow-md">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm opacity-90">Chiffre d'affaires</p>
-                            <p class="text-2xl font-bold">{{ number_format($chiffreAffaires, 0, ',', ' ') }} €</p>
-                            <p class="text-xs opacity-75">Ventes du mois</p>
+            <!-- ===== SECTION 1 : INDICATEURS GLOBAUX ===== -->
+            <div class="row mb-4">
+                <div class="col-sm-6 col-lg-3 mb-3 mb-lg-0">
+                    <div class="small-box bg-success h-100">
+                        <div class="inner">
+                            <h3>{{ number_format($chiffreAffaires, 0, ',', ' ') }} €</h3>
+                            <p>Chiffre d'affaires</p>
                         </div>
-                        <i class="fas fa-euro-sign text-3xl opacity-50"></i>
+                        <div class="icon">
+                            <i class="fas fa-euro-sign"></i>
+                        </div>
+                        <span class="small-box-footer">Ventes du mois</span>
                     </div>
                 </div>
 
-                <!-- Total achats fournisseurs -->
-                <div class="bg-gradient-to-br from-orange-400 to-orange-600 text-white p-4 rounded-lg shadow-md">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm opacity-90">Achats fournisseurs</p>
-                            <p class="text-2xl font-bold">{{ number_format($totalAchats, 0, ',', ' ') }} €</p>
-                            <p class="text-xs opacity-75">Approvisionnements</p>
+                <div class="col-sm-6 col-lg-3 mb-3 mb-lg-0">
+                    <div class="small-box bg-warning h-100">
+                        <div class="inner">
+                            <h3>{{ number_format($totalAchats, 0, ',', ' ') }} €</h3>
+                            <p>Achats fournisseurs</p>
                         </div>
-                        <i class="fas fa-truck text-3xl opacity-50"></i>
+                        <div class="icon">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <span class="small-box-footer">Approvisionnements</span>
                     </div>
                 </div>
 
-                <!-- Bénéfice estimé -->
-                <div class="bg-gradient-to-br from-blue-400 to-blue-600 text-white p-4 rounded-lg shadow-md">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm opacity-90">Bénéfice estimé</p>
-                            <p class="text-2xl font-bold">{{ number_format($benefice, 0, ',', ' ') }} €</p>
-                            <p class="text-xs opacity-75">Marge brute</p>
+                <div class="col-sm-6 col-lg-3 mb-3 mb-lg-0">
+                    <div class="small-box bg-info h-100">
+                        <div class="inner">
+                            <h3>{{ number_format($benefice, 0, ',', ' ') }} €</h3>
+                            <p>Bénéfice estimé</p>
                         </div>
-                        <i class="fas fa-chart-line text-3xl opacity-50"></i>
+                        <div class="icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <span class="small-box-footer">Marge brute</span>
                     </div>
                 </div>
 
-                <!-- Produits en stock critique -->
-                <div class="bg-gradient-to-br from-red-400 to-red-600 text-white p-4 rounded-lg shadow-md">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm opacity-90">Stock critique</p>
-                            <p class="text-2xl font-bold">{{ $stockCritique }}</p>
-                            <p class="text-xs opacity-75">Produits à risque</p>
+                <div class="col-sm-6 col-lg-3 mb-3 mb-lg-0">
+                    <div class="small-box bg-danger h-100">
+                        <div class="inner">
+                            <h3>{{ $stockCritique }}</h3>
+                            <p>Stock critique</p>
                         </div>
-                        <i class="fas fa-exclamation-triangle text-3xl opacity-50"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Deuxième ligne de KPIs clients -->
-            <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- Clients actifs -->
-                <div class="bg-gradient-to-br from-purple-400 to-purple-600 text-white p-4 rounded-lg shadow-md">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm opacity-90">Clients actifs</p>
-                            <p class="text-2xl font-bold">{{ $clientsActifs }}</p>
-                            <p class="text-xs opacity-75">Acheteurs enregistrés</p>
+                        <div class="icon">
+                            <i class="fas fa-exclamation-triangle"></i>
                         </div>
-                        <i class="fas fa-users text-3xl opacity-50"></i>
-                    </div>
-                </div>
-
-                <!-- Commandes clients -->
-                <div class="bg-gradient-to-br from-indigo-400 to-indigo-600 text-white p-4 rounded-lg shadow-md">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm opacity-90">Commandes clients</p>
-                            <p class="text-2xl font-bold">{{ $nombreCommandesClients }}</p>
-                            <p class="text-xs opacity-75">Depuis le début</p>
-                        </div>
-                        <i class="fas fa-shopping-bag text-3xl opacity-50"></i>
-                    </div>
-                </div>
-
-                <!-- Panier moyen -->
-                <div class="bg-gradient-to-br from-pink-400 to-pink-600 text-white p-4 rounded-lg shadow-md">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm opacity-90">Panier moyen</p>
-                            <p class="text-2xl font-bold">{{ number_format($panierMoyen, 2, ',', ' ') }} €</p>
-                            <p class="text-xs opacity-75">Par commande client</p>
-                        </div>
-                        <i class="fas fa-shopping-cart text-3xl opacity-50"></i>
+                        <span class="small-box-footer">Produits à risque</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Section des graphiques -->
-            <div class="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- ===== SECTION 2 : KPI CLIENTS ===== -->
+            <div class="row mb-4">
+                <div class="col-sm-6 col-md-4 mb-3 mb-md-0">
+                    <div class="small-box bg-purple h-100">
+                        <div class="inner">
+                            <h3>{{ $clientsActifs }}</h3>
+                            <p>Clients actifs</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <span class="small-box-footer">Acheteurs enregistrés</span>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-md-4 mb-3 mb-md-0">
+                    <div class="small-box bg-indigo h-100">
+                        <div class="inner">
+                            <h3>{{ $nombreCommandesClients }}</h3>
+                            <p>Commandes clients</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                        <span class="small-box-footer">Depuis le début</span>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-md-4 mx-auto">
+                    <div class="small-box bg-pink h-100">
+                        <div class="inner">
+                            <h3>{{ number_format($panierMoyen, 2, ',', ' ') }} €</h3>
+                            <p>Panier moyen</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <span class="small-box-footer">Par commande client</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== SECTION 3 : GRAPHIQUES ===== -->
+            <div class="row mb-4">
                 <!-- Graphique des commandes par statut -->
-                <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow">
-                    <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
-                        <i class="fas fa-chart-pie mr-2 text-blue-500"></i>
-                        Commandes par statut
-                    </h4>
-                    <div class="chart-container" style="position: relative; height: 250px;">
-                        <canvas id="commandesParStatutChart"></canvas>
-                    </div>
-                    <!-- Légende supplémentaire -->
-                    <div class="mt-4 grid grid-cols-3 gap-2 text-center text-sm">
-                        @foreach($commandesParStatut as $statut)
-                        <div class="p-2 rounded-lg {{ $statut->status === 'en attente' ? 'bg-yellow-100 dark:bg-yellow-800' : ($statut->status === 'arrivé' ? 'bg-green-100 dark:bg-green-800' : 'bg-red-100 dark:bg-red-800') }}">
-                            <span class="font-medium">{{ ucfirst($statut->status) }}</span>
-                            <span class="block text-lg font-bold">{{ $statut->count }}</span>
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="fas fa-chart-pie mr-2"></i> Commandes par statut</h6>
                         </div>
-                        @endforeach
+                        <div class="card-body">
+                            <div class="chart-container" style="position: relative; height: 250px;">
+                                <canvas id="commandesParStatutChart"></canvas>
+                            </div>
+                            <!-- Légende supplémentaire sur mobile -->
+                            <div class="row mt-4 g-2">
+                                @foreach($commandesParStatut as $statut)
+                                @php
+                                    $statusColors = [
+                                        'pending' => 'bg-warning',
+                                        'processing' => 'bg-info',
+                                        'shipped' => 'bg-primary',
+                                        'delivered' => 'bg-success',
+                                        'arrived' => 'bg-success',
+                                        'cancelled' => 'bg-danger',
+                                    ];
+                                    $statusLabels = [
+                                        'pending' => 'En attente',
+                                        'processing' => 'En traitement',
+                                        'shipped' => 'Expédiée',
+                                        'delivered' => 'Livrée',
+                                        'arrived' => 'Arrivée',
+                                        'cancelled' => 'Annulée',
+                                    ];
+                                @endphp
+                                <div class="col-6 col-md-4 mb-2">
+                                    <div class="p-2 rounded {{ $statusColors[$statut->status] ?? 'bg-secondary' }} text-white text-center">
+                                        <small class="d-block d-sm-inline">{{ $statusLabels[$statut->status] ?? ucfirst($statut->status) }}</small>
+                                        <span class="d-block font-weight-bold">{{ $statut->count }}</span>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Graphique des produits en stock -->
-                <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow">
-                    <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
-                        <i class="fas fa-chart-bar mr-2 text-green-500"></i>
-                        Top 10 produits en stock
-                    </h4>
-                    <div class="chart-container" style="position: relative; height: 250px;">
-                        <canvas id="produitsEnStockChart"></canvas>
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="fas fa-chart-bar mr-2"></i> Top 10 produits en stock</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" style="position: relative; height: 250px;">
+                                <canvas id="produitsEnStockChart"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Section des fournisseurs -->
-            <div class="mb-6">
-                <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
-                    <i class="fas fa-truck mr-2 text-purple-500"></i>
-                    Statistiques des fournisseurs
-                </h4>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
-                        <thead class="bg-blue-50 dark:bg-blue-900">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Fournisseur</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Email</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Téléphone</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Nb commandes</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Montant total</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-                            @forelse ($fournisseurs as $fournisseur)
-                            <tr class="hover:bg-gray-100 dark:hover:bg-gray-600 transition duration-200">
-                                <td class="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200">
-                                    {{ $fournisseur->name }}
-                                </td>
-                                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
-                                    {{ $fournisseur->email }}
-                                </td>
-                                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
-                                    {{ $fournisseur->telephone }}
-                                </td>
-                                <td class="px-4 py-3 text-sm">
-                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-                                        {{ $fournisseur->orders_count ?? 0 }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 text-sm font-semibold text-green-600 dark:text-green-400">
-                                    {{ number_format($fournisseur->orders_sum_total_amount ?? 0, 2, ',', ' ') }} €
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="5" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-                                    <i class="fas fa-truck text-4xl mb-2"></i>
-                                    <p>Aucun fournisseur trouvé</p>
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+            <!-- ===== SECTION 4 : STATISTIQUES FOURNISSEURS ===== -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0"><i class="fas fa-truck mr-2"></i> Statistiques des fournisseurs</h6>
+                    <span class="badge bg-light text-dark">{{ $fournisseurs->count() ?? 0 }} fournisseurs</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Fournisseur</th>
+                                    <th class="d-none d-md-table-cell">Email</th>
+                                    <th class="d-none d-md-table-cell">Téléphone</th>
+                                    <th>Nb commandes</th>
+                                    <th>Montant total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($fournisseurs as $fournisseur)
+                                <tr>
+                                    <td class="font-weight-bold">
+                                        {{ $fournisseur->admin_name ?? $fournisseur->name }}
+                                        @if($fournisseur->is_preferred)
+                                            <span class="badge bg-warning ml-1"><i class="fas fa-star"></i></span>
+                                        @endif
+                                        <span class="d-block d-md-none small text-muted">
+                                            {{ $fournisseur->email }}<br>
+                                            {{ $fournisseur->telephone }}
+                                        </span>
+                                    </td>
+                                    <td class="d-none d-md-table-cell">{{ $fournisseur->email }}</td>
+                                    <td class="d-none d-md-table-cell">{{ $fournisseur->telephone }}</td>
+                                    <td>
+                                        <span class="badge bg-info p-2">
+                                            {{ $fournisseur->orders_count ?? 0 }}
+                                        </span>
+                                    </td>
+                                    <td class="font-weight-bold text-success">
+                                        {{ number_format($fournisseur->orders_sum_total_amount ?? 0, 2) }} €
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">
+                                        <i class="fas fa-truck fa-3x text-muted mb-3"></i>
+                                        <p class="text-muted">Aucun fournisseur trouvé</p>
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <!-- Section des rapports générés -->
-            <div class="mt-8">
-                <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
-                    <i class="fas fa-file-alt mr-2 text-orange-500"></i>
-                    Rapports générés
-                </h4>
-                
-                @if($reports->count() > 0)
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        @foreach($reports as $report)
-                        <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:shadow-lg transition duration-200">
-                            <div class="flex items-start justify-between">
-                                <div>
-                                    <h5 class="font-semibold text-blue-600 dark:text-blue-400 text-lg">{{ $report->name }}</h5>
-                                    <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">{{ $report->description }}</p>
-                                    
-                                    <div class="grid grid-cols-2 gap-4 text-xs">
-                                        <div>
-                                            <span class="text-gray-500 dark:text-gray-400">Transactions:</span>
-                                            <span class="ml-1 font-semibold">{{ $report->transactions->count() }}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-gray-500 dark:text-gray-400">Stocks critiques:</span>
-                                            <span class="ml-1 font-semibold">{{ $report->stocks->count() }}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-gray-500 dark:text-gray-400">Créé le:</span>
-                                            <span class="ml-1 font-semibold">{{ $report->created_at->format('d/m/Y') }}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-gray-500 dark:text-gray-400">Statut:</span>
-                                            <span class="ml-1 px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs">
-                                                Actif
-                                            </span>
+            <!-- ===== SECTION 5 : STATISTIQUES VENDEURS MARKETPLACE (NOUVEAU) ===== -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0"><i class="fas fa-store mr-2"></i> Statistiques des vendeurs marketplace</h6>
+                    <span class="badge bg-light text-dark">{{ $vendeurs->count() ?? 0 }} vendeurs</span>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Sous-totaux marketplace -->
+                    <div class="row p-3 bg-light border-bottom">
+                        <div class="col-6 col-md-3">
+                            <div class="text-center">
+                                <span class="text-muted d-block">CA Marketplace</span>
+                                <span class="font-weight-bold text-success h5">{{ number_format($caMarketplace, 2) }} €</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-center">
+                                <span class="text-muted d-block">Commandes</span>
+                                <span class="font-weight-bold h5">{{ $commandesMarketplace }}</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-center">
+                                <span class="text-muted d-block">Commission moyenne</span>
+                                <span class="font-weight-bold h5">{{ $commissionMoyenne }}%</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-center">
+                                <span class="text-muted d-block">Revenu commissions</span>
+                                <span class="font-weight-bold text-primary h5">{{ number_format($revenuCommissions, 2) }} €</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Boutique</th>
+                                    <th class="d-none d-md-table-cell">Vendeur</th>
+                                    <th class="d-none d-lg-table-cell">Email</th>
+                                    <th>Commission</th>
+                                    <th>Produits</th>
+                                    <th>Commandes</th>
+                                    <th>CA</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($vendeurs as $vendeur)
+                                <tr>
+                                    <td class="font-weight-bold">
+                                        {{ $vendeur->admin_shop_name ?? $vendeur->shop_name }}
+                                        <span class="d-block d-md-none small text-muted">
+                                            {{ $vendeur->user->name ?? 'N/A' }}<br>
+                                            Comm: {{ $vendeur->commission_rate }}%
+                                        </span>
+                                    </td>
+                                    <td class="d-none d-md-table-cell">{{ $vendeur->user->name ?? 'N/A' }}</td>
+                                    <td class="d-none d-lg-table-cell">
+                                        <a href="mailto:{{ $vendeur->email }}">{{ $vendeur->email }}</a>
+                                    </td>
+                                    <td><span class="badge bg-info">{{ $vendeur->commission_rate }}%</span></td>
+                                    <td class="text-center">{{ $vendeur->products_count ?? 0 }}</td>
+                                    <td class="text-center">{{ $vendeur->orders_count ?? 0 }}</td>
+                                    <td class="font-weight-bold text-success">{{ number_format($vendeur->orders_sum_total_amount ?? 0, 2) }} €</td>
+                                    <td>
+                                        @if($vendeur->status == 'active')
+                                            <span class="badge bg-success">Actif</span>
+                                        @elseif($vendeur->status == 'pending')
+                                            <span class="badge bg-warning">En attente</span>
+                                        @else
+                                            <span class="badge bg-secondary">{{ $vendeur->status }}</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="8" class="text-center py-4">
+                                        <i class="fas fa-store fa-3x text-muted mb-3"></i>
+                                        <p class="text-muted">Aucun vendeur marketplace trouvé</p>
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== SECTION 6 : RAPPORTS GÉNÉRÉS ===== -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-file-alt mr-2"></i> Rapports générés</h6>
+                </div>
+                <div class="card-body">
+                    @if($reports->count() > 0)
+                        <div class="row g-3">
+                            @foreach($reports as $report)
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card h-100 border-gold">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="flex-grow-1">
+                                                <h6 class="text-primary font-weight-bold">{{ $report->name }}</h6>
+                                                <p class="text-muted small">{{ Str::limit($report->description, 80) }}</p>
+                                                
+                                                <div class="row small g-2">
+                                                    <div class="col-6">
+                                                        <span class="text-muted">Transactions:</span>
+                                                        <span class="ml-1 font-weight-bold">{{ $report->transactions->count() }}</span>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <span class="text-muted">Stocks critiques:</span>
+                                                        <span class="ml-1 font-weight-bold">{{ $report->stocks->count() }}</span>
+                                                    </div>
+                                                    <div class="col-6 mt-2">
+                                                        <span class="text-muted">Créé le:</span>
+                                                        <span class="ml-1 font-weight-bold">{{ $report->created_at->format('d/m/Y') }}</span>
+                                                    </div>
+                                                    <div class="col-6 mt-2">
+                                                        <span class="text-muted">Statut:</span>
+                                                        <span class="ml-1 badge bg-success">Actif</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <a href="{{ route('admin.rapports.export', $report->id) }}" 
+                                               class="btn btn-sm btn-outline-primary ml-2"
+                                               target="_blank">
+                                                <i class="fas fa-download"></i>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                                <button class="text-gray-400 hover:text-blue-500 transition-colors" onclick="exportReport({{ $report->id }})">
-                                    <i class="fas fa-download text-lg"></i>
-                                </button>
                             </div>
+                            @endforeach
                         </div>
-                        @endforeach
-                    </div>
-                    
-                    <!-- Pagination -->
-                    <div class="mt-6">
-                        {{ $reports->links() }}
-                    </div>
-                @else
-                    <div class="bg-gray-50 dark:bg-gray-700 p-8 rounded-lg text-center">
-                        <i class="fas fa-file-alt text-4xl text-gray-400 mb-3"></i>
-                        <p class="text-gray-500 dark:text-gray-400">Aucun rapport généré pour le moment.</p>
-                        <button onclick="generateReports()" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
-                            <i class="fas fa-sync-alt mr-2"></i> Générer les rapports
-                        </button>
-                    </div>
-                @endif
+                        
+                        <!-- Pagination -->
+                        <div class="mt-4 d-flex justify-content-center">
+                            {{ $reports->links() }}
+                        </div>
+                    @else
+                        <div class="text-center py-5">
+                            <i class="fas fa-file-alt fa-4x text-muted mb-3"></i>
+                            <p class="text-muted mb-4">Aucun rapport généré pour le moment.</p>
+                            <form action="{{ route('admin.rapports.generate') }}" method="POST" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-sync-alt mr-2"></i> Générer les rapports
+                                </button>
+                            </form>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
@@ -286,20 +425,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // Traduire les statuts
         const translatedLabels = commandesLabels.map(label => {
             const translations = {
-                'en attente': 'En attente',
-                'arrivé': 'Arrivé',
-                'annulé': 'Annulé',
                 'pending': 'En attente',
-                'completed': 'Terminé',
-                'cancelled': 'Annulé'
+                'processing': 'En traitement',
+                'shipped': 'Expédiée',
+                'delivered': 'Livrée',
+                'arrived': 'Arrivée',
+                'cancelled': 'Annulée',
+                'paid': 'Payée',
+                'refunded': 'Remboursée'
             };
             return translations[label] || label;
         });
-        
-        // Couleurs adaptées au mode
-        const backgroundColors = isDarkMode ? 
-            ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'] : 
-            ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'];
         
         new Chart(commandesParStatutCtx, {
             type: 'pie',
@@ -307,7 +443,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 labels: translatedLabels,
                 datasets: [{
                     data: commandesData,
-                    backgroundColor: backgroundColors,
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'],
                     borderColor: isDarkMode ? '#1f2937' : '#ffffff',
                     borderWidth: 2
                 }]
@@ -335,7 +471,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 const value = context.raw || 0;
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                 const percentage = ((value / total) * 100).toFixed(1);
-                                return `${label}: ${value} commandes (${percentage}%)`;
+                                return `${label}: ${value} (${percentage}%)`;
                             }
                         }
                     }
@@ -349,16 +485,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (produitsEnStockElement) {
         const produitsEnStockCtx = produitsEnStockElement.getContext('2d');
         
-        // Données PHP
-        const produitsLabels = @json($produitsEnStock->pluck('product.name'));
+        // Données PHP avec noms traduits
+        const produitsLabels = @json($produitsEnStock->map(function($stock) {
+            return $stock->product ? ($stock->product->admin_name ?? $stock->product->name) : 'Produit inconnu';
+        }));
         const produitsQuantities = @json($produitsEnStock->pluck('quantity'));
-        
-        // Générer des couleurs basées sur les quantités
-        const barColors = produitsQuantities.map(qty => {
-            if (qty < 5) return isDarkMode ? '#ef4444' : '#f87171';
-            if (qty < 10) return isDarkMode ? '#f59e0b' : '#fbbf24';
-            return isDarkMode ? '#10b981' : '#34d399';
-        });
         
         new Chart(produitsEnStockCtx, {
             type: 'bar',
@@ -367,7 +498,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     label: 'Quantité en stock',
                     data: produitsQuantities,
-                    backgroundColor: barColors,
+                    backgroundColor: produitsQuantities.map(qty => {
+                        if (qty < 5) return '#ef4444';
+                        if (qty < 10) return '#f59e0b';
+                        return '#10b981';
+                    }),
                     borderColor: isDarkMode ? '#374151' : '#9ca3af',
                     borderWidth: 1,
                     borderRadius: 4
@@ -379,31 +514,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 plugins: {
                     legend: {
                         display: false
-                    },
-                    tooltip: {
-                        backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
-                        titleColor: textColor,
-                        bodyColor: textColor,
-                        borderColor: gridColor,
-                        borderWidth: 1,
-                        callbacks: {
-                            label: function(context) {
-                                return `Quantité: ${context.raw}`;
-                            }
-                        }
                     }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: {
-                            color: gridColor,
-                            drawBorder: false
-                        },
-                        ticks: {
-                            color: textColor,
-                            stepSize: 5
-                        },
+                        grid: { color: gridColor },
+                        ticks: { color: textColor },
                         title: {
                             display: true,
                             text: 'Quantité',
@@ -411,10 +528,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     },
                     x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
+                        grid: { display: false },
+                        ticks: { 
                             color: textColor,
                             maxRotation: 45,
                             minRotation: 45
@@ -426,68 +541,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Fonction pour exporter un rapport
-function exportReport(reportId) {
-    fetch(`/rapports/${reportId}/export`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.blob())
-    .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `rapport_${reportId}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        a.remove();
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        alert('Erreur lors de l\'export du rapport');
-    });
-}
-
-// Fonction pour générer les rapports
-function generateReports() {
-    const btn = event.target;
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Génération...';
-    btn.disabled = true;
-    
-    fetch('/rapports/generate', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Erreur: ' + data.message);
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        alert('Erreur lors de la génération des rapports');
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    });
-}
-
-// Rafraîchir les données périodiquement (optionnel)
+// Rafraîchir les données périodiquement
 let refreshInterval = setInterval(function() {
     if (document.visibilityState === 'visible') {
-        fetch('/rapports/refresh-data', {
+        fetch('/admin/rapports/refresh-data', {
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
             }
@@ -500,59 +557,184 @@ let refreshInterval = setInterval(function() {
         })
         .catch(() => {});
     }
-}, 60000); // Vérifier toutes les minutes
+}, 60000);
 
-// Nettoyer l'intervalle quand on quitte la page
+// Nettoyer l'intervalle
 window.addEventListener('beforeunload', function() {
     clearInterval(refreshInterval);
 });
 </script>
 
-<!-- Styles supplémentaires -->
 <style>
-.chart-container {
+/* ===== STYLES EXISTANTS ===== */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.bg-purple {
+    background-color: #6f42c1 !important;
+    color: white;
+}
+.bg-indigo {
+    background-color: #6610f2 !important;
+    color: white;
+}
+.bg-pink {
+    background-color: #e83e8c !important;
+    color: white;
+}
+.small-box {
+    border-radius: 0.25rem;
+    box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
+    display: block;
+    margin-bottom: 0;
     position: relative;
-    width: 100%;
+    overflow: hidden;
+    color: #fff;
+    padding: 15px;
+    transition: transform 0.3s;
+}
+.small-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+.small-box > .inner {
+    padding: 10px;
+}
+.small-box h3 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0 0 5px;
+}
+.small-box p {
+    font-size: 1rem;
+    margin-bottom: 0;
+}
+.small-box .icon {
+    color: rgba(255,255,255,0.15);
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    font-size: 70px;
+}
+.small-box-footer {
+    display: block;
+    padding: 3px 0;
+    text-align: center;
+    background: rgba(0,0,0,0.1);
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    border-radius: 0 0 0.25rem 0.25rem;
+    margin-top: 10px;
+    font-size: 0.85rem;
+}
+.border-gold {
+    border-left: 4px solid #f7d44a !important;
 }
 
-/* Animation pour les cartes */
-.bg-gradient-to-br {
-    transition: transform 0.2s;
+/* ===== NOUVEAUX STYLES RESPONSIVES ===== */
+@media (max-width: 768px) {
+    .small-box {
+        padding: 10px;
+        margin-bottom: 0;
+    }
+    
+    .small-box h3 {
+        font-size: 1.6rem;
+    }
+    
+    .small-box .icon {
+        font-size: 50px;
+    }
+    
+    .small-box-footer {
+        font-size: 0.75rem;
+        padding: 2px 0;
+    }
+    
+    .card-header {
+        padding: 12px 15px;
+    }
+    
+    .card-header h6 {
+        font-size: 1rem;
+    }
+    
+    .chart-container {
+        height: 200px !important;
+    }
+    
+    /* Table fournisseurs */
+    .table td, .table th {
+        padding: 8px;
+        font-size: 0.85rem;
+    }
+    
+    /* Légende des statuts */
+    .col-6 {
+        padding: 0 5px;
+    }
+    
+    .col-6 div {
+        padding: 5px !important;
+    }
+    
+    .col-6 small {
+        font-size: 0.7rem;
+    }
+    
+    .col-6 span {
+        font-size: 0.8rem;
+    }
 }
 
-.bg-gradient-to-br:hover {
-    transform: translateY(-2px);
+@media (max-width: 576px) {
+    .small-box h3 {
+        font-size: 1.3rem;
+    }
+    
+    .small-box p {
+        font-size: 0.8rem;
+    }
+    
+    .small-box .icon {
+        font-size: 40px;
+        right: 5px;
+        top: 5px;
+    }
+    
+    .card-body {
+        padding: 15px;
+    }
+    
+    .chart-container {
+        height: 180px !important;
+    }
+    
+    /* Bouton générer */
+    .btn-primary {
+        width: 100%;
+        padding: 12px;
+    }
+    
+    /* Pagination */
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .pagination .page-link {
+        padding: 5px 10px;
+        font-size: 0.85rem;
+    }
 }
 
-/* Style pour la pagination */
-.pagination {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    margin-top: 1rem;
+/* Hauteur uniforme pour les small-box */
+.h-100 {
+    height: 100%;
 }
 
-.pagination .page-item .page-link {
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.5rem;
-    background-color: #f3f4f6;
-    color: #374151;
-    transition: all 0.2s;
-}
-
-.dark .pagination .page-item .page-link {
-    background-color: #374151;
-    color: #d1d5db;
-}
-
-.pagination .page-item.active .page-link {
-    background-color: #3b82f6;
-    color: white;
-}
-
-.pagination .page-item .page-link:hover {
-    background-color: #60a5fa;
-    color: white;
-}
+/* Gap utility */
+.g-2 { gap: 0.5rem; }
+.g-3 { gap: 1rem; }
 </style>
 @endsection

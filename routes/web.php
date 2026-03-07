@@ -16,15 +16,36 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\Admin\FinanceController;
 use App\Http\Controllers\Client\OrderController as ClientOrderController;
 use App\Http\Controllers\Client\ProfileController as ClientProfileController;
-use App\Http\Controllers\Admin\VendorController; // ← AJOUTER CET IMPORT
+
+// NOUVEAUX CONTROLLERS ADMIN
+use App\Http\Controllers\Admin\VendorController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+
+// ===========================================
+// ROUTE POUR CHANGER LA LANGUE (AJOUTÉE ICI)
+// ===========================================
+Route::get('/language/{locale}', function ($locale) {
+    if (!in_array($locale, ['fr', 'en', 'pt_BR', 'es', 'it', 'de'])) {
+        abort(400);
+    }
+    session(['locale' => $locale]);
+    app()->setLocale($locale);
+    return redirect()->back();
+})->name('language.switch');
 
 // ===========================================
 // CHARGEMENT DES ROUTES DE LA BOUTIQUE ET VENDEUR
 // ===========================================
 require __DIR__.'/shop.php';
+// ===========================================
+// CHARGEMENT DES ROUTES VENDEUR
 require __DIR__.'/vendor.php';   
+// ===========================================
+// CHARGEMENT DES ROUTES D'API POUR LES WEBHOOKS
+require __DIR__.'/api-webhooks.php';
 
 // ===========================================
 // ROUTES D'AUTHENTIFICATION (communes)
@@ -52,6 +73,10 @@ Route::middleware(['auth'])->prefix('client')->name('client.')->group(function (
     Route::get('/profile', [ClientProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ClientProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ClientProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::delete('/profile', [ClientProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Optionnel : si vous voulez aussi gérer la photo de profil
+    Route::post('/profile/photo', [ClientProfileController::class, 'updatePhoto'])->name('profile.photo');
 });
 
 // ===========================================
@@ -82,12 +107,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
     });
 
-    // categories
-       Route::prefix('categories')->name('categories.')->group(function () {
+    // Catégories
+    Route::prefix('categories')->name('categories.')->group(function () {
+        Route::get('/', [CategoryController::class, 'index'])->name('index');
+        Route::get('/create', [CategoryController::class, 'create'])->name('create');
+        Route::post('/', [CategoryController::class, 'store'])->name('store');
+        Route::get('/{category}/edit', [CategoryController::class, 'edit'])->name('edit');
+        Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
+        Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
         Route::post('/quick-create', [CategoryController::class, 'quickCreate'])->name('quick-create');
-        // Vous pouvez ajouter d'autres routes pour les catégories ici plus tard
     });
-    
     
     // Fournisseurs
     Route::prefix('suppliers')->name('suppliers.')->group(function () {
@@ -95,56 +124,78 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/create', [SupplierController::class, 'create'])->name('create');
         Route::post('/', [SupplierController::class, 'store'])->name('store');
         Route::post('/store-with-products', [SupplierController::class, 'storeWithProducts'])->name('storeWithProducts');
+        Route::get('/{supplier}', [SupplierController::class, 'show'])->name('show'); 
         Route::get('/{supplier}/edit', [SupplierController::class, 'edit'])->name('edit');
-        Route::patch('/{supplier}', [SupplierController::class, 'update'])->name('update');
+        Route::match(['PUT', 'PATCH'], '/{supplier}', [SupplierController::class, 'update'])->name('update');
         Route::delete('/{supplier}', [SupplierController::class, 'destroy'])->name('destroy');
     });
     
-    // Commandes
+    // ===========================================
+    // COMMANDES ADMIN (avec contrôleur dédié)
+    // ===========================================
     Route::prefix('orders')->name('orders.')->group(function () {
+        Route::get('/', [AdminOrderController::class, 'index'])->name('index');
+        Route::get('/create/{supplier_id?}', [AdminOrderController::class, 'create'])->name('create');
+        Route::post('/', [AdminOrderController::class, 'store'])->name('store');
+        Route::get('/{order}', [AdminOrderController::class, 'show'])->name('show');
+        Route::get('/{order}/edit', [AdminOrderController::class, 'edit'])->name('edit');
+        Route::put('/{order}', [AdminOrderController::class, 'update'])->name('update');
         Route::patch('/{order}/status', [OrderController::class, 'updateStatus'])->name('updateStatus');
-        Route::get('/', [OrderController::class, 'index'])->name('index');
-        Route::get('/create/{supplier_id?}', [OrderController::class, 'create'])->name('create');
-        Route::post('/', [OrderController::class, 'store'])->name('store');
-        Route::get('/{order}', [OrderController::class, 'show'])->name('show');
-        Route::get('/{order}/edit', [OrderController::class, 'edit'])->name('edit');
-        Route::put('/{order}', [OrderController::class, 'update'])->name('update');
-        Route::delete('/{order}', [OrderController::class, 'destroy'])->name('destroy');
+        Route::delete('/{order}', [AdminOrderController::class, 'destroy'])->name('destroy');
     });
     
-    // Transactions
+    // ===========================================
+    // TRANSACTIONS
+    // ===========================================
     Route::prefix('transactions')->name('transactions.')->group(function () {
+        // Routes principales
         Route::get('/', [TransactionController::class, 'index'])->name('index');
         Route::get('/create', [TransactionController::class, 'create'])->name('create');
         Route::post('/', [TransactionController::class, 'store'])->name('store');
+        
+        // Routes AJAX / API
+        Route::get('/{transaction}', [TransactionController::class, 'show'])->name('show');
+        Route::get('/export/csv', [TransactionController::class, 'export'])->name('export');
+        
+        // Note: Pas de routes edit/update/destroy car les transactions sont immuables
+        // (on ne peut pas modifier une transaction, on peut seulement en créer de nouvelles)
     });
     
     // Rapports
     Route::prefix('rapports')->name('rapports.')->group(function () {
         Route::get('/', [RapportController::class, 'index'])->name('index');
+        Route::post('/generate', [RapportController::class, 'generate'])->name('generate');
+        Route::get('/{report}/export', [RapportController::class, 'export'])->name('export');
+        Route::get('/refresh-data', [RapportController::class, 'refreshData'])->name('refresh');
     });
     
     // ===========================================
-    // ROUTES ADMIN POUR LES VENDEURS (AJOUTÉES ICI)
+    // ROUTES ADMIN POUR LES VENDEURS
     // ===========================================
     Route::prefix('vendors')->name('vendors.')->group(function () {
+        // Routes GET (affichage)
         Route::get('/', [VendorController::class, 'index'])->name('index');
         Route::get('/{vendor}', [VendorController::class, 'show'])->name('show');
-        Route::post('/{vendor}/approve', [VendorController::class, 'approve'])->name('approve');
-        Route::post('/{vendor}/reject', [VendorController::class, 'reject'])->name('reject');
-        Route::post('/{vendor}/suspend', [VendorController::class, 'suspend'])->name('suspend');
+        
+        // Routes de mise à jour (PATCH pour les modifications partielles)
+        Route::patch('/{vendor}/approve', [VendorController::class, 'approve'])->name('approve');
+        Route::patch('/{vendor}/reject', [VendorController::class, 'reject'])->name('reject');
+        Route::patch('/{vendor}/suspend', [VendorController::class, 'suspend'])->name('suspend');
+        
+        // Commission reste en POST car c'est une mise à jour spécifique
         Route::post('/{vendor}/commission', [VendorController::class, 'updateCommission'])->name('commission');
     });
     
-    // API interne
+    // ===========================================
+    // API INTERNE
+    // ===========================================
     Route::prefix('api')->name('api.')->group(function () {
         Route::get('/products/{supplier}', [OrderController::class, 'getProductsBySupplier'])->name('products.by-supplier');
         Route::get('/stock-data', [DashboardController::class, 'getStockData'])->name('stock.data');
         Route::get('/transactions-data', [DashboardController::class, 'transactionsData'])->name('transactions.data');
-        Route::get('/api/categories', function() {
-                    return App\Models\Category::where('is_active', true)->get(['id', 'name']);
-                })->middleware('auth');
-                
+        Route::get('/categories', function() {
+            return App\Models\Category::where('is_active', true)->get(['id', 'name']);
+        })->middleware('auth')->name('categories.list');
     });
     
     // Profile admin
@@ -154,6 +205,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password');
         Route::patch('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo');
         Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
+    });
+
+    // Finance
+    Route::prefix('finance')->name('finance.')->group(function () {
+        Route::get('/', [FinanceController::class, 'index'])->name('index');
+        Route::get('/transactions', [FinanceController::class, 'transactions'])->name('transactions');
+        Route::get('/commissions', [FinanceController::class, 'commissions'])->name('commissions');
+        Route::post('/commissions/pay', [FinanceController::class, 'payCommissions'])->name('commissions.pay');
+        Route::get('/export', [FinanceController::class, 'export'])->name('export');
     });
 });
 
@@ -184,7 +244,10 @@ if (app()->environment('local')) {
         
         Route::get('/test-update-stock/{orderId}', function ($orderId) {
             $order = \App\Models\Order::findOrFail($orderId);
-            return 'Test route - à configurer';
+            return response()->json([
+                'message' => 'Route de test - à configurer',
+                'order' => $order
+            ]);
         });
     });
 }

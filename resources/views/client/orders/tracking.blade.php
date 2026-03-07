@@ -1,15 +1,14 @@
-{{-- resources/views/client/orders/tracking.blade.php --}}
 @extends('shop.layouts.shop')
 
-@section('title', 'Suivi de commande #' . $order->id)
+@section('title', __('messages.order_tracking') . ' #' . $order->id)
 
 @section('content')
 <div class="container">
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('shop.home') }}">Accueil</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('client.orders.index') }}">Mes commandes</a></li>
-            <li class="breadcrumb-item active">Suivi commande #{{ $order->id }}</li>
+            <li class="breadcrumb-item"><a href="{{ route('shop.home') }}">{{ __('messages.home') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('client.orders.index') }}">{{ __('messages.my_orders') }}</a></li>
+            <li class="breadcrumb-item active">{{ __('messages.order_tracking') }} #{{ $order->id }}</li>
         </ol>
     </nav>
 
@@ -18,26 +17,31 @@
             <div class="card">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">
-                        <i class="fas fa-truck me-2"></i> Suivi de votre commande #{{ $order->id }}
+                        <i class="fas fa-truck me-2"></i> {{ __('messages.order_tracking') }} #{{ $order->id }}
                     </h5>
                 </div>
                 <div class="card-body">
                     <!-- Statut actuel -->
                     <div class="text-center mb-4">
-                        <span class="badge bg-{{ $order->status_color ?? 'warning' }} fs-6 p-3">
-                            <i class="fas {{ $order->status_icon ?? 'fa-clock' }} me-2"></i>
-                            {{ $order->status_label ?? $order->status }}
+                        <span class="badge bg-{{ $order->status_color }} fs-6 p-3">
+                            <i class="fas {{ $order->status_icon }} me-2"></i>
+                            {{ $order->status_label }}
                         </span>
                     </div>
 
                     <!-- Barre de progression -->
                     @php
-                        $progressSteps = ['en attente', 'en traitement', 'expédiée', 'livrée'];
-                        $currentStep = array_search($order->status, $progressSteps);
+                        $progressSteps = [
+                            __('messages.status_pending'),
+                            __('messages.status_processing'),
+                            __('messages.status_shipped'),
+                            __('messages.status_delivered')
+                        ];
+                        $currentStep = array_search($order->status_label, $progressSteps);
                         $progress = ($currentStep !== false) ? (($currentStep + 1) / count($progressSteps)) * 100 : 0;
                     @endphp
 
-                    @if($order->status !== 'annulé')
+                    @if(!$order->isCancelled())
                     <div class="progress mb-4" style="height: 30px;">
                         <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
                              role="progressbar" 
@@ -51,7 +55,7 @@
                     @endif
 
                     <!-- Timeline d'historique -->
-                    <h6 class="mt-4 mb-3">Historique de la commande</h6>
+                    <h6 class="mt-4 mb-3">{{ __('messages.order_history') }}</h6>
                     <div class="timeline">
                         @forelse($order->statusHistory ?? [] as $history)
                         <div class="timeline-item">
@@ -71,13 +75,13 @@
                                 <p class="mb-0">{{ $history->comment }}</p>
                                 @endif
                                 @if($history->user)
-                                <small class="text-muted">Par: {{ $history->user->name }}</small>
+                                <small class="text-muted">{{ __('messages.by') }}: {{ $history->user->name }}</small>
                                 @endif
                             </div>
                         </div>
                         @empty
                         <div class="text-center py-4">
-                            <p class="text-muted">Aucun historique disponible pour cette commande.</p>
+                            <p class="text-muted">{{ __('messages.no_history') }}</p>
                         </div>
                         @endforelse
                     </div>
@@ -85,34 +89,34 @@
                     <!-- Informations de la commande -->
                     <div class="row mt-4">
                         <div class="col-sm-6">
-                            <h6>Détails de la commande</h6>
+                            <h6>{{ __('messages.order_details') }}</h6>
                             <table class="table table-sm">
                                 <tr>
-                                    <td>Numéro:</td>
+                                    <td>{{ __('messages.order_number') }}:</td>
                                     <td class="text-end">#{{ $order->id }}</td>
                                 </tr>
                                 <tr>
-                                    <td>Date:</td>
+                                    <td>{{ __('messages.order_date') }}:</td>
                                     <td class="text-end">{{ $order->created_at->format('d/m/Y H:i') }}</td>
                                 </tr>
                                 <tr>
-                                    <td>Total:</td>
+                                    <td>{{ __('messages.total') }}:</td>
                                     <td class="text-end text-primary">{{ number_format($order->total_amount, 2) }} €</td>
                                 </tr>
                                 <tr>
-                                    <td>Paiement:</td>
+                                    <td>{{ __('messages.payment') }}:</td>
                                     <td class="text-end">
-                                        @if($order->payment)
-                                            <span class="badge bg-success">Payé</span>
+                                        @if($order->payment && $order->payment->status === 'completed')
+                                            <span class="badge bg-success">{{ __('messages.paid') }}</span>
                                         @else
-                                            <span class="badge bg-warning">En attente</span>
+                                            <span class="badge bg-warning">{{ __('messages.pending') }}</span>
                                         @endif
                                     </td>
                                 </tr>
                             </table>
                         </div>
                         <div class="col-sm-6">
-                            <h6>Adresse de livraison</h6>
+                            <h6>{{ __('messages.shipping_address') }}</h6>
                             <address>
                                 {{ $order->shipping_name }}<br>
                                 {{ $order->shipping_address }}<br>
@@ -123,12 +127,24 @@
                         </div>
                     </div>
 
+                    <!-- Informations de livraison si disponibles -->
+                    @if($order->tracking_number)
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-box me-2"></i>
+                        <strong>{{ __('messages.tracking_number') }}:</strong> {{ $order->tracking_number }}
+                        @if($order->carrier)
+                            <br><i class="fas fa-truck me-2"></i>
+                            <strong>{{ __('messages.carrier') }}:</strong> {{ $order->carrier }}
+                        @endif
+                    </div>
+                    @endif
+
                     <div class="d-flex justify-content-between mt-4">
                         <a href="{{ route('client.orders.show', $order) }}" class="btn btn-outline-primary">
-                            <i class="fas fa-receipt me-2"></i> Voir les détails
+                            <i class="fas fa-receipt me-2"></i> {{ __('messages.view_details') }}
                         </a>
                         <a href="{{ route('client.orders.index') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left me-2"></i> Retour aux commandes
+                            <i class="fas fa-arrow-left me-2"></i> {{ __('messages.back_to_orders') }}
                         </a>
                     </div>
                 </div>

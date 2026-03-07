@@ -1,15 +1,29 @@
-{{-- resources/views/partials/navbar.blade.php --}}
-<nav class="main-header navbar navbar-expand navbar-white navbar-light">
+<nav class="main-header navbar navbar-expand navbar-dark navbar-gradient">
     <!-- Left navbar links -->
     <ul class="navbar-nav">
         <li class="nav-item">
-            <a class="nav-link" data-widget="pushmenu" href="#" role="button">
+            <a class="nav-link text-white" data-widget="pushmenu" href="#" role="button">
                 <i class="fas fa-bars"></i>
             </a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
-            <a href="{{ route('admin.dashboard') }}" class="nav-link">
+            <a href="{{ route('admin.dashboard') }}" class="nav-link text-white hover-gold">
                 <i class="fas fa-tachometer-alt mr-1"></i> Dashboard
+            </a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="{{ route('admin.stocks.index') }}" class="nav-link text-white hover-gold">
+                <i class="fas fa-box mr-1"></i> Stocks
+            </a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="{{ route('admin.products.index') }}" class="nav-link text-white hover-gold">
+                <i class="fas fa-cubes mr-1"></i> Produits
+            </a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="{{ route('admin.suppliers.index') }}" class="nav-link text-white hover-gold">
+                <i class="fas fa-truck mr-1"></i> Fournisseurs
             </a>
         </li>
     </ul>
@@ -18,70 +32,75 @@
     <ul class="navbar-nav ml-auto">
         <!-- Notifications -->
         <li class="nav-item dropdown">
-            <a class="nav-link" data-toggle="dropdown" href="#">
+            <a class="nav-link text-white hover-gold" data-toggle="dropdown" href="#">
                 <i class="far fa-bell"></i>
                 @php
                     $unreadNotifications = auth()->user()->unreadNotifications;
                     $notificationCount = $unreadNotifications->count();
                 @endphp
                 @if($notificationCount > 0)
-                    <span class="badge badge-warning navbar-badge">{{ $notificationCount }}</span>
+                    <span class="badge badge-warning navbar-badge animate-pulse">{{ $notificationCount }}</span>
                 @endif
             </a>
-            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                <span class="dropdown-item dropdown-header">
-                    {{ $notificationCount }} Notification(s)
-                </span>
+            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right shadow-lg border-0">
+                <div class="dropdown-header bg-gradient-primary text-white rounded-top py-3">
+                    <i class="far fa-bell mr-2"></i>
+                    <span>{{ $notificationCount }} Notification(s)</span>
+                </div>
                 
-                @forelse($unreadNotifications as $notification)
-                    @php
-                        $data = $notification->data;
-                        $actionUrl = $data['action_url'] ?? '#';
-                        $icon = $data['icon'] ?? 'fa-info-circle';
-                        $color = $data['color'] ?? 'info';
-                        $message = $data['message'] ?? 'Nouvelle notification';
-                    @endphp
-                    
-                    <div class="dropdown-item">
-                        <a href="{{ $actionUrl }}" class="d-flex align-items-center text-decoration-none text-dark">
-                            <div class="mr-3">
-                                <i class="fas {{ $icon }} text-{{ $color }}"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <small class="float-right text-muted">{{ $notification->created_at->diffForHumans() }}</small>
-                                <h6 class="mb-0">{{ $message }}</h6>
-                                @if(isset($data['shop_name']))
-                                    <p class="text-muted mb-0 small">{{ $data['shop_name'] }}</p>
-                                @endif
-                            </div>
-                        </a>
-                        <form action="{{ route('notifications.read', $notification->id) }}" method="POST" class="d-none">
-                            @csrf
-                        </form>
-                    </div>
-                    <div class="dropdown-divider"></div>
-                @empty
-                    <span class="dropdown-item text-center py-3">
-                        <i class="fas fa-check-circle text-success mb-2"></i><br>
-                        Aucune notification
-                    </span>
-                @endforelse
+                <div class="notification-list" style="max-height: 300px; overflow-y: auto;">
+                    @forelse($unreadNotifications as $notification)
+                        @php
+                            $data = $notification->data;
+                            $actionUrl = $data['action_url'] ?? '#';
+                            $icon = $data['icon'] ?? 'fa-info-circle';
+                            $color = $data['color'] ?? 'info';
+                            $message = $data['message'] ?? 'Nouvelle notification';
+                        @endphp
+                        
+                        <div class="dropdown-item notification-item p-3 border-bottom">
+                            <a href="{{ $actionUrl }}" class="d-flex align-items-center text-decoration-none" onclick="markAsRead('{{ $notification->id }}')">
+                                <div class="mr-3">
+                                    <div class="rounded-circle p-2 bg-{{ $color }} bg-opacity-10">
+                                        <i class="fas {{ $icon }} text-{{ $color }}"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <small class="float-right text-muted">{{ $notification->created_at->diffForHumans() }}</small>
+                                    <h6 class="mb-0 text-dark">{{ $message }}</h6>
+                                    @if(isset($data['shop_name']))
+                                        <p class="text-muted mb-0 small">{{ $data['shop_name'] }}</p>
+                                    @endif
+                                </div>
+                            </a>
+                            <form id="read-form-{{ $notification->id }}" action="{{ route('notifications.read', $notification->id) }}" method="POST" class="d-none">
+                                @csrf
+                            </form>
+                        </div>
+                    @empty
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                            <p class="text-muted mb-0">Aucune notification</p>
+                        </div>
+                    @endforelse
+                </div>
 
                 @if($notificationCount > 0)
-                <div class="dropdown-divider"></div>
-                <form action="{{ route('notifications.read-all') }}" method="POST" class="dropdown-item p-0">
-                    @csrf
-                    <button type="submit" class="dropdown-item text-center text-primary">
-                        <i class="fas fa-check-double mr-2"></i> Marquer tout comme lu
-                    </button>
-                </form>
+                <div class="dropdown-footer p-2 bg-light">
+                    <form action="{{ route('notifications.read-all') }}" method="POST" class="m-0">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-primary btn-block">
+                            <i class="fas fa-check-double mr-2"></i> Marquer tout comme lu
+                        </button>
+                    </form>
+                </div>
                 @endif
             </div>
         </li>
 
         <!-- User Menu -->
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" data-toggle="dropdown">
+        <li class="nav-item dropdown user-menu">
+            <a class="nav-link dropdown-toggle d-flex align-items-center text-white hover-gold" href="#" id="userDropdown" data-toggle="dropdown">
                 <div class="mr-2 d-flex align-items-center">
                     @php
                         $userPhoto = Auth::user()->profile_photo_url 
@@ -94,61 +113,170 @@
                     @if($userPhoto)
                         <img src="{{ $userPhoto }}" 
                              alt="{{ Auth::user()->name }}" 
-                             class="img-circle elevation-1"
-                             style="width: 30px; height: 30px; object-fit: cover;">
+                             class="img-circle elevation-2 border border-white"
+                             style="width: 32px; height: 32px; object-fit: cover;">
                     @else
-                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white"
-                             style="width: 30px; height: 30px;">
+                        <div class="bg-gold rounded-circle d-flex align-items-center justify-content-center text-dark font-weight-bold"
+                             style="width: 32px; height: 32px;">
                             <span>{{ substr(Auth::user()->name, 0, 1) }}</span>
                         </div>
                     @endif
                 </div>
-                <span class="ml-1 d-none d-md-inline">{{ Auth::user()->name }}</span>
+                <span class="ml-1 d-none d-md-inline font-weight-medium">{{ Auth::user()->name }}</span>
             </a>
-            <div class="dropdown-menu dropdown-menu-right py-0" style="min-width: 240px;">
-                <div class="bg-primary text-white px-3 py-2 rounded-top">
+            <div class="dropdown-menu dropdown-menu-right py-0 shadow-lg border-0" style="min-width: 280px;">
+                <!-- User Info Header -->
+                <div class="bg-gradient-primary text-white px-3 py-3 rounded-top">
                     <div class="d-flex align-items-center">
                         @if($userPhoto)
                             <img src="{{ $userPhoto }}" 
                                  alt="{{ Auth::user()->name }}" 
-                                 class="rounded-circle mr-2"
-                                 style="width: 40px; height: 40px; object-fit: cover;">
+                                 class="rounded-circle mr-3 border-2 border-white"
+                                 style="width: 48px; height: 48px; object-fit: cover;">
                         @else
-                            <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center mr-2"
-                                 style="width: 40px; height: 40px;">
-                                <span class="font-weight-bold">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                            <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center mr-3 font-weight-bold border-2 border-white"
+                                 style="width: 48px; height: 48px; font-size: 20px;">
+                                <span>{{ substr(Auth::user()->name, 0, 1) }}</span>
                             </div>
                         @endif
                         <div>
-                            <h6 class="mb-0 text-white">{{ Auth::user()->name }}</h6>
+                            <h6 class="mb-0 text-white font-weight-bold">{{ Auth::user()->name }}</h6>
                             <small class="text-white-50">{{ Auth::user()->email }}</small>
+                            @if(Auth::user()->isAdmin())
+                                <div class="mt-1">
+                                    <span class="badge bg-gold text-dark">Administrateur</span>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
+
+                <!-- Menu Items -->
                 <div class="py-2">
-                    <a href="{{ route('admin.profile.edit') }}" class="dropdown-item py-2">
+                    <a href="{{ route('admin.profile.edit') }}" class="dropdown-item py-2 hover-gold-bg">
                         <i class="fas fa-user-circle mr-2 text-primary"></i> Mon profil
                     </a>
+                    
                     @if(Auth::user()->isAdmin())
-                        <a href="{{ route('admin.vendors.index') }}" class="dropdown-item py-2">
+                        <a href="{{ route('admin.vendors.index') }}" class="dropdown-item py-2 hover-gold-bg">
                             <i class="fas fa-store mr-2 text-warning"></i> Gestion vendeurs
-                            @if($notificationCount > 0)
-                                <span class="badge bg-warning float-right">{{ $notificationCount }}</span>
-                            @endif
                         </a>
-                        <a href="{{ route('admin.dashboard') }}" class="dropdown-item py-2">
-                            <i class="fas fa-cog mr-2 text-secondary"></i> Administration
+                        
+                        <div class="dropdown-divider my-1"></div>
+                        
+                        <a href="{{ route('shop.home') }}" target="_blank" class="dropdown-item py-2 hover-gold-bg">
+                            <i class="fas fa-external-link-alt mr-2 text-info"></i> Voir la boutique
                         </a>
                     @endif
+                    
                     <div class="dropdown-divider my-1"></div>
-                    <form method="POST" action="{{ route('logout') }}">
+                    
+                    <!-- VERSION CORRIGÉE DU FORMULAIRE DE DÉCONNEXION -->
+                    <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display: none;">
                         @csrf
-                        <button type="submit" class="dropdown-item py-2 text-danger">
-                            <i class="fas fa-sign-out-alt mr-2"></i> Déconnexion
-                        </button>
                     </form>
+                    <a href="#" class="dropdown-item py-2 text-danger hover-gold-bg" 
+                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Déconnexion
+                    </a>
                 </div>
             </div>
         </li>
     </ul>
 </nav>
+
+<style>
+.navbar-gradient {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border-bottom: 3px solid #f7d44a;
+}
+
+.hover-gold {
+    transition: color 0.3s ease;
+}
+.hover-gold:hover {
+    color: #f7d44a !important;
+}
+
+.hover-gold-bg:hover {
+    background-color: rgba(247, 212, 74, 0.1) !important;
+}
+
+.bg-gold {
+    background-color: #f7d44a !important;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+.animate-pulse {
+    animation: pulse 2s infinite;
+}
+
+.notification-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .navbar-nav .dropdown-menu {
+        position: absolute !important;
+        right: 0 !important;
+        left: auto !important;
+        min-width: 280px;
+        max-width: 320px;
+    }
+    
+    .user-menu .nav-link span {
+        display: none;
+    }
+    
+    .user-menu .nav-link img,
+    .user-menu .nav-link .bg-gold {
+        margin-right: 0 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar-nav .dropdown-menu {
+        min-width: 260px;
+    }
+    
+    .notification-item .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .notification-item .mr-3 {
+        margin-right: 0 !important;
+        margin-bottom: 8px;
+    }
+    
+    .notification-item .float-right {
+        float: none !important;
+        display: block;
+        margin-bottom: 5px;
+    }
+}
+</style>
+
+<script>
+function markAsRead(notificationId) {
+    document.getElementById('read-form-' + notificationId).submit();
+}
+
+// Ajouter une confirmation de déconnexion (optionnel)
+document.addEventListener('DOMContentLoaded', function() {
+    const logoutLink = document.querySelector('a[onclick*="logout-form"]');
+    if (logoutLink) {
+        logoutLink.addEventListener('click', function(e) {
+            if (!confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+</script>

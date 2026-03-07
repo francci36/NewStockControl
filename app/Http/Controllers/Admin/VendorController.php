@@ -30,49 +30,77 @@ class VendorController extends Controller
     }
 
     /**
-     * Détail d'une demande
+     * Détail d'une demande - CORRIGÉ
      */
     public function show(Vendor $vendor)
     {
+        // Charger les relations
         $vendor->load('user');
-        return view('admin.vendors.show', compact('vendor'));
+        
+        // Statistiques - CORRECTION : préciser la table pour 'status'
+        $stats = [
+            'products_count' => $vendor->products()->count(),
+            'orders_count' => $vendor->orders()->count(),
+            'pending_orders' => $vendor->orders()
+                ->where('orders.status', 'pending')  // ← CORRECTION ICI
+                ->count(),
+            'revenue' => $vendor->orders()->sum('total_amount')
+        ];
+        
+        // Produits récents
+        $recentProducts = $vendor->products()
+            ->latest()
+            ->limit(5)
+            ->get();
+        
+        // Commandes récentes (optionnel)
+        $recentOrders = $vendor->orders()
+            ->latest()
+            ->limit(5)
+            ->get();
+        
+        return view('admin.vendors.show', compact(
+            'vendor', 
+            'stats', 
+            'recentProducts',
+            'recentOrders'
+        ));
     }
 
     /**
      * Approuver un vendeur
      */
     public function approve(Vendor $vendor)
-{
-    try {
-        DB::beginTransaction();
+    {
+        try {
+            DB::beginTransaction();
 
-        // Mettre à jour le statut du vendeur
-        $vendor->update([
-            'status' => 'active',
-            'approved_at' => now(),
-        ]);
+            // Mettre à jour le statut du vendeur
+            $vendor->update([
+                'status' => 'active',
+                'approved_at' => now(),
+            ]);
 
-        // Mettre à jour le rôle de l'utilisateur
-        $user = $vendor->user;
-        $user->role = 'vendor';
-        $user->save();
+            // Mettre à jour le rôle de l'utilisateur
+            $user = $vendor->user;
+            $user->role = 'vendor';
+            $user->save();
 
-        // 🚨 Invalider toutes les sessions de cet utilisateur
-        // Cela le forcera à se reconnecter
-        DB::table('sessions')->where('user_id', $user->id)->delete();
+            // Invalider toutes les sessions de cet utilisateur
+            DB::table('sessions')->where('user_id', $user->id)->delete();
 
-        DB::commit();
+            DB::commit();
 
-        return redirect()->route('admin.vendors.index')
-            ->with('success', "La boutique {$vendor->shop_name} a été approuvée. L'utilisateur devra se reconnecter.");
+            return redirect()->route('admin.vendors.index')
+                ->with('success', "La boutique {$vendor->shop_name} a été approuvée. L'utilisateur devra se reconnecter.");
 
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Erreur approbation vendeur: ' . $e->getMessage());
-        
-        return back()->with('error', 'Une erreur est survenue.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Erreur approbation vendeur: ' . $e->getMessage());
+            
+            return back()->with('error', 'Une erreur est survenue.');
+        }
     }
-}
 
     /**
      * Rejeter un vendeur

@@ -1,11 +1,10 @@
-{{-- resources/views/layouts/auth.blade.php --}}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Connexion - Ma Boutique')</title>
+    <title>@yield('title', __('auth.login_title') . ' - ' . config('app.name'))</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -15,14 +14,17 @@
 </head>
 <body class="bg-light">
     <!-- Navigation simplifiée -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
         <div class="container">
-            <a class="navbar-brand" href="{{ route('shop.home') }}">
-                <i class="fas fa-paw"></i> Ma Boutique Animalière
+            <a class="navbar-brand d-flex align-items-center" href="{{ route('shop.home') }}">
+                <img src="{{ asset('images/logo.png') }}" 
+                     alt="{{ config('app.name') }}" 
+                     style="height: 35px; width: auto; margin-right: 10px;">
+                <span style="color: #f7d44a; font-weight: 600;">Carioca & Coquelicot</span>
             </a>
             <div class="navbar-nav ms-auto">
                 <a href="{{ route('shop.home') }}" class="nav-link text-white">
-                    <i class="fas fa-home"></i> Retour à la boutique
+                    <i class="fas fa-home me-2" style="color: #f7d44a;"></i>{{ __('auth.back_to_shop') }}
                 </a>
             </div>
         </div>
@@ -39,8 +41,8 @@
     <footer class="bg-white py-3 mt-5 border-top">
         <div class="container text-center">
             <p class="text-muted mb-0">
-                &copy; {{ date('Y') }} Ma Boutique Animalière - 
-                <a href="{{ route('shop.home') }}" class="text-primary">Retour à la boutique</a>
+                &copy; {{ date('Y') }} <strong>Carioca & Coquelicot</strong> - 
+                <a href="{{ route('shop.home') }}" class="text-primary">{{ __('auth.back_to_shop') }}</a>
             </p>
         </div>
     </footer>

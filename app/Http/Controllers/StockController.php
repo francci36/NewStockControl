@@ -9,22 +9,83 @@ use Illuminate\Http\Request;
 
 class StockController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Vérifier si la table stocks est vide
+        // Synchroniser les stocks si nécessaire
         if (Stock::count() == 0) {
-            Log::warning('Table stocks vide - tentative de synchronisation');
             $this->syncStocks();
         }
 
-        // Récupérer les stocks avec pagination
-        $stocks = Stock::with('product')->paginate(20);
-
-        // Log pour vérifier les données
-        Log::info('Stocks récupérés : ', [
-            'count' => $stocks->count(),
-            'total' => $stocks->total()
-        ]);
+        // Construction de la requête
+        $query = Stock::with(['product', 'product.supplier']);
+        
+        // 🔍 RECHERCHE
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('product', function($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('sku', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        }
+        
+        // 📊 FILTRE PAR STATUT
+        if ($request->filled('status')) {
+            switch ($request->status) {
+                case 'low':
+                    $query->whereHas('product', function($q) {
+                        $q->whereRaw('quantity <= COALESCE(stock_threshold, 5)')
+                          ->where('quantity', '>', 0);
+                    });
+                    break;
+                case 'out':
+                    $query->whereHas('product', function($q) {
+                        $q->where('quantity', '<=', 0);
+                    });
+                    break;
+                case 'normal':
+                    $query->whereHas('product', function($q) {
+                        $q->whereRaw('quantity > COALESCE(stock_threshold, 5)');
+                    });
+                    break;
+            }
+        }
+        
+        // 🔄 GESTION DU TRI (CORRIGÉ)
+        if ($request->filled('sort')) {
+            switch ($request->sort) {
+                case 'name_asc':
+                    $query->join('products', 'stocks.product_id', '=', 'products.id')
+                          ->select('stocks.*')
+                          ->orderBy('products.name', 'asc');
+                    break;
+                case 'name_desc':
+                    $query->join('products', 'stocks.product_id', '=', 'products.id')
+                          ->select('stocks.*')
+                          ->orderBy('products.name', 'desc');
+                    break;
+                case 'quantity_asc':
+                    $query->orderBy('quantity', 'asc');
+                    break;
+                case 'quantity_desc':
+                    $query->orderBy('quantity', 'desc');
+                    break;
+                default:
+                    // Tri par défaut : nom ascendant
+                    $query->join('products', 'stocks.product_id', '=', 'products.id')
+                          ->select('stocks.*')
+                          ->orderBy('products.name', 'asc');
+                    break;
+            }
+        } else {
+            // Tri par défaut si aucun tri spécifié
+            $query->join('products', 'stocks.product_id', '=', 'products.id')
+                  ->select('stocks.*')
+                  ->orderBy('products.name', 'asc');
+        }
+        
+        // Pagination
+        $stocks = $query->paginate(20);
 
         return view('stocks.index', compact('stocks'));
     }
@@ -35,35 +96,11 @@ class StockController extends Controller
     private function syncStocks()
     {
         $products = Product::all();
-        $count = 0;
-        
         foreach ($products as $product) {
             Stock::updateOrCreate(
                 ['product_id' => $product->id],
                 ['quantity' => $product->quantity]
             );
-            $count++;
-        }
-        
-        Log::info("Synchronisation terminée: $count stocks créés/mis à jour");
-    }
-
-    /**
-     * Route de synchronisation manuelle
-     */
-    public function sync()
-    {
-        try {
-            $this->syncStocks();
-            return response()->json([
-                'success' => true,
-                'message' => 'Stocks synchronisés avec succès'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
         }
     }
 
@@ -75,17 +112,12 @@ class StockController extends Controller
 
         $stock->update($validated);
         
-        // Mettre à jour aussi le produit correspondant
         if ($stock->product) {
             $stock->product->quantity = $validated['quantity'];
             $stock->product->save();
-            Log::info('Stock et produit mis à jour', [
-                'stock_id' => $stock->id,
-                'product_id' => $stock->product_id,
-                'quantity' => $validated['quantity']
-            ]);
         }
 
-        return redirect()->route('stocks.index')->with('success', 'Stock mis à jour');
+        return redirect()->route('admin.stocks.index')
+            ->with('success', 'Stock mis à jour avec succès');
     }
 }

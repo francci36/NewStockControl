@@ -1,42 +1,53 @@
 @extends('shop.layouts.shop')
 
-@section('title', $product->name . ' - Ma Boutique Animalière')
+@section('title', $product->translated_name . ' - ' . __('messages.shop_name'))
 
 @section('content')
-<div class="container">
+<div class="container py-4">
+    <!-- Fil d'Ariane -->
     <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('shop.home') }}">Accueil</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('shop.products.index') }}">Produits</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ $product->name }}</li>
+        <ol class="breadcrumb bg-light-gold p-3 rounded-3">
+            <li class="breadcrumb-item">
+                <a href="{{ route('shop.home') }}" class="text-decoration-none text-gold">
+                    <i class="fas fa-home me-1"></i> {{ __('messages.home') }}
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ route('shop.products.index') }}" class="text-decoration-none text-gold">
+                    <i class="fas fa-box me-1"></i> {{ __('messages.products') }}
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{{ $product->translated_name }}</li>
         </ol>
     </nav>
 
     <div class="row">
         <!-- Image du produit -->
         <div class="col-md-6 mb-4">
-            <div class="card position-relative">
+            <div class="card border-0 shadow-lg product-image-card">
                 <!-- Badge stock limité -->
                 @if($product->quantity <= $product->stock_threshold && $product->quantity > 0)
                     <span class="position-absolute top-0 start-0 badge bg-danger m-3" style="z-index: 10;">
-                        <i class="fas fa-exclamation-triangle me-1"></i> Stock limité
+                        <i class="fas fa-exclamation-triangle me-1"></i> {{ __('messages.low_stock') }}
                     </span>
                 @endif
                 
                 <!-- Image du produit -->
-                <div class="text-center p-3">
+                <div class="product-image-wrapper text-center p-4">
                     @if($product->image)
                         @php
                             $imageName = basename($product->image);
                         @endphp
                         <img src="{{ asset('storage/products/' . $imageName) }}" 
-                             alt="{{ $product->name }}" 
-                             class="img-fluid"
+                             alt="{{ $product->translated_name }}" 
+                             class="img-fluid product-main-image"
                              style="max-height: 400px; width: auto; object-fit: contain;"
-                             onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\'fas fa-box fa-5x text-secondary\'></i><p class=\'mt-2 text-muted\'>Image non disponible</p>';">
+                             onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'text-center py-5\'><i class=\'fas fa-box fa-5x text-gold\'></i><p class=\'mt-3 text-muted\'>{{ __('messages.image_not_available') }}</p></div>';">
                     @else
-                        <i class="fas fa-box fa-5x text-secondary"></i>
-                        <p class="mt-2 text-muted">Aucune image disponible</p>
+                        <div class="text-center py-5">
+                            <i class="fas fa-box fa-5x text-gold"></i>
+                            <p class="mt-3 text-muted">{{ __('messages.no_image') }}</p>
+                        </div>
                     @endif
                 </div>
             </div>
@@ -44,153 +55,195 @@
 
         <!-- Détails du produit -->
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <!-- Catégorie -->
-                    @if($product->category)
-                    <div class="mb-2">
-                        <span class="badge bg-secondary">{{ $product->category->name }}</span>
-                    </div>
-                    @endif
-                    
-                    <h1 class="card-title h2 mb-3">{{ $product->name }}</h1>
-                    
-                    <div class="mb-3">
-                        <!-- Vendeur ou Fournisseur -->
-                        @if($product->vendor)
-                            <span class="badge bg-success">
-                                <i class="fas fa-store me-1"></i> {{ $product->vendor->shop_name }}
-                            </span>
-                        @elseif($product->supplier)
-                            <span class="badge bg-info">
-                                <i class="fas fa-truck me-1"></i> {{ $product->supplier->name }}
+            <div class="card border-0 shadow-lg product-details-card">
+                <div class="card-body p-4">
+                    <!-- Catégorie et badges -->
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        @if($product->category)
+                            <span class="badge bg-light-gold text-dark px-3 py-2">
+                                <i class="fas fa-tag me-1 text-gold"></i> {{ $product->category->translated_name }}
                             </span>
                         @endif
                         
-                        <!-- Statut stock -->
-                        @if($product->quantity > 10)
-                            <span class="badge bg-success">
-                                <i class="fas fa-check-circle me-1"></i> En stock ({{ $product->quantity }})
+                        <!-- Vendeur ou Fournisseur -->
+                        @if($product->vendor)
+                            <span class="badge bg-success px-3 py-2">
+                                <i class="fas fa-store me-1"></i> {{ __('messages.sold_by') }}: {{ $product->vendor->shop_name }}
                             </span>
-                        @elseif($product->quantity > 0)
-                            <span class="badge bg-warning">
-                                <i class="fas fa-exclamation-circle me-1"></i> Stock limité ({{ $product->quantity }})
-                            </span>
-                        @else
-                            <span class="badge bg-danger">
-                                <i class="fas fa-times-circle me-1"></i> Rupture de stock
+                        @elseif($product->supplier)
+                            <span class="badge bg-info px-3 py-2">
+                                <i class="fas fa-truck me-1"></i> {{ __('messages.supplier') }}: {{ $product->supplier->name }}
                             </span>
                         @endif
                     </div>
-
+                    
+                    <!-- Titre -->
+                    <h1 class="card-title h2 mb-3 fw-bold">{{ $product->translated_name }}</h1>
+                    
                     <!-- Prix -->
                     <div class="mb-4">
-                        <h2 class="text-primary mb-0">{{ number_format($product->price, 2) }} €</h2>
-                        @if($product->quantity > 0)
-                            <small class="text-muted">TVA incluse</small>
+                        <div class="d-flex align-items-baseline gap-2">
+                            <span class="text-gold fs-1 fw-bold">{{ number_format($product->price, 2) }} €</span>
+                            @if($product->quantity > 0)
+                                <small class="text-muted">{{ __('messages.tax_included') }}</small>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Statut stock -->
+                    <div class="mb-4">
+                        @if($product->quantity > 10)
+                            <div class="alert alert-success border-0 py-3">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>{{ __('messages.in_stock') }}</strong> - {{ $product->quantity }} {{ __('messages.units_available') }}
+                            </div>
+                        @elseif($product->quantity > 0)
+                            <div class="alert alert-warning border-0 py-3">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <strong>{{ __('messages.low_stock') }}</strong> - {{ $product->quantity }} {{ __('messages.units_available') }}
+                            </div>
+                        @else
+                            <div class="alert alert-danger border-0 py-3">
+                                <i class="fas fa-times-circle me-2"></i>
+                                <strong>{{ __('messages.out_of_stock') }}</strong>
+                            </div>
                         @endif
                     </div>
 
                     <!-- Description courte -->
-                    @if($product->short_description)
-                    <div class="mb-3">
-                        <h5>En bref</h5>
-                        <p class="text-muted fst-italic">{{ $product->short_description }}</p>
+                    @if($product->short_description || $product->translated_short_description)
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-2">{{ __('messages.short_description') }}</h5>
+                        <p class="text-muted fst-italic border-start border-gold ps-3 py-2">
+                            {{ $product->translated_short_description ?? $product->short_description }}
+                        </p>
                     </div>
                     @endif
 
                     <!-- Description complète -->
+                    @if($product->description || $product->translated_description)
                     <div class="mb-4">
-                        <h5>Description détaillée</h5>
-                        <p class="text-muted">{{ $product->description ?? 'Aucune description disponible.' }}</p>
+                        <h5 class="fw-bold mb-2">{{ __('messages.full_description') }}</h5>
+                        <div class="text-muted description-content">
+                            {{ $product->translated_description ?? $product->description ?? __('messages.no_description') }}
+                        </div>
                     </div>
+                    @endif
 
                     <!-- Formulaire d'achat -->
                     @if($product->quantity > 0)
-                        <form action="{{ route('shop.cart.add') }}" method="POST" class="mb-3">
+                        <form action="{{ route('shop.cart.add') }}" method="POST" class="mb-4">
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
                             
                             <div class="row g-3 align-items-end">
                                 <div class="col-auto">
-                                    <label for="quantity" class="form-label fw-bold">Quantité</label>
-                                    <input type="number" 
-                                           name="quantity" 
-                                           id="quantity" 
-                                           class="form-control form-control-lg" 
-                                           value="1" 
-                                           min="1" 
-                                           max="{{ $product->quantity }}"
-                                           style="width: 120px;">
+                                    <label for="quantity" class="form-label fw-bold">{{ __('messages.quantity') }}</label>
+                                    <div class="input-group">
+                                        <button type="button" class="btn btn-outline-gold" onclick="decrementQuantity()">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" 
+                                               name="quantity" 
+                                               id="quantity" 
+                                               class="form-control form-control-lg text-center border-gold" 
+                                               value="1" 
+                                               min="1" 
+                                               max="{{ $product->quantity }}"
+                                               style="width: 80px;">
+                                        <button type="button" class="btn btn-outline-gold" onclick="incrementQuantity()">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="col-auto">
-                                    <button type="submit" class="btn btn-primary btn-lg">
-                                        <i class="fas fa-cart-plus me-2"></i> Ajouter au panier
+                                <div class="col-auto flex-grow-1">
+                                    <button type="submit" class="btn btn-gold btn-lg w-100">
+                                        <i class="fas fa-cart-plus me-2"></i> {{ __('messages.add_to_cart') }}
                                     </button>
                                 </div>
                             </div>
-                            <div class="mt-2">
-                                <small class="text-muted">
-                                    <i class="fas fa-box me-1"></i> {{ $product->quantity }} unités disponibles
-                                </small>
-                            </div>
                         </form>
-                    @else
-                        <div class="alert alert-danger">
-                            <i class="fas fa-times-circle me-2"></i> Ce produit n'est pas disponible actuellement.
-                        </div>
                     @endif
 
                     <!-- Caractéristiques -->
-                    <div class="mt-4 p-3 bg-light dark:bg-gray-700 rounded">
-                        <h5 class="mb-3">Caractéristiques</h5>
-                        <ul class="list-unstyled mb-0">
-                            <li class="mb-2">
-                                <i class="fas fa-hashtag me-2 text-primary"></i>
-                                <strong>Référence:</strong> #{{ $product->id }}
-                            </li>
-                            <li class="mb-2">
-                                <i class="fas fa-tag me-2 text-primary"></i>
-                                <strong>Catégorie:</strong> {{ $product->category->name ?? 'Non catégorisé' }}
-                            </li>
-                            <li class="mb-2">
-                                <i class="fas fa-building me-2 text-primary"></i>
-                                <strong>Vendu par:</strong> 
-                                @if($product->vendor)
-                                    {{ $product->vendor->shop_name }}
-                                @elseif($product->supplier)
-                                    {{ $product->supplier->name }}
-                                @else
-                                    Non spécifié
-                                @endif
-                            </li>
-                            <li class="mb-2">
-                                <i class="fas fa-calendar-plus me-2 text-primary"></i>
-                                <strong>Ajouté le:</strong> {{ $product->created_at->format('d/m/Y') }}
-                            </li>
-                            @if($product->updated_at != $product->created_at)
-                            <li class="mb-2">
-                                <i class="fas fa-sync me-2 text-primary"></i>
-                                <strong>Dernière mise à jour:</strong> {{ $product->updated_at->format('d/m/Y') }}
-                            </li>
-                            @endif
-                        </ul>
+                    <div class="mt-4 p-4 bg-light-gold rounded-3">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-info-circle text-gold me-2"></i> {{ __('messages.features') }}</h5>
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <div class="d-flex align-items-center">
+                                    <div class="feature-icon me-3">
+                                        <i class="fas fa-hashtag text-gold"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">{{ __('messages.reference') }}</small>
+                                        <strong>#{{ $product->id }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="d-flex align-items-center">
+                                    <div class="feature-icon me-3">
+                                        <i class="fas fa-tag text-gold"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">{{ __('messages.category') }}</small>
+                                        <strong>{{ $product->category->translated_name ?? __('messages.uncategorized') }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="d-flex align-items-center">
+                                    <div class="feature-icon me-3">
+                                        <i class="fas fa-building text-gold"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">{{ __('messages.sold_by') }}</small>
+                                        <strong>
+                                            @if($product->vendor)
+                                                {{ $product->vendor->shop_name }}
+                                            @elseif($product->supplier)
+                                                {{ $product->supplier->name }}
+                                            @else
+                                                {{ __('messages.not_specified') }}
+                                            @endif
+                                        </strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="d-flex align-items-center">
+                                    <div class="feature-icon me-3">
+                                        <i class="fas fa-calendar-plus text-gold"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">{{ __('messages.added_on') }}</small>
+                                        <strong>{{ $product->created_at->format('d/m/Y') }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Partager -->
                     <div class="mt-4">
-                        <h6 class="mb-2">Partager ce produit</h6>
+                        <h6 class="fw-bold mb-3">{{ __('messages.share') }}</h6>
                         <div class="d-flex gap-2">
                             <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(request()->url()) }}" 
-                               target="_blank" class="btn btn-sm btn-outline-primary">
+                               target="_blank" 
+                               class="btn btn-outline-gold rounded-circle social-btn"
+                               title="Facebook">
                                 <i class="fab fa-facebook-f"></i>
                             </a>
-                            <a href="https://twitter.com/intent/tweet?url={{ urlencode(request()->url()) }}&text={{ urlencode($product->name) }}" 
-                               target="_blank" class="btn btn-sm btn-outline-info">
+                            <a href="https://twitter.com/intent/tweet?url={{ urlencode(request()->url()) }}&text={{ urlencode($product->translated_name) }}" 
+                               target="_blank" 
+                               class="btn btn-outline-gold rounded-circle social-btn"
+                               title="Twitter">
                                 <i class="fab fa-twitter"></i>
                             </a>
-                            <a href="https://wa.me/?text={{ urlencode($product->name . ' - ' . request()->url()) }}" 
-                               target="_blank" class="btn btn-sm btn-outline-success">
+                            <a href="https://wa.me/?text={{ urlencode($product->translated_name . ' - ' . request()->url()) }}" 
+                               target="_blank" 
+                               class="btn btn-outline-gold rounded-circle social-btn"
+                               title="WhatsApp">
                                 <i class="fab fa-whatsapp"></i>
                             </a>
                         </div>
@@ -203,37 +256,40 @@
     <!-- Produits similaires -->
     @if(isset($relatedProducts) && $relatedProducts->count() > 0)
     <div class="mt-5">
-        <h3 class="mb-4">Produits similaires</h3>
+        <h3 class="section-title mb-4">{{ __('messages.similar_products') }}</h3>
         <div class="row">
             @foreach($relatedProducts as $relatedProduct)
             <div class="col-md-3 mb-4">
-                <div class="card h-100 product-card">
+                <div class="card h-100 border-0 shadow-sm product-card">
                     <!-- Image du produit similaire -->
-                    <div class="text-center bg-light p-2" style="height: 150px; display: flex; align-items: center; justify-content: center;">
+                    <div class="product-image-wrapper text-center bg-light p-3" style="height: 180px;">
                         @if($relatedProduct->image)
                             @php
                                 $imageName = basename($relatedProduct->image);
                             @endphp
                             <img src="{{ asset('storage/products/' . $imageName) }}" 
-                                 alt="{{ $relatedProduct->name }}" 
-                                 class="img-fluid"
-                                 style="max-height: 130px; width: auto; object-fit: contain;"
-                                 onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\'fas fa-box fa-3x text-secondary\'></i>';">
+                                 alt="{{ $relatedProduct->translated_name }}" 
+                                 class="img-fluid product-image"
+                                 style="max-height: 140px; width: auto; object-fit: contain;"
+                                 onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\'fas fa-box fa-3x text-gold\'></i>';">
                         @else
-                            <i class="fas fa-box fa-3x text-secondary"></i>
+                            <i class="fas fa-box fa-3x text-gold"></i>
                         @endif
                     </div>
                     
                     <div class="card-body">
-                        <h5 class="card-title">{{ $relatedProduct->name }}</h5>
-                        <p class="card-text text-muted small">{{ Str::limit($relatedProduct->description, 50) }}</p>
+                        <h5 class="card-title fw-bold">{{ $relatedProduct->translated_name }}</h5>
+                        @if($relatedProduct->category)
+                            <span class="badge bg-light-gold text-dark mb-2">{{ $relatedProduct->category->translated_name }}</span>
+                        @endif
+                        <p class="card-text text-muted small">{{ Str::limit($relatedProduct->translated_description ?? $relatedProduct->description, 50) }}</p>
                         <p class="card-text">
-                            <strong class="text-primary">{{ number_format($relatedProduct->price, 2) }} €</strong>
+                            <strong class="text-gold">{{ number_format($relatedProduct->price, 2) }} €</strong>
                         </p>
                     </div>
-                    <div class="card-footer bg-transparent border-0">
-                        <a href="{{ route('shop.products.show', $relatedProduct) }}" class="btn btn-outline-primary w-100 btn-sm">
-                            Voir détails
+                    <div class="card-footer bg-transparent border-0 pb-3">
+                        <a href="{{ route('shop.products.show', $relatedProduct) }}" class="btn btn-outline-gold w-100 btn-sm">
+                            {{ __('messages.view_details') }}
                         </a>
                     </div>
                 </div>
@@ -247,27 +303,179 @@
 
 @push('styles')
 <style>
+    /* Couleurs du thème */
+    :root {
+        --primary-dark: #1a1a2e;
+        --primary-medium: #16213e;
+        --primary-light: #0f3460;
+        --accent-gold: #f7d44a;
+        --text-light: #e0e0e0;
+    }
+
+    /* Fil d'Ariane */
+    .bg-light-gold {
+        background-color: rgba(247, 212, 74, 0.1) !important;
+    }
+    
+    .breadcrumb {
+        margin-bottom: 0;
+    }
+    
+    .breadcrumb-item + .breadcrumb-item::before {
+        color: var(--accent-gold);
+    }
+
+    /* Cartes */
+    .product-image-card, .product-details-card {
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .product-image-card:hover, .product-details-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(247, 212, 74, 0.15) !important;
+    }
+
+    /* Image produit */
+    .product-main-image {
+        transition: transform 0.5s ease;
+    }
+    
+    .product-main-image:hover {
+        transform: scale(1.05);
+    }
+
+    /* Boutons gold */
+    .btn-gold {
+        background-color: var(--accent-gold);
+        color: var(--primary-dark);
+        border: none;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+    
+    .btn-gold:hover {
+        background-color: #e5c03a;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(247, 212, 74, 0.3);
+    }
+    
+    .btn-outline-gold {
+        background-color: transparent;
+        color: var(--accent-gold);
+        border: 2px solid var(--accent-gold);
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+    
+    .btn-outline-gold:hover {
+        background-color: var(--accent-gold);
+        color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(247, 212, 74, 0.3);
+    }
+
+    /* Badges */
+    .bg-light-gold {
+        background-color: rgba(247, 212, 74, 0.15) !important;
+        color: var(--primary-dark) !important;
+    }
+    
+    .badge {
+        padding: 0.5em 1em;
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+
+    /* Texte gold */
+    .text-gold {
+        color: var(--accent-gold) !important;
+    }
+
+    /* Bordures */
+    .border-gold {
+        border-color: var(--accent-gold) !important;
+    }
+
+    /* Boutons sociaux */
+    .social-btn {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    /* Description */
+    .description-content {
+        line-height: 1.8;
+    }
+
+    /* Icônes de caractéristiques */
+    .feature-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background-color: rgba(247, 212, 74, 0.15);
+    }
+
+    /* Cartes produits similaires */
     .product-card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition: all 0.3s ease;
+        border-radius: 10px;
+        overflow: hidden;
     }
     
     .product-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+        box-shadow: 0 15px 30px rgba(247, 212, 74, 0.15) !important;
+        border-bottom: 3px solid var(--accent-gold);
     }
     
-    .badge {
-        padding: 0.5em 0.8em;
-        font-weight: 500;
+    .product-image-wrapper {
+        overflow: hidden;
+    }
+    
+    .product-image {
+        transition: transform 0.5s ease;
+    }
+    
+    .product-card:hover .product-image {
+        transform: scale(1.05);
+    }
+
+    /* Section title */
+    .section-title {
+        position: relative;
+        padding-bottom: 10px;
+        color: var(--primary-dark);
+        font-weight: 700;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: var(--accent-gold);
+    }
+
+    /* Mode sombre */
+    .dark .bg-light-gold {
+        background-color: rgba(247, 212, 74, 0.1) !important;
+        color: var(--text-light) !important;
     }
     
     .dark .bg-light {
         background-color: #2d2d44 !important;
-    }
-    
-    .dark .bg-light i,
-    .dark .bg-light p {
-        color: #e0e0e0 !important;
     }
     
     .dark .card {
@@ -275,12 +483,39 @@
         border-color: #4a4a6a;
     }
     
-    .dark .card-title {
-        color: #e0e0e0;
+    .dark .card-title,
+    .dark .h1, .dark .h2, .dark .h3, .dark .h4, .dark .h5, .dark .h6 {
+        color: var(--text-light);
     }
     
     .dark .text-muted {
         color: #a0a0c0 !important;
     }
+    
+    .dark .bg-white {
+        background-color: #2d2d44 !important;
+    }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+    // Fonctions pour incrémenter/décrémenter la quantité
+    function incrementQuantity() {
+        const input = document.getElementById('quantity');
+        const max = parseInt(input.getAttribute('max')) || 999;
+        let value = parseInt(input.value) || 1;
+        if (value < max) {
+            input.value = value + 1;
+        }
+    }
+    
+    function decrementQuantity() {
+        const input = document.getElementById('quantity');
+        let value = parseInt(input.value) || 1;
+        if (value > 1) {
+            input.value = value - 1;
+        }
+    }
+</script>
 @endpush

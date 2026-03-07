@@ -19,4 +19,10 @@ return [
             'webhook_secret' => env('CHRONOPOST_WEBHOOK_SECRET'),
         ],
     ],
+
+    // ✅ Stripe doit être au même niveau que 'carriers' et 'vendor'
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+    ],
 ];

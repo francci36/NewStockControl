@@ -1,7 +1,6 @@
-{{-- resources/views/vendor/pending.blade.php --}}
-@extends('layouts.app')
+@extends('vendor.layouts.app')
 
-@section('title', 'Demande en cours')
+@section('title', __('messages.vendor_pending'))
 
 @section('content')
 <div class="container py-5">
@@ -13,33 +12,33 @@
                         <i class="fas fa-clock fa-5x text-warning"></i>
                     </div>
                     
-                    <h2 class="mb-3">Demande en cours de traitement</h2>
+                    <h2 class="mb-3">{{ __('messages.vendor_pending') }}</h2>
                     
                     <p class="lead mb-4">
-                        Bonjour <strong>{{ auth()->user()->name }}</strong>,<br>
-                        Votre demande pour ouvrir la boutique <strong>"{{ $vendor->shop_name }}"</strong> a bien été reçue.
+                        {{ __('messages.vendor_pending_greeting', ['name' => auth()->user()->name]) }}<br>
+                        {{ __('messages.vendor_pending_message', ['shop' => $vendor->shop_name]) }}
                     </p>
 
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle mr-2"></i>
-                        Notre équipe examine actuellement votre demande. Vous recevrez un email sous 48h.
+                        {{ __('messages.vendor_pending_info') }}
                     </div>
 
                     <div class="mt-4">
-                        <h5 class="mb-3">Récapitulatif de votre demande</h5>
+                        <h5 class="mb-3">{{ __('messages.vendor_summary') }}</h5>
                         <table class="table table-bordered">
                             <tr>
-                                <th>Nom de la boutique</th>
+                                <th>{{ __('messages.vendor_shop_name') }}</th>
                                 <td>{{ $vendor->shop_name }}</td>
                             </tr>
                             <tr>
-                                <th>Statut</th>
+                                <th>{{ __('messages.status') }}</th>
                                 <td>
-                                    <span class="badge bg-warning">En attente</span>
+                                    <span class="badge bg-warning">{{ __('messages.vendor_pending') }}</span>
                                 </td>
                             </tr>
                             <tr>
-                                <th>Date de demande</th>
+                                <th>{{ __('messages.request_date') }}</th>
                                 <td>{{ $vendor->created_at->format('d/m/Y H:i') }}</td>
                             </tr>
                         </table>
@@ -47,7 +46,7 @@
 
                     <div class="mt-4">
                         <a href="{{ route('shop.home') }}" class="btn btn-primary">
-                            <i class="fas fa-home mr-2"></i> Retour à l'accueil
+                            <i class="fas fa-home mr-2"></i> {{ __('messages.back_to_shop') }}
                         </a>
                     </div>
                 </div>

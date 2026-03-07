@@ -1,17 +1,16 @@
-{{-- resources/views/client/orders/index.blade.php --}}
 @extends('shop.layouts.shop')
 
-@section('title', 'Mes commandes - Ma Boutique')
+@section('title', __('messages.my_orders') . ' - ' . __('messages.shop_name'))
 
 @section('content')
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>
             <i class="fas fa-history text-primary me-2"></i>
-            Mes commandes
+            {{ __('messages.my_orders') }}
         </h1>
         <a href="{{ route('shop.products.index') }}" class="btn btn-outline-primary">
-            <i class="fas fa-shopping-bag me-2"></i> Continuer mes achats
+            <i class="fas fa-shopping-bag me-2"></i> {{ __('messages.continue_shopping') }}
         </a>
     </div>
 
@@ -20,10 +19,10 @@
             <div class="display-1 text-muted mb-4">
                 <i class="fas fa-box-open"></i>
             </div>
-            <h2 class="mb-3">Aucune commande pour le moment</h2>
-            <p class="text-muted mb-4">Découvrez nos produits et passez votre première commande !</p>
+            <h2 class="mb-3">{{ __('messages.no_orders') }}</h2>
+            <p class="text-muted mb-4">{{ __('messages.no_orders_message') }}</p>
             <a href="{{ route('shop.products.index') }}" class="btn btn-primary btn-lg">
-                <i class="fas fa-store me-2"></i> Voir la boutique
+                <i class="fas fa-store me-2"></i> {{ __('messages.view_products') }}
             </a>
         </div>
     @else
@@ -34,7 +33,7 @@
                     <div class="card-header bg-light d-flex justify-content-between align-items-center">
                         <span class="fw-bold">
                             <i class="fas fa-receipt me-2 text-primary"></i>
-                            Commande #{{ $order->id }}
+                            {{ __('messages.order') }} #{{ $order->id }}
                         </span>
                         <span class="badge bg-{{ $order->status_color ?? 'secondary' }} fs-6">
                             <i class="fas {{ $order->status_icon ?? 'fa-clock' }} me-1"></i>
@@ -44,11 +43,11 @@
                     <div class="card-body">
                         <div class="row mb-3">
                             <div class="col-sm-6">
-                                <small class="text-muted">Date de commande</small>
+                                <small class="text-muted">{{ __('messages.order_date') }}</small>
                                 <p class="fw-bold">{{ $order->created_at->format('d/m/Y H:i') }}</p>
                             </div>
                             <div class="col-sm-6">
-                                <small class="text-muted">Total</small>
+                                <small class="text-muted">{{ __('messages.total') }}</small>
                                 <p class="fw-bold text-primary">{{ number_format($order->total_amount, 2) }} €</p>
                             </div>
                         </div>
@@ -56,12 +55,12 @@
                         <!-- Barre de progression (si commande non annulée) -->
                         @if($order->status != 'annulé')
                         @php
-                            $progressSteps = ['en attente', 'en traitement', 'expédiée', 'livrée'];
+                            $progressSteps = [__('messages.status_pending'), __('messages.status_processing'), __('messages.status_shipped'), __('messages.status_delivered')];
                             $currentStep = array_search($order->status, $progressSteps);
                             $progress = ($currentStep !== false) ? (($currentStep + 1) / count($progressSteps)) * 100 : 0;
                         @endphp
                         <div class="mb-3">
-                            <small class="text-muted">Progression</small>
+                            <small class="text-muted">{{ __('messages.progress') }}</small>
                             <div class="progress mt-1" style="height: 8px;">
                                 <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
                                      role="progressbar" 
@@ -76,24 +75,24 @@
                         @endif
 
                         <div class="mb-3">
-                            <small class="text-muted">Produits commandés</small>
+                            <small class="text-muted">{{ __('messages.ordered_products') }}</small>
                             <div class="mt-2">
                                 @foreach($order->products->take(3) as $product)
                                     <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <span>{{ $product->name }}</span>
+                                        <span>{{ $product->translated_name }}</span>
                                         <span class="badge bg-secondary">x{{ $product->pivot->quantity }}</span>
                                     </div>
                                 @endforeach
                                 @if($order->products->count() > 3)
                                     <small class="text-muted">
-                                        et {{ $order->products->count() - 3 }} autre(s) produit(s)
+                                        {{ __('messages.and_x_more', ['count' => $order->products->count() - 3]) }}
                                     </small>
                                 @endif
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <small class="text-muted">Adresse de livraison</small>
+                            <small class="text-muted">{{ __('messages.shipping_address') }}</small>
                             <p class="mb-0">{{ $order->shipping_address }}</p>
                             <p class="mb-0">{{ $order->shipping_zip }} {{ $order->shipping_city }}</p>
                             <p>{{ $order->shipping_country }}</p>
@@ -102,11 +101,11 @@
                         <div class="d-flex gap-2">
                             <a href="{{ route('client.orders.show', $order) }}" 
                                class="btn btn-outline-primary flex-grow-1">
-                                <i class="fas fa-eye me-2"></i> Détails
+                                <i class="fas fa-eye me-2"></i> {{ __('messages.details') }}
                             </a>
                             <a href="{{ route('client.orders.tracking', $order) }}" 
                                class="btn btn-outline-success">
-                                <i class="fas fa-truck me-2"></i> Suivre
+                                <i class="fas fa-truck me-2"></i> {{ __('messages.track') }}
                             </a>
                         </div>
 
@@ -114,7 +113,7 @@
                         @if($order->payment)
                         <div class="mt-2 text-end">
                             <small class="text-success">
-                                <i class="fas fa-check-circle me-1"></i> Paiement effectué
+                                <i class="fas fa-check-circle me-1"></i> {{ __('messages.payment_completed') }}
                             </small>
                         </div>
                         @endif

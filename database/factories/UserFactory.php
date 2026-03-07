@@ -29,6 +29,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'role' => fake()->randomElement(['admin', 'user']), // AJOUT : rôle par défaut
         ];
     }
 
@@ -39,6 +40,26 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is an admin.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'admin',
+        ]);
+    }
+
+    /**
+     * Indicate that the user is a regular client.
+     */
+    public function client(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'user',
         ]);
     }
 }

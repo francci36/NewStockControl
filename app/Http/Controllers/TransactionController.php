@@ -12,73 +12,107 @@ use Illuminate\Support\Facades\Log;
 
 class TransactionController extends Controller
 {
-    public function index()
+    /**
+     * Affiche la liste des transactions
+     */
+   public function index(Request $request)
     {
-        $transactions = Transaction::with(['product', 'user'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-            
+        $query = Transaction::with(['product', 'user']);
+        
+        // Filtre par période
+        if ($request->filled('period') && $request->period !== 'all') {
+            $query->where('created_at', '>=', now()->subDays($request->period));
+        }
+        
+        // Filtre par type
+        if ($request->filled('type') && $request->type !== 'all') {
+            $query->where('type', $request->type);
+        }
+        
+        // Filtre par recherche produit
+        if ($request->filled('search')) {
+            $query->whereHas('product', function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%');
+            });
+        }
+        
+        $transactions = $query->orderBy('created_at', 'desc')->paginate(15);
+        
+        // Retourner la vue avec seulement la variable $transactions
         return view('transactions.index', compact('transactions'));
     }
 
+    /**
+     * Formulaire de création de transaction
+     */
     public function create()
     {
-        $products = Product::with('supplier')
+        // Récupérer tous les produits avec leurs relations pour les noms traduits
+        $products = Product::with(['supplier', 'vendor'])
             ->orderBy('name')
-            ->get();
-            
+            ->get()
+            ->map(function ($product) {
+                // Ajouter l'accesseur admin_name pour le JavaScript
+                $product->admin_name = $product->admin_name;
+                return $product;
+            });
+        
+        // CORRECTION : Utiliser le bon chemin de vue    
         return view('transactions.create', compact('products'));
     }
 
+    /**
+     * Enregistre une nouvelle transaction
+     */
     public function store(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|array',
-            'product_id.*' => 'exists:products,id',
-            'quantity' => 'required|array',
-            'quantity.*' => 'numeric|min:1',
-            'price' => 'required|array',
-            'price.*' => 'numeric|min:0',
             'type' => 'required|in:entry,exit',
+            'products' => 'required|array|min:1',
+            'products.*.product_id' => 'required|exists:products,id',
+            'products.*.quantity' => 'required|numeric|min:1',
+            'notes' => 'nullable|string|max:500',
         ]);
 
         try {
             DB::beginTransaction();
 
-            foreach ($request->product_id as $index => $productId) {
-                $product = Product::findOrFail($productId);
+            foreach ($request->products as $productData) {
+                $product = Product::findOrFail($productData['product_id']);
                 
                 // Vérification du stock pour les sorties
                 if ($request->type === 'exit') {
-                    $totalQuantity = $request->quantity[$index];
-                    
-                    if ($product->quantity < $totalQuantity) {
-                        throw new \Exception("Stock insuffisant pour {$product->name}. Stock: {$product->quantity}, demandé: {$totalQuantity}");
+                    if ($product->quantity < $productData['quantity']) {
+                        throw new \Exception("Stock insuffisant pour {$product->admin_name}. Stock: {$product->quantity}, demandé: {$productData['quantity']}");
                     }
                 }
 
                 // Création de la transaction
                 $transaction = Transaction::create([
-                    'product_id' => $productId,
-                    'quantity' => $request->quantity[$index],
-                    'price' => $request->price[$index],
+                    'product_id' => $productData['product_id'],
+                    'quantity' => $productData['quantity'],
+                    'price' => $product->price,
+                    'total_value' => $product->price * $productData['quantity'],
                     'type' => $request->type,
-                    'user_id' => auth()->id(), // Enregistrer qui a fait la transaction
+                    'user_id' => auth()->id(),
+                    'notes' => $request->notes,
                 ]);
 
                 // Mise à jour du stock du produit
                 if ($request->type === 'entry') {
-                    $product->quantity += $request->quantity[$index];
+                    $product->quantity += $productData['quantity'];
                     Log::info('Entrée de stock manuelle', [
-                        'product' => $product->name,
-                        'quantite' => $request->quantity[$index],
+                        'product' => $product->admin_name,
+                        'product_id' => $product->id,
+                        'quantite' => $productData['quantity'],
                         'user' => auth()->user()->name
                     ]);
                 } else {
-                    $product->quantity -= $request->quantity[$index];
+                    $product->quantity -= $productData['quantity'];
                     Log::info('Sortie de stock manuelle', [
-                        'product' => $product->name,
-                        'quantite' => $request->quantity[$index],
+                        'product' => $product->admin_name,
+                        'product_id' => $product->id,
+                        'quantite' => $productData['quantity'],
                         'user' => auth()->user()->name
                     ]);
                 }
@@ -109,5 +143,81 @@ class TransactionController extends Controller
                 ->with('error', 'Erreur: ' . $e->getMessage())
                 ->withInput();
         }
+    }
+
+    /**
+     * Récupère les détails d'une transaction pour l'AJAX
+     */
+    public function show(Transaction $transaction)
+    {
+        $transaction->load(['product', 'user']);
+        
+        return response()->json([
+            'id' => $transaction->id,
+            'product_name' => $transaction->product 
+                ? ($transaction->product->admin_name ?? $transaction->product->name) 
+                : 'Produit supprimé',
+            'quantity' => $transaction->quantity,
+            'price' => number_format($transaction->price, 2),
+            'total' => number_format($transaction->total_value, 2),
+            'type' => $transaction->type,
+            'type_label' => $transaction->type === 'entry' ? 'Entrée' : 'Sortie',
+            'user_name' => $transaction->user->name ?? 'Système',
+            'date' => $transaction->created_at->format('d/m/Y H:i'),
+            'order_id' => $transaction->order_id,
+            'notes' => $transaction->notes,
+        ]);
+    }
+
+    /**
+     * Exporte les transactions en CSV
+     */
+    public function export(Request $request)
+    {
+        $query = Transaction::with(['product', 'user']);
+        
+        if ($request->filled('period') && $request->period !== 'all') {
+            $query->where('created_at', '>=', now()->subDays($request->period));
+        }
+        
+        if ($request->filled('type') && $request->type !== 'all') {
+            $query->where('type', $request->type);
+        }
+        
+        if ($request->filled('search')) {
+            $query->whereHas('product', function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%');
+            });
+        }
+        
+        $transactions = $query->orderBy('created_at', 'desc')->get();
+        
+        $filename = 'transactions_' . date('Y-m-d') . '.csv';
+        $handle = fopen('php://output', 'w');
+        
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        
+        // En-têtes CSV
+        fputcsv($handle, ['ID', 'Date', 'Type', 'Produit', 'Quantité', 'Prix', 'Total', 'Utilisateur', 'Notes']);
+        
+        foreach ($transactions as $transaction) {
+            fputcsv($handle, [
+                $transaction->id,
+                $transaction->created_at->format('d/m/Y H:i'),
+                $transaction->type === 'entry' ? 'Entrée' : 'Sortie',
+                $transaction->product 
+                    ? ($transaction->product->admin_name ?? $transaction->product->name) 
+                    : 'Produit supprimé',
+                $transaction->quantity,
+                number_format($transaction->price, 2) . ' €',
+                number_format($transaction->total_value, 2) . ' €',
+                $transaction->user->name ?? 'Système',
+                $transaction->notes ?? '',
+            ]);
+        }
+        
+        fclose($handle);
+        exit;
     }
 }

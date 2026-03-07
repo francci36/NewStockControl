@@ -3,186 +3,206 @@
 @section('title', 'Ajouter des produits')
 
 @section('content')
-<div class="container mx-auto py-6">
-    <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg">
-        <!-- Titre de la page -->
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-green-100 dark:bg-green-900 rounded-t-lg">
-            <h1 class="text-2xl font-semibold text-green-700 dark:text-green-400 flex items-center">
-                <i class="fas fa-plus-circle mr-2"></i> Ajouter des produits
-            </h1>
+<div class="container-fluid py-6">
+    <div class="card shadow-lg">
+        <!-- En-tête -->
+        <div class="card-header bg-gradient-success text-white d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0">
+                    <i class="fas fa-plus-circle mr-2"></i>
+                    Ajouter des produits
+                </h5>
+                <small class="text-white-50">Créez un ou plusieurs produits en une seule fois</small>
+            </div>
+            <a href="{{ route('admin.products.index') }}" class="btn btn-light btn-sm">
+                <i class="fas fa-arrow-left mr-2"></i> Retour à la liste
+            </a>
         </div>
 
-        <div class="px-6 py-4">
+        <div class="card-body">
             <!-- Messages d'erreur -->
             @if($errors->any())
-                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-lg">
-                    <ul class="list-disc list-inside">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>Erreurs de validation :</strong>
+                    <ul class="mb-0 mt-2">
                         @foreach($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
                     </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
 
             <!-- Formulaire d'ajout de produits -->
-            <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data" id="productForm">
                 @csrf
                 
                 <!-- Sélection du fournisseur -->
-                <div class="mb-6">
-                    <label for="supplier_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Fournisseur <span class="text-red-500">*</span>
-                    </label>
-                    <select name="supplier_id" 
-                            id="supplier_id" 
-                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-300 dark:focus:ring-green-500 dark:bg-gray-700 dark:text-gray-200 @error('supplier_id') border-red-500 @enderror"
-                            required>
-                        <option value="">Sélectionner un fournisseur</option>
-                        @foreach($suppliers as $supplier)
-                            <option value="{{ $supplier->id }}" {{ old('supplier_id', $supplier_id ?? '') == $supplier->id ? 'selected' : '' }}>
-                                {{ $supplier->name }}
-                            </option>
-                        @endforeach
-                    </select>
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="fas fa-truck mr-2"></i>Fournisseur</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="supplier_id" class="form-label">Fournisseur <span class="text-danger">*</span></label>
+                                    <select name="supplier_id" 
+                                            id="supplier_id" 
+                                            class="form-control @error('supplier_id') is-invalid @enderror"
+                                            required>
+                                        <option value="">Sélectionner un fournisseur</option>
+                                        @foreach($suppliers as $supplier)
+                                            <option value="{{ $supplier->id }}" {{ old('supplier_id', $supplier_id ?? '') == $supplier->id ? 'selected' : '' }}>
+                                                {{ $supplier->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('supplier_id')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-info mb-0">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Tous les produits seront associés à ce fournisseur.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Conteneur pour les produits -->
                 <div id="products-container">
                     <!-- Premier produit par défaut -->
-                    <div class="product-item border p-4 mb-4 rounded-lg bg-gray-50 dark:bg-gray-700" data-index="0">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-lg font-semibold">Produit #1</h3>
-                            <button type="button" class="remove-product text-red-600 hover:text-red-800" style="display: none;">
-                                <i class="fas fa-trash"></i> Supprimer
+                    <div class="card mb-4 product-item" data-index="0">
+                        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fas fa-box mr-2"></i>
+                                Produit <span class="product-number">#1</span>
+                            </h6>
+                            <button type="button" class="btn btn-danger btn-sm remove-product" style="display: none;">
+                                <i class="fas fa-trash mr-1"></i> Supprimer
                             </button>
                         </div>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Nom du produit -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Nom du produit <span class="text-red-500">*</span>
-                                </label>
-                                <input type="text" 
-                                       name="products[0][name]" 
-                                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-300 dark:bg-gray-800"
-                                       required>
-                            </div>
-                            
-                            <!-- Prix -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Prix (€) <span class="text-red-500">*</span>
-                                </label>
-                                <input type="number" 
-                                       name="products[0][price]" 
-                                       step="0.01"
-                                       min="0"
-                                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-300 dark:bg-gray-800"
-                                       required>
-                            </div>
-                            
-                            <!-- Sélection de la catégorie avec option de création -->
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Catégorie <span class="text-red-500">*</span>
-                                </label>
-                                <div class="flex space-x-2">
-                                    <select name="products[0][category_id]" 
-                                            id="category_select_0"
-                                            class="category-select w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-300 dark:bg-gray-800"
-                                            required
-                                            onchange="toggleNewCategory(0)">
-                                        <option value="">Sélectionner une catégorie</option>
-                                        <option value="new">➕ Créer une nouvelle catégorie</option>
-                                        @forelse($categories as $category)
-                                            <option value="{{ $category->id }}">
-                                                {{ $category->name }}
-                                            </option>
-                                        @empty
-                                            <option value="" disabled>Aucune catégorie disponible</option>
-                                        @endforelse
-                                    </select>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Colonne gauche -->
+                                <div class="col-md-6">
+                                    <!-- Nom du produit -->
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Nom du produit <span class="text-danger">*</span></label>
+                                        <input type="text" 
+                                               name="products[0][name]" 
+                                               class="form-control"
+                                               value="{{ old('products.0.name') }}"
+                                               required>
+                                    </div>
+                                    
+                                    <!-- Prix -->
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Prix (€) <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <input type="number" 
+                                                   name="products[0][price]" 
+                                                   step="0.01"
+                                                   min="0"
+                                                   class="form-control"
+                                                   value="{{ old('products.0.price') }}"
+                                                   required>
+                                            <span class="input-group-text">€</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Seuil de stock -->
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Seuil d'alerte stock</label>
+                                        <input type="number" 
+                                               name="products[0][stock_threshold]" 
+                                               min="1"
+                                               value="{{ old('products.0.stock_threshold', 5) }}"
+                                               class="form-control">
+                                        <small class="text-muted">Stock minimum avant alerte</small>
+                                    </div>
                                 </div>
                                 
-                                <!-- Champ pour nouvelle catégorie (caché par défaut) -->
-                                <div id="new_category_container_0" class="mt-2 hidden">
-                                    <div class="flex space-x-2">
-                                        <input type="text" 
-                                               id="new_category_name_0"
-                                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-300 dark:bg-gray-800"
-                                               placeholder="Nom de la nouvelle catégorie">
-                                        <button type="button" 
-                                                onclick="addNewCategory(0)"
-                                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg whitespace-nowrap">
-                                            <i class="fas fa-plus"></i> Ajouter
+                                <!-- Colonne droite -->
+                                <div class="col-md-6">
+                                    <!-- Catégorie -->
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Catégorie <span class="text-danger">*</span></label>
+                                        <select name="products[0][category_id]" 
+                                                id="category_select_0"
+                                                class="form-control category-select"
+                                                required>
+                                            <option value="">Sélectionner une catégorie</option>
+                                            @forelse($categories as $category)
+                                                <option value="{{ $category->id }}" {{ old('products.0.category_id') == $category->id ? 'selected' : '' }}>
+                                                    {{ $category->name }}
+                                                </option>
+                                            @empty
+                                                <option value="" disabled>Aucune catégorie disponible</option>
+                                            @endforelse
+                                        </select>
+                                        
+                                        <!-- Bouton pour ajouter une catégorie rapidement -->
+                                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="quickAddCategory(0)">
+                                            <i class="fas fa-plus mr-1"></i> Ajouter une nouvelle catégorie
                                         </button>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-1">Le slug sera généré automatiquement</p>
+                                    
+                                    <!-- Image -->
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Image du produit</label>
+                                        <input type="file" 
+                                               name="products[0][image]" 
+                                               accept="image/jpeg,image/png,image/jpg,image/gif"
+                                               class="form-control">
+                                        <small class="text-muted">Formats: JPEG, PNG, JPG, GIF (max 2MB)</small>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <!-- Seuil de stock -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Seuil d'alerte stock
-                                </label>
-                                <input type="number" 
-                                       name="products[0][stock_threshold]" 
-                                       min="1"
-                                       value="5"
-                                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-300 dark:bg-gray-800">
-                            </div>
-                            
-                            <!-- Image -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Image du produit
-                                </label>
-                                <input type="file" 
-                                       name="products[0][image]" 
-                                       accept="image/jpeg,image/png,image/jpg,image/gif"
-                                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-300 dark:bg-gray-800">
-                                <p class="text-xs text-gray-500 mt-1">Formats: JPEG, PNG, JPG, GIF (max 2MB)</p>
-                            </div>
-                            
-                            <!-- Description courte -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Description courte
-                                </label>
-                                <input type="text" 
-                                       name="products[0][short_description]" 
-                                       maxlength="255"
-                                       placeholder="Brève description"
-                                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-300 dark:bg-gray-800">
-                            </div>
-                            
-                            <!-- Description complète -->
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Description détaillée
-                                </label>
-                                <textarea name="products[0][description]" 
-                                          rows="3"
-                                          placeholder="Description complète du produit"
-                                          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-300 dark:bg-gray-800"></textarea>
+                                
+                                <!-- Ligne complète pour les descriptions -->
+                                <div class="col-md-12">
+                                    <!-- Description courte -->
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Description courte</label>
+                                        <input type="text" 
+                                               name="products[0][short_description]" 
+                                               maxlength="255"
+                                               class="form-control"
+                                               value="{{ old('products.0.short_description') }}"
+                                               placeholder="Brève description (max 255 caractères)">
+                                    </div>
+                                    
+                                    <!-- Description complète -->
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Description détaillée</label>
+                                        <textarea name="products[0][description]" 
+                                                  rows="4"
+                                                  class="form-control"
+                                                  placeholder="Description complète du produit...">{{ old('products.0.description') }}</textarea>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Boutons d'action -->
-                <div class="flex justify-between items-center mt-6">
-                    <button type="button" id="add-product" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <button type="button" id="add-product" class="btn btn-info">
                         <i class="fas fa-plus mr-2"></i> Ajouter un autre produit
                     </button>
                     
-                    <div class="space-x-3">
-                        <a href="{{ route('admin.products.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg">
+                    <div>
+                        <a href="{{ route('admin.products.index') }}" class="btn btn-secondary mr-2">
                             <i class="fas fa-times mr-2"></i> Annuler
                         </a>
-                        <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">
+                        <button type="submit" class="btn btn-success">
                             <i class="fas fa-save mr-2"></i> Enregistrer les produits
                         </button>
                     </div>
@@ -192,152 +212,200 @@
     </div>
 </div>
 
-<!-- Script pour gérer l'ajout dynamique de produits et la création de catégories -->
+<!-- Script pour gérer l'ajout dynamique de produits et les catégories -->
 <script>
-// Fonction pour afficher/masquer le champ de nouvelle catégorie
-function toggleNewCategory(index) {
-    const select = document.getElementById(`category_select_${index}`);
-    const container = document.getElementById(`new_category_container_${index}`);
-    
-    if (select.value === 'new') {
-        container.classList.remove('hidden');
-    } else {
-        container.classList.add('hidden');
-    }
-}
-
-// Fonction pour ajouter une nouvelle catégorie via AJAX
-function addNewCategory(index) {
-    const categoryName = document.getElementById(`new_category_name_${index}`).value.trim();
-    
-    if (!categoryName) {
-        alert('Veuillez saisir un nom de catégorie');
-        return;
-    }
-    
-    // Générer le slug à partir du nom
-    const slug = categoryName.toLowerCase()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/\s+/g, '-');
-    
-    // Appel AJAX pour créer la catégorie
-    fetch('{{ route("admin.categories.quick-create") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({
-            name: categoryName,
-            slug: slug,
-            description: 'Catégorie créée rapidement',
-            is_active: true
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Ajouter la nouvelle catégorie au select
-            const select = document.getElementById(`category_select_${index}`);
-            const option = document.createElement('option');
-            option.value = data.category.id;
-            option.textContent = data.category.name;
-            option.selected = true;
-            select.appendChild(option);
-            
-            // Réinitialiser et cacher le champ de nouvelle catégorie
-            document.getElementById(`new_category_name_${index}`).value = '';
-            document.getElementById(`new_category_container_${index}`).classList.add('hidden');
-            
-            // Afficher un message de succès
-            alert('Catégorie créée avec succès !');
-        } else {
-            alert('Erreur : ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        alert('Une erreur est survenue lors de la création de la catégorie');
-    });
-}
-
 document.addEventListener('DOMContentLoaded', function() {
     let productCount = 1;
     const container = document.getElementById('products-container');
     
+    // Fonction pour ajouter une nouvelle catégorie
+    window.quickAddCategory = function(index) {
+        const categoryName = prompt('Nom de la nouvelle catégorie:');
+        if (!categoryName) return;
+        
+        // Désactiver le bouton pendant l'appel
+        const button = event.target;
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création...';
+        button.disabled = true;
+        
+        fetch('/admin/categories/quick-create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ name: categoryName, is_active: true })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw err; });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Ajouter la catégorie à tous les selects
+                document.querySelectorAll('.category-select').forEach(select => {
+                    const option = document.createElement('option');
+                    option.value = data.category.id;
+                    option.textContent = data.category.name;
+                    
+                    // Ajouter l'option et la sélectionner
+                    select.appendChild(option);
+                });
+                
+                // Sélectionner la nouvelle catégorie dans le select concerné
+                const currentSelect = document.getElementById(`category_select_${index}`);
+                if (currentSelect) {
+                    currentSelect.value = data.category.id;
+                }
+                
+                alert('Catégorie créée avec succès !');
+            } else {
+                alert('Erreur: ' + (data.message || 'Erreur inconnue'));
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Erreur lors de la création de la catégorie');
+        })
+        .finally(() => {
+            // Restaurer le bouton
+            button.innerHTML = originalText;
+            button.disabled = false;
+        });
+    };
+    
+    // Ajouter une nouvelle ligne de produit
     document.getElementById('add-product').addEventListener('click', function() {
-        const template = document.querySelector('.product-item').cloneNode(true);
-        const index = productCount;
+        const template = container.querySelector('.product-item').cloneNode(true);
         
-        // Mettre à jour les indices
-        template.setAttribute('data-index', index);
-        template.querySelector('h3').textContent = 'Produit #' + (index + 1);
+        // Mettre à jour les indices dans les noms des champs
+        template.innerHTML = template.innerHTML.replace(/products\[0\]/g, `products[${productCount}]`);
         
-        // Mettre à jour les IDs et names
-        template.querySelectorAll('input, textarea, select').forEach(input => {
-            const name = input.getAttribute('name');
-            if (name) {
-                input.setAttribute('name', name.replace(/\[\d+\]/, `[${index}]`));
-            }
-            
-            // Mettre à jour les IDs pour les selects de catégorie
-            if (input.id && input.id.includes('category_select_')) {
-                input.id = `category_select_${index}`;
-                input.setAttribute('onchange', `toggleNewCategory(${index})`);
-            }
-            
-            // Réinitialiser les valeurs
-            if (input.type !== 'file' && input.tagName !== 'SELECT') {
+        // Mettre à jour les IDs des selects et les appels de fonction
+        const categorySelect = template.querySelector('.category-select');
+        if (categorySelect) {
+            categorySelect.id = `category_select_${productCount}`;
+            categorySelect.value = '';
+        }
+        
+        // Mettre à jour le bouton d'ajout de catégorie
+        const addButton = template.querySelector('button[onclick^="quickAddCategory"]');
+        if (addButton) {
+            addButton.setAttribute('onclick', `quickAddCategory(${productCount})`);
+        }
+        
+        // Mettre à jour le numéro du produit
+        const productNumber = template.querySelector('.product-number');
+        if (productNumber) {
+            productNumber.textContent = `#${productCount + 1}`;
+        }
+        
+        // Réinitialiser les valeurs des champs
+        template.querySelectorAll('input:not([type="button"]):not([type="file"]), textarea, select').forEach(input => {
+            if (input.type === 'file') {
+                input.value = '';
+            } else if (input.tagName === 'SELECT') {
+                input.selectedIndex = 0;
+            } else {
                 input.value = '';
             }
-            if (input.tagName === 'SELECT') {
-                input.selectedIndex = 0;
-            }
         });
-        
-        // Mettre à jour le conteneur de nouvelle catégorie
-        const newCatContainer = template.querySelector('[id^="new_category_container_"]');
-        if (newCatContainer) {
-            newCatContainer.id = `new_category_container_${index}`;
-            newCatContainer.classList.add('hidden');
-            
-            const nameInput = newCatContainer.querySelector('[id^="new_category_name_"]');
-            if (nameInput) {
-                nameInput.id = `new_category_name_${index}`;
-                nameInput.value = '';
-            }
-            
-            const addButton = newCatContainer.querySelector('button[onclick^="addNewCategory"]');
-            if (addButton) {
-                addButton.setAttribute('onclick', `addNewCategory(${index})`);
-            }
-        }
         
         // Afficher le bouton supprimer
         const removeBtn = template.querySelector('.remove-product');
-        removeBtn.style.display = 'inline-flex';
-        removeBtn.addEventListener('click', function() {
-            template.remove();
-        });
+        if (removeBtn) {
+            removeBtn.style.display = 'inline-block';
+            removeBtn.onclick = function() {
+                if (document.querySelectorAll('.product-item').length > 1) {
+                    template.remove();
+                    updateProductNumbers();
+                } else {
+                    alert('Vous devez garder au moins un produit');
+                }
+            };
+        }
         
         container.appendChild(template);
         productCount++;
     });
     
-    // Gestion de la suppression pour le premier produit
-    document.querySelectorAll('.remove-product').forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (document.querySelectorAll('.product-item').length > 1) {
-                this.closest('.product-item').remove();
+    // Fonction pour mettre à jour les numéros de produits
+    function updateProductNumbers() {
+        const rows = document.querySelectorAll('.product-item');
+        rows.forEach((row, idx) => {
+            const productNumber = row.querySelector('.product-number');
+            if (productNumber) {
+                productNumber.textContent = '#' + (idx + 1);
             }
         });
-    });
+    }
+    
+    // Gestionnaire pour le bouton supprimer du premier produit
+    const firstRemoveBtn = document.querySelector('.remove-product');
+    if (firstRemoveBtn) {
+        firstRemoveBtn.addEventListener('click', function() {
+            if (document.querySelectorAll('.product-item').length > 1) {
+                this.closest('.product-item').remove();
+                updateProductNumbers();
+            } else {
+                alert('Vous devez garder au moins un produit');
+            }
+        });
+    }
 });
 </script>
 
 <style>
-.hidden {
-    display: none;
+.bg-gradient-success {
+    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+}
+.text-white-50 {
+    color: rgba(255, 255, 255, 0.5);
+}
+.card-header {
+    font-weight: 600;
+}
+.form-label {
+    font-weight: 500;
+}
+.product-item {
+    transition: all 0.3s ease;
+}
+.product-item:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+@media (max-width: 768px) {
+    .bg-gradient-success {
+        flex-direction: column;
+        text-align: center;
+    }
+    .bg-gradient-success .btn {
+        margin-top: 10px;
+        width: 100%;
+    }
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .d-flex.justify-content-between .btn,
+    .d-flex.justify-content-between a {
+        width: 100%;
+        margin: 5px 0 !important;
+    }
+    .product-item .row > div {
+        margin-bottom: 15px;
+    }
+    .input-group {
+        flex-wrap: wrap;
+    }
+    .input-group .btn {
+        width: 100%;
+        margin-top: 5px;
+        border-radius: 0.25rem !important;
+    }
 }
 </style>
 @endsection

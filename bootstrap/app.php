@@ -12,19 +12,37 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Enregistrer les alias de middleware
-        $middleware->alias([
-            'admin' => AdminMiddleware::class,
-            'vendor' => \App\Http\Middleware\VendorMiddleware::class,
-            'share.cart' => \App\Http\Middleware\ShareCartCount::class,
+        // ===========================================
+        // MIDDLEWARES DU GROUPE WEB
+        // ===========================================
+        // Ajoute SetLocale au groupe de middlewares 'web'
+        // Il sera exécuté sur toutes les routes web
+        $middleware->web(append: [
+            \App\Http\Middleware\SetLocale::class,
         ]);
         
-        // AJOUT : Exclure les routes webhook de la validation CSRF
+        // ===========================================
+        // ALIAS DE MIDDLEWARES
+        // ===========================================
+        // Permet d'utiliser 'admin' dans les routes au lieu du chemin complet
+        $middleware->alias([
+            'admin' => AdminMiddleware::class,                     // Vérifie si l'utilisateur est admin
+            'vendor' => \App\Http\Middleware\VendorMiddleware::class, // Vérifie si l'utilisateur est vendeur
+            'share.cart' => \App\Http\Middleware\ShareCartCount::class, // Partage le nombre d'articles du panier
+            'set.locale' => \App\Http\Middleware\SetLocale::class,      // Définit la langue (alias)
+        ]);
+        
+        // ===========================================
+        // EXCEPTIONS CSRF
+        // ===========================================
+        // Exclut les routes webhook de la protection CSRF
+        // Car les webhooks viennent de services externes
         $middleware->validateCsrfTokens(except: [
             'api/webhooks/*',
             'webhooks/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Gestion des exceptions
+        // Vous pouvez personnaliser ici
     })->create();

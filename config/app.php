@@ -78,11 +78,31 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    'locale' => env('APP_LOCALE', 'fr'),
 
-    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'fr'),
 
-    'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
+    'faker_locale' => env('APP_FAKER_LOCALE', 'fr_FR'),
+
+      /*
+    |--------------------------------------------------------------------------
+    | Available Locales
+    |--------------------------------------------------------------------------
+    |
+    | This array lists all the languages available in your application.
+    | The key is the locale code, the value is the display name.
+    |
+    */
+    'available_locales' => [
+        'fr' => 'Français',
+        'en' => 'English',
+        'pt_BR' => 'Português (Brasil)',
+        'es' => 'Español',
+        'de' => 'Deutsch',
+       // 'es' => 'Español',
+        //'de' => 'Deutsch',
+        //'it' => 'Italiano',
+    ],
 
     /*
     |--------------------------------------------------------------------------
