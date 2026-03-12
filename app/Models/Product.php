@@ -5,13 +5,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Translatable\HasTranslations; // Ajoutez cette ligne
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations; // Ajoutez HasTranslations
 
     protected $fillable = [
         'name',
+        'sku',
         'description',
         'short_description',
         'price',
@@ -30,11 +32,14 @@ class Product extends Model
         'is_active' => true,
     ];
 
-    // ✅ AJOUT IMPORTANT : caster les JSON en tableaux
+    // Définir les champs traduisibles (pour Spatie)
+    public $translatable = ['name', 'description', 'short_description'];
+
     protected $casts = [
         'name' => 'array',
         'description' => 'array',
         'short_description' => 'array',
+        'is_active' => 'boolean',
     ];
 
     // Relations
@@ -58,6 +63,11 @@ class Product extends Model
         return $this->hasOne(Stock::class);
     }
 
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
     public function orders()
     {
         return $this->belongsToMany(Order::class, 'order_items')
@@ -65,7 +75,7 @@ class Product extends Model
                     ->withTimestamps();
     }
 
-    // Relation avec les traductions
+    // Relation avec les traductions (table séparée)
     public function translations()
     {
         return $this->hasMany(ProductTranslation::class);
@@ -81,110 +91,100 @@ class Product extends Model
         }]);
     }
     
-    // ✅ ACCESSEUR ROBUSTE POUR LE NOM TRADUIT (pour le front office)
+    // ✅ ACCESSEUR POUR LE FRONT OFFICE (utilise Spatie d'abord, puis la table)
     public function getTranslatedNameAttribute()
     {
-        $locale = app()->getLocale();
-        $shortLocale = str_contains($locale, '_') ? explode('_', $locale)[0] : $locale;
-        
-        // Essayer les traductions d'abord
-        if ($this->relationLoaded('translations')) {
-            // Essayer locale complète (de_DE)
-            $translation = $this->translations->firstWhere('locale', $locale);
+        try {
+            // Essayer Spatie Translatable d'abord
+            return $this->getTranslation('name', app()->getLocale());
+        } catch (\Exception $e) {
+            // Fallback sur l'ancienne méthode
+            $locale = app()->getLocale();
+            $shortLocale = str_contains($locale, '_') ? explode('_', $locale)[0] : $locale;
             
-            // Essayer locale courte (de)
-            if (!$translation) {
-                $translation = $this->translations->firstWhere('locale', $shortLocale);
+            if ($this->relationLoaded('translations')) {
+                $translation = $this->translations->firstWhere('locale', $locale) ?? 
+                              $this->translations->firstWhere('locale', $shortLocale);
+                
+                if ($translation && $translation->name) {
+                    return $translation->name;
+                }
             }
             
-            if ($translation && $translation->name) {
-                return $translation->name;
+            $names = $this->name;
+            if (is_array($names)) {
+                return $names[$locale] ?? $names[$shortLocale] ?? $names['fr'] ?? 'Produit';
             }
+            
+            return $names ?? 'Produit';
         }
-        
-        // Utiliser le JSON casté
-        $names = $this->name;
-        if (is_array($names)) {
-            return $names[$locale] ?? $names[$shortLocale] ?? $names['fr'] ?? array_values($names)[0] ?? 'Produit';
-        }
-        
-        return $names;
     }
     
     public function getTranslatedDescriptionAttribute()
     {
-        $locale = app()->getLocale();
-        $shortLocale = str_contains($locale, '_') ? explode('_', $locale)[0] : $locale;
-        
-        if ($this->relationLoaded('translations')) {
-            $translation = $this->translations->firstWhere('locale', $locale);
-            if (!$translation) {
-                $translation = $this->translations->firstWhere('locale', $shortLocale);
+        try {
+            return $this->getTranslation('description', app()->getLocale());
+        } catch (\Exception $e) {
+            $locale = app()->getLocale();
+            $shortLocale = str_contains($locale, '_') ? explode('_', $locale)[0] : $locale;
+            
+            if ($this->relationLoaded('translations')) {
+                $translation = $this->translations->firstWhere('locale', $locale) ?? 
+                              $this->translations->firstWhere('locale', $shortLocale);
+                
+                if ($translation && $translation->description) {
+                    return $translation->description;
+                }
             }
-            if ($translation && $translation->description) {
-                return $translation->description;
+            
+            $descriptions = $this->description;
+            if (is_array($descriptions)) {
+                return $descriptions[$locale] ?? $descriptions[$shortLocale] ?? $descriptions['fr'] ?? '';
             }
+            
+            return $descriptions ?? '';
         }
-        
-        $descriptions = $this->description;
-        if (is_array($descriptions)) {
-            return $descriptions[$locale] ?? $descriptions[$shortLocale] ?? $descriptions['fr'] ?? '';
-        }
-        
-        return $descriptions;
     }
     
+    // Accesseur pour la courte description, avec fallback similaire
     public function getTranslatedShortDescriptionAttribute()
     {
         $locale = app()->getLocale();
-        $shortLocale = str_contains($locale, '_') ? explode('_', $locale)[0] : $locale;
         
-        if ($this->relationLoaded('translations')) {
-            $translation = $this->translations->firstWhere('locale', $locale);
-            if (!$translation) {
-                $translation = $this->translations->firstWhere('locale', $shortLocale);
+        // Utiliser Spatie Translatable
+        try {
+            return $this->getTranslation('short_description', $locale);
+        } catch (\Exception $e) {
+            // Fallback
+            $shortDescriptions = $this->short_description;
+            if (is_array($shortDescriptions)) {
+                return $shortDescriptions[$locale] ?? $shortDescriptions['fr'] ?? '';
             }
-            if ($translation && $translation->short_description) {
-                return $translation->short_description;
-            }
+            return $shortDescriptions ?? '';
         }
-        
-        $shortDescriptions = $this->short_description;
-        if (is_array($shortDescriptions)) {
-            return $shortDescriptions[$locale] ?? $shortDescriptions[$shortLocale] ?? $shortDescriptions['fr'] ?? '';
-        }
-        
-        return $shortDescriptions;
     }
 
-    // ✅ NOUVEAU : ACCESSEUR POUR L'ADMIN (version française)
+    // ✅ ACCESSEUR POUR L'ADMIN
     public function getAdminNameAttribute()
     {
         if (is_array($this->name)) {
-            // Priorité au français, sinon première langue disponible
-            return $this->name['fr'] ?? 
-                   $this->name[array_key_first($this->name)] ?? 
-                   'Sans nom';
+            return $this->name['fr'] ?? array_values($this->name)[0] ?? 'Sans nom';
         }
         return $this->name ?? 'Sans nom';
     }
 
     public function getAdminDescriptionAttribute()
     {
-        if (isset($this->description) && is_array($this->description)) {
-            return $this->description['fr'] ?? 
-                   $this->description[array_key_first($this->description)] ?? 
-                   '';
+        if (is_array($this->description)) {
+            return $this->description['fr'] ?? array_values($this->description)[0] ?? '';
         }
         return $this->description ?? '';
     }
 
     public function getAdminShortDescriptionAttribute()
     {
-        if (isset($this->short_description) && is_array($this->short_description)) {
-            return $this->short_description['fr'] ?? 
-                   $this->short_description[array_key_first($this->short_description)] ?? 
-                   '';
+        if (is_array($this->short_description)) {
+            return $this->short_description['fr'] ?? array_values($this->short_description)[0] ?? '';
         }
         return $this->short_description ?? '';
     }
@@ -203,5 +203,27 @@ class Product extends Model
     public function scopeInStock($query)
     {
         return $query->where('quantity', '>', 0);
+    }
+
+    /**
+ * Récupère la description courte traduite de façon sécurisée
+ */
+    public function getSafeShortDescriptionAttribute()
+    {
+        $locale = app()->getLocale();
+        $shortDesc = $this->getTranslation('short_description', $locale);
+        
+        // Vérifier si c'est du JSON vide ou null
+        if (!empty($shortDesc) && $shortDesc !== '[]' && $shortDesc !== 'null' && !is_array($shortDesc)) {
+            return $shortDesc;
+        }
+        
+        // Fallback sur la description complète
+        $desc = $this->getTranslation('description', $locale);
+        if (!empty($desc) && $desc !== '[]' && $desc !== 'null' && !is_array($desc)) {
+            return Str::limit($desc, 50);
+        }
+        
+        return '';
     }
 }

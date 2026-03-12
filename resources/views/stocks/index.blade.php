@@ -60,9 +60,12 @@
                 <div class="col-sm-6 col-md-4 mx-auto">
                     <div class="small-box bg-danger h-100">
                         <div class="inner">
-                            <h3>{{ $stocks->filter(function($stock) { 
-                                return $stock->quantity <= ($stock->product->stock_threshold ?? 5); 
-                            })->count() }}</h3>
+                            @php
+                                $lowStockCount = $stocks->filter(function($stock) { 
+                                    return $stock->quantity <= ($stock->product->stock_threshold ?? 5); 
+                                })->count();
+                            @endphp
+                            <h3>{{ $lowStockCount }}</h3>
                             <p>Stock faible</p>
                         </div>
                         <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
@@ -71,7 +74,7 @@
             </div>
         </div>
 
-        <!-- FILTRES AMÉLIORÉS -->
+        <!-- FILTRES -->
         <div class="card-body border-bottom">
             <form method="GET" action="{{ route('admin.stocks.index') }}" id="filterForm">
                 <div class="row g-3">
@@ -97,7 +100,7 @@
                         <label for="status" class="form-label fw-bold">
                             <i class="fas fa-filter mr-2"></i>Statut du stock
                         </label>
-                        <select name="status" id="status" class="form-control" onchange="this.form.submit()">
+                        <select name="status" id="status" class="form-control">
                             <option value="">Tous les statuts</option>
                             <option value="low" {{ request('status') == 'low' ? 'selected' : '' }}>⚠️ Stock bas (≤ seuil)</option>
                             <option value="normal" {{ request('status') == 'normal' ? 'selected' : '' }}>✅ Normal</option>
@@ -109,7 +112,7 @@
                         <label class="form-label fw-bold">
                             <i class="fas fa-sort-alpha-down mr-2"></i>Tri
                         </label>
-                        <select name="sort" id="sort" class="form-control" onchange="this.form.submit()">
+                        <select name="sort" id="sort" class="form-control">
                             <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>Nom (A-Z)</option>
                             <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>Nom (Z-A)</option>
                             <option value="quantity_asc" {{ request('sort') == 'quantity_asc' ? 'selected' : '' }}>Stock (croissant)</option>
@@ -118,11 +121,9 @@
                     </div>
 
                     <div class="col-md-2 d-flex align-items-end">
-                        @if(request('search') || request('status') || request('sort'))
-                        <a href="{{ route('admin.stocks.index') }}" class="btn btn-outline-secondary w-100">
-                            <i class="fas fa-times mr-2"></i> Réinitialiser
-                        </a>
-                        @endif
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter mr-2"></i> Appliquer
+                        </button>
                     </div>
                 </div>
             </form>
@@ -170,6 +171,12 @@
                         </a>
                     </span>
                     @endif
+                    
+                    @if(request('search') || request('status') || request('sort'))
+                    <a href="{{ route('admin.stocks.index') }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-times mr-1"></i> Tout effacer
+                    </a>
+                    @endif
                 </div>
             </div>
             @endif
@@ -196,27 +203,37 @@
                         <tr>
                             <td class="d-none d-md-table-cell">{{ $stock->id }}</td>
                             
-                            <!-- COLONNE PRODUIT AVEC IMAGE CORRIGÉE ET NOM TRADUIT -->
+                            <!-- COLONNE PRODUIT - VERSION CORRIGÉE SANS BOUCLE INFINIE -->
                             <td>
                                 <div class="d-flex align-items-center">
-                                    @if($stock->product && $stock->product->image)
-                                        @php
-                                            $imageName = basename($stock->product->image);
-                                            $imagePath = 'storage/products/' . $imageName;
-                                        @endphp
-                                        <img src="{{ asset($imagePath) }}" 
-                                             alt="{{ $stock->product->admin_name ?? $stock->product->name }}" 
-                                             class="rounded-circle mr-2" 
-                                             style="width: 30px; height: 30px; object-fit: cover;"
-                                             onerror="this.onerror=null; this.style.display='none'; this.parentNode.innerHTML += '<div class=\'rounded-circle bg-secondary d-flex align-items-center justify-content-center mr-2\' style=\'width:30px;height:30px;\'><i class=\'fas fa-box text-white\'></i></div>';">
+                                    @php
+                                        $hasImage = $stock->product && $stock->product->image;
+                                        $imageUrl = $hasImage ? asset('storage/products/' . basename($stock->product->image)) : null;
+                                        $productName = $stock->product->admin_name ?? $stock->product->name ?? 'Produit inconnu';
+                                    @endphp
+                                    
+                                    @if($hasImage)
+                                        <div class="position-relative" style="width: 30px; height: 30px; margin-right: 0.5rem;">
+                                            <img src="{{ $imageUrl }}" 
+                                                 alt="{{ $productName }}" 
+                                                 class="rounded-circle position-absolute" 
+                                                 style="width: 30px; height: 30px; object-fit: cover;"
+                                                 onload="this.style.display='block'; this.nextElementSibling.style.display='none';"
+                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center position-absolute" 
+                                                 style="width: 30px; height: 30px; display: none;">
+                                                <i class="fas fa-box text-white" style="font-size: 14px;"></i>
+                                            </div>
+                                        </div>
                                     @else
                                         <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mr-2" 
                                              style="width: 30px; height: 30px;">
                                             <i class="fas fa-box text-white" style="font-size: 14px;"></i>
                                         </div>
                                     @endif
+                                    
                                     <div>
-                                        <strong>{{ Str::limit($stock->product->admin_name ?? $stock->product->name ?? 'Produit inconnu', 25) }}</strong>
+                                        <strong>{{ Str::limit($productName, 25) }}</strong>
                                         @if($stock->product && $stock->product->sku)
                                             <br><small class="text-muted">SKU: {{ $stock->product->sku }}</small>
                                         @endif
@@ -224,7 +241,7 @@
                                 </div>
                             </td>
                             
-                            <!-- COLONNE FOURNISSEUR / VENDEUR CORRIGÉE AVEC NOMS TRADUITS -->
+                            <!-- COLONNE FOURNISSEUR / VENDEUR -->
                             <td class="d-none d-md-table-cell">
                                 @if($stock->product && $stock->product->supplier)
                                     <a href="{{ route('admin.suppliers.show', $stock->product->supplier->id) }}" class="text-decoration-none">
@@ -257,7 +274,7 @@
                             </td>
                             <td class="d-none d-lg-table-cell">{{ $stock->updated_at->format('d/m/Y H:i') }}</td>
                             <td>
-                                <button class="btn btn-sm btn-primary" onclick="openStockModal({{ $stock->id }}, '{{ addslashes($stock->product->admin_name ?? $stock->product->name ?? 'Produit inconnu') }}', {{ $stock->quantity }})">
+                                <button class="btn btn-sm btn-primary" onclick="openStockModal({{ $stock->id }}, '{{ addslashes($productName) }}', {{ $stock->quantity }})">
                                     <i class="fas fa-edit"></i>
                                 </button>
                             </td>
@@ -279,7 +296,7 @@
         </div>
 
         <!-- Pagination -->
-        @if($stocks->hasPages())
+        @if($stocks instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator && $stocks->hasPages())
         <div class="card-footer">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
                 <div class="text-muted mb-2 mb-md-0">
@@ -393,77 +410,62 @@
 
 <script>
 // Variables globales
-let searchTimeout;
+let syncBtn = document.getElementById('syncStocksBtn');
 let searchInput = document.getElementById('search');
-let cursorPosition = 0;
+let statusSelect = document.getElementById('status');
+let sortSelect = document.getElementById('sort');
 
-document.addEventListener('DOMContentLoaded', function() {
-    const syncBtn = document.getElementById('syncStocksBtn');
-    
-    // Recherche automatique avec préservation du curseur
-    if (searchInput) {
-        // Sauvegarder la position du curseur
-        searchInput.addEventListener('keyup', function(e) {
-            cursorPosition = this.selectionStart;
-        });
+// Synchronisation
+if (syncBtn) {
+    syncBtn.addEventListener('click', function() {
+        const btn = this;
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Synchronisation...';
+        btn.disabled = true;
         
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            
-            searchTimeout = setTimeout(() => {
-                const currentValue = this.value;
-                sessionStorage.setItem('lastSearch', currentValue);
-                sessionStorage.setItem('cursorPosition', cursorPosition);
-                document.getElementById('filterForm').submit();
-            }, 800);
-        });
-    }
-    
-    // Restaurer le focus après rechargement
-    const lastSearch = sessionStorage.getItem('lastSearch');
-    const savedCursorPosition = sessionStorage.getItem('cursorPosition');
-    
-    if (lastSearch && searchInput) {
-        searchInput.value = lastSearch;
-        searchInput.focus();
-        if (savedCursorPosition) {
-            searchInput.setSelectionRange(savedCursorPosition, savedCursorPosition);
-        }
-        sessionStorage.removeItem('lastSearch');
-        sessionStorage.removeItem('cursorPosition');
-    }
-    
-    // Synchronisation
-    if (syncBtn) {
-        syncBtn.addEventListener('click', function() {
-            const btn = this;
-            const originalHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Synchronisation...';
-            btn.disabled = true;
-            
-            fetch('/admin/stocks/sync', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Erreur: ' + data.message);
-                    btn.innerHTML = originalHtml;
-                    btn.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-                alert('Erreur lors de la synchronisation');
+        fetch('{{ route("admin.stocks.sync") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erreur: ' + data.message);
                 btn.innerHTML = originalHtml;
                 btn.disabled = false;
-            });
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Erreur lors de la synchronisation');
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
         });
+    });
+}
+
+// Soumission manuelle des filtres
+if (searchInput) {
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('filterForm').submit();
+        }
+    });
+}
+
+// Empêcher la soumission multiple du formulaire
+document.getElementById('filterForm').addEventListener('submit', function() {
+    const submitBtn = this.querySelector('button[type="submit"]');
+    if (submitBtn && !submitBtn.disabled) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Filtrage...';
     }
 });
 

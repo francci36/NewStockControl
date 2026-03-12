@@ -30,7 +30,7 @@
     <!-- Filtres et recherche -->
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-header bg-gradient-dark text-white py-3">
-            <h6 class="mb-0"><i class="fas fa-filter me-2 text-gold"></i> {{ __('messages.filter') }} & {{ __('messages.search') }}</h6>
+            <h6 class="mb-0"><i class="fas fa-filter me-2 text-gold"></i> {{ __('messages.filter_search') }}</h6>
         </div>
         <div class="card-body">
             <form action="{{ route('shop.products.index') }}" method="GET">
@@ -52,7 +52,7 @@
 
                     <!-- Filtre par catégorie -->
                     <div class="col-md-2">
-                        <label class="form-label fw-bold small text-uppercase text-gold">{{ __('messages.category') }}</label>
+                        <label class="form-label fw-bold small text-uppercase text-gold">{{ __('messages.filter_by_category') }}</label>
                         <select name="category" class="form-select border-gold" onchange="this.form.submit()">
                             <option value="">{{ __('messages.all_categories') }}</option>
                             @foreach($categories ?? [] as $category)
@@ -66,7 +66,7 @@
 
                     <!-- Filtre par vendeur/fournisseur -->
                     <div class="col-md-2">
-                        <label class="form-label fw-bold small text-uppercase text-gold">{{ __('messages.sold_by') }}</label>
+                        <label class="form-label fw-bold small text-uppercase text-gold">{{ __('messages.filter_by_vendor') }}</label>
                         <select name="vendor" class="form-select border-gold" onchange="this.form.submit()">
                             <option value="">{{ __('messages.all_vendors') }}</option>
                             @foreach($vendors ?? [] as $vendor)
@@ -109,16 +109,19 @@
                     <div class="col-md-3">
                         <div class="row g-2">
                             <div class="col-6">
-                                <label class="form-label fw-bold small text-uppercase text-gold">{{ __('messages.stock') }}</label>
+                                <label class="form-label fw-bold small text-uppercase text-gold">{{ __('messages.filter_by_stock') }}</label>
                                 <select name="stock" class="form-select border-gold" onchange="this.form.submit()">
                                     <option value="">{{ __('messages.all') }}</option>
                                     <option value="low" {{ request('stock') == 'low' ? 'selected' : '' }}>
                                         {{ __('messages.low_stock') }}
                                     </option>
+                                    <option value="in_stock" {{ request('stock') == 'in_stock' ? 'selected' : '' }}>
+                                        {{ __('messages.in_stock_only') }}
+                                    </option>
                                 </select>
                             </div>
                             <div class="col-6">
-                                <label class="form-label fw-bold small text-uppercase text-gold">{{ __('messages.sort') }}</label>
+                                <label class="form-label fw-bold small text-uppercase text-gold">{{ __('messages.sort_by') }}</label>
                                 <select name="sort" class="form-select border-gold" onchange="this.form.submit()">
                                     <option value="latest" {{ request('sort', 'latest') == 'latest' ? 'selected' : '' }}>
                                         {{ __('messages.latest') }}
@@ -172,10 +175,49 @@
     <!-- Grille de produits -->
     <div class="row">
         @forelse($products as $product)
+        @php
+            // Fonction helper pour nettoyer les traductions (définie UNE SEULE fois avant la boucle)
+            // Mais comme on ne peut pas définir de fonction dans une boucle, on utilise un simple if
+            $productName = $product->translated_name;
+            if (is_string($productName) && str_starts_with($productName, '{') && str_ends_with($productName, '}')) {
+                $decoded = json_decode($productName, true);
+                if (is_array($decoded)) {
+                    $productName = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $productName;
+                }
+            }
+            
+            $categoryName = null;
+            if ($product->category) {
+                $categoryName = $product->category->translated_name;
+                if (is_string($categoryName) && str_starts_with($categoryName, '{') && str_ends_with($categoryName, '}')) {
+                    $decoded = json_decode($categoryName, true);
+                    if (is_array($decoded)) {
+                        $categoryName = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $categoryName;
+                    }
+                }
+            }
+            
+            $shortDesc = $product->translated_short_description ?? '';
+            if (is_string($shortDesc) && str_starts_with($shortDesc, '{') && str_ends_with($shortDesc, '}')) {
+                $decoded = json_decode($shortDesc, true);
+                if (is_array($decoded)) {
+                    $shortDesc = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $shortDesc;
+                }
+            }
+            
+            $fullDesc = $product->translated_description ?? '';
+            if (is_string($fullDesc) && str_starts_with($fullDesc, '{') && str_ends_with($fullDesc, '}')) {
+                $decoded = json_decode($fullDesc, true);
+                if (is_array($decoded)) {
+                    $fullDesc = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $fullDesc;
+                }
+            }
+        @endphp
+        
         <div class="col-md-3 mb-4">
             <div class="card h-100 shadow-sm product-card border-0">
                 <!-- Badges -->
-                @if($product->quantity <= $product->stock_threshold)
+                @if($product->quantity <= $product->stock_threshold && $product->quantity > 0)
                     <span class="position-absolute top-0 start-0 badge bg-danger m-2">
                         <i class="fas fa-exclamation-triangle me-1"></i> {{ __('messages.low_stock') }}
                     </span>
@@ -188,7 +230,7 @@
                             $imageName = basename($product->image);
                         @endphp
                         <img src="{{ asset('storage/products/' . $imageName) }}" 
-                             alt="{{ $product->translated_name }}" 
+                             alt="{{ $productName }}" 
                              class="img-fluid product-image"
                              style="max-width: 100%; max-height: 180px; width: auto; height: auto; object-fit: contain;"
                              onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\'fas fa-box fa-4x text-secondary\'></i>';">
@@ -199,14 +241,18 @@
                 
                 <div class="card-body">
                     <!-- Nom et catégorie -->
-                    <h5 class="card-title fw-bold">{{ $product->translated_name }}</h5>
-                    @if($product->category)
-                        <span class="badge bg-light-gold text-dark mb-2">{{ $product->category->translated_name }}</span>
+                    <h5 class="card-title fw-bold">{{ $productName }}</h5>
+                    @if($categoryName)
+                        <span class="badge bg-light-gold text-dark mb-2">{{ $categoryName }}</span>
                     @endif
                     
-                    <!-- Description courte -->
+                    <!-- Description courte avec fallback -->
                     <p class="card-text text-muted small">
-                        {{ $product->translated_short_description ?? Str::limit($product->translated_description ?? $product->description, 50) }}
+                        @if(!empty($shortDesc) && $shortDesc !== '[]' && $shortDesc !== 'null')
+                            {{ $shortDesc }}
+                        @elseif(!empty($fullDesc) && $fullDesc !== '[]' && $fullDesc !== 'null')
+                            {{ Str::limit($fullDesc, 50) }}
+                        @endif
                     </p>
                     
                     <!-- Vendeur / Fournisseur -->
@@ -229,8 +275,12 @@
                     
                     <!-- Stock -->
                     <p class="card-text">
-                        <small class="text-{{ $product->quantity > 5 ? 'success' : ($product->quantity > 0 ? 'warning' : 'danger') }}">
-                            <i class="fas fa-{{ $product->quantity > 5 ? 'check-circle' : ($product->quantity > 0 ? 'exclamation-circle' : 'times-circle') }} me-1"></i>
+                        @php
+                            $stockClass = $product->quantity > 5 ? 'success' : ($product->quantity > 0 ? 'warning' : 'danger');
+                            $stockIcon = $product->quantity > 5 ? 'check-circle' : ($product->quantity > 0 ? 'exclamation-circle' : 'times-circle');
+                        @endphp
+                        <small class="text-{{ $stockClass }}">
+                            <i class="fas fa-{{ $stockIcon }} me-1"></i>
                             @if($product->quantity > 0)
                                 {{ $product->quantity }} {{ __('messages.in_stock') }}
                             @else

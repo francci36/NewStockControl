@@ -1,7 +1,6 @@
 <?php
 
 return [
-    // Général
     'shop_name' => 'Carioca & Coquelicot',
     'home' => 'Accueil',
     'products' => 'Produits',
@@ -35,38 +34,38 @@ return [
     'errors' => 'Erreurs',
     'all_rights_reserved' => 'Tous droits réservés',
     'welcome' => 'Bienvenue dans notre boutique animalière',
-
-    // Navigation
     'become_vendor' => 'Devenir vendeur',
     'vendor_space' => 'Espace vendeur',
     'administration' => 'Administration',
-
-    // Accueil
     'home_title' => 'Accueil - Carioca & Coquelicot',
     'hero_subtitle' => 'Découvrez notre sélection de produits de qualité pour vos animaux de compagnie',
     'free_shipping' => 'Livraison gratuite dès 50€ d\'achat',
+    'free_shipping_over' => 'Livraison gratuite dès :amount €',
     'view_all_products' => 'Voir tous les produits',
     'categories' => 'Catégories',
     'products_count' => 'produits',
     'view_products' => 'Voir les produits',
     'new_arrivals' => 'Nouveautés',
     'best_sellers' => 'Meilleures ventes',
+    'best_seller' => 'Meilleure vente',
     'new' => 'Nouveau',
     'view_details' => 'Voir détails',
     'low_stock' => 'Stock limité',
-    
-    // Communauté
+    'units' => 'unités',
+    'in_stock' => 'en stock',
+    'out_of_stock' => 'Rupture de stock',
+    'no_categories' => 'Aucune catégorie trouvée',
+    'no_new_products' => 'Aucun nouveau produit trouvé',
+    'no_featured_products' => 'Aucun produit à la une trouvé',
     'join_community' => 'Rejoignez notre communauté !',
     'join_benefits' => 'Créez un compte pour bénéficier de nombreux avantages :',
     'order_tracking' => 'Suivi de commande',
     'tracking_desc' => 'Suivez vos commandes en temps réel',
-    'order_history' => 'Historique',
+    'order_history' => 'Historique de la commande',
     'history_desc' => 'Retrouvez toutes vos commandes',
     'quick_checkout' => 'Commandes rapides',
     'quick_desc' => 'Commandez en un clic',
     'create_account' => 'Créer un compte',
-
-    // Produits
     'products_title' => 'Nos produits',
     'all_categories' => 'Toutes catégories',
     'all_vendors' => 'Tous les vendeurs',
@@ -86,12 +85,8 @@ return [
     'reset_filters' => 'Réinitialiser les filtres',
     'products_found' => 'produit(s) trouvé(s)',
     'page' => 'Page',
-    'in_stock' => 'en stock',
-    'out_of_stock' => 'Rupture de stock',
     'sold_by' => 'Vendu par',
     'supplier' => 'Fournisseur',
-
-    // Détail produit
     'image_not_available' => 'Image non disponible',
     'no_image' => 'Aucune image disponible',
     'tax_included' => 'TVA incluse',
@@ -111,8 +106,6 @@ return [
     'last_updated' => 'Dernière mise à jour',
     'share' => 'Partager',
     'similar_products' => 'Produits similaires',
-
-    // Panier
     'cart_title' => 'Mon Panier',
     'empty_cart' => 'Votre panier est vide',
     'empty_cart_message' => 'Découvrez nos produits de qualité pour vos animaux de compagnie !',
@@ -133,8 +126,6 @@ return [
     'secure_payment' => 'Paiement sécurisé',
     'login_to_checkout' => 'Vous devez être connecté pour passer commande',
     'confirm_action' => 'Êtes-vous sûr de vouloir effectuer cette action ?',
-
-    // Checkout
     'checkout_title' => 'Finaliser votre commande',
     'shipping_address' => 'Adresse de livraison',
     'full_name' => 'Nom complet',
@@ -157,8 +148,6 @@ return [
     'terms_link' => 'conditions générales de vente',
     'confirm_order' => 'Confirmer la commande',
     'processing_payment' => 'Traitement du paiement...',
-
-    // Confirmation
     'order_confirmation_title' => 'Confirmation de commande',
     'thank_you' => 'Merci pour votre commande !',
     'order_confirmed' => 'Votre commande #:id a bien été enregistrée.',
@@ -169,9 +158,7 @@ return [
     'total' => 'Total',
     'ordered_products' => 'Produits commandés',
     'product' => 'Produit',
-    'quantity' => 'Quantité',
     'unit_price' => 'Prix unitaire',
-    'total_ttc' => 'Total TTC',
     'confirmation_email_sent' => 'Un email de confirmation a été envoyé à :email',
     'email_info' => 'Vous recevrez également un email de confirmation dans quelques instants.',
     'pending' => 'En attente',
@@ -181,13 +168,7 @@ return [
     'delivered' => 'Livrée',
     'cancelled' => 'Annulée',
     'refunded' => 'Remboursée',
-    'continue_shopping' => 'Continuer mes achats',
     'view_my_orders' => 'Voir mes commandes',
-    'administration' => 'Administration',
-
-    // ============================================
-    // COMMANDES - CLIENTS
-    // ============================================
     'order' => 'Commande',
     'no_orders' => 'Aucune commande',
     'no_orders_message' => 'Découvrez nos produits et passez votre première commande !',
@@ -199,17 +180,10 @@ return [
     'payment_pending' => 'Paiement en attente',
     'back_to_orders' => 'Retour aux commandes',
     'new_order' => 'Nouvelle commande',
-    'order_tracking' => 'Suivi de commande',
-    'order_history' => 'Historique de la commande',
     'no_history' => 'Aucun historique disponible',
     'by' => 'Par',
-    'paid' => 'Payé',
-    'pending' => 'En attente',
     'payment' => 'Paiement',
     'bank_transfer' => 'Virement bancaire',
-    'view_details' => 'Voir les détails',
-
-    // Statuts
     'status_pending' => 'en attente',
     'status_processing' => 'en traitement',
     'status_shipped' => 'expédiée',
@@ -217,8 +191,6 @@ return [
     'status_cancelled' => 'annulée',
     'status_arrived' => 'arrivée',
     'status_paid' => 'payée',
-
-    // Messages flash
     'product_added_to_cart' => 'Produit ajouté au panier !',
     'cart_updated' => 'Panier mis à jour !',
     'cart_cleared' => 'Panier vidé !',
@@ -231,16 +203,11 @@ return [
     'checkout_error' => 'Erreur lors de la commande',
     'stock_insufficient' => 'Stock insuffisant',
     'stock_error_item' => ':product : seulement :stock disponible(s)',
-    'empty_cart' => 'Votre panier est vide',
     'payment_intent_error' => 'Erreur de création du paiement',
-
-    // Footer
     'shop_description' => 'Votre boutique en ligne pour animaux de compagnie',
     'quick_links' => 'Liens rapides',
     'contact' => 'Contact',
     'language_changed' => 'Langue changée en :lang',
-
-    // Footer - Nouveaux champs
     'newsletter_title' => 'Recevez nos offres exclusives',
     'newsletter_subtitle' => 'Inscrivez-vous pour recevoir -10% sur votre première commande',
     'email_placeholder' => 'Votre adresse email',
@@ -250,6 +217,7 @@ return [
     'weekdays' => 'Lundi - Vendredi',
     'saturday' => 'Samedi',
     'sunday' => 'Dimanche',
+    'closed' => 'Fermé',
     'support' => 'Support client',
     'follow_us' => 'Suivez-nous',
     'download_app' => 'Téléchargez l\'application',
@@ -257,23 +225,8 @@ return [
     'privacy_policy' => 'Politique de confidentialité',
     'terms_of_use' => 'Conditions d\'utilisation',
     'cookies' => 'Cookies',
-
-    // Commandes
-    'order_details' => 'Détails de la commande',
-    'payment' => 'Paiement',
-    'back_to_orders' => 'Retour aux commandes',
-    'new_order' => 'Nouvelle commande',
-    'can_be_tracked' => 'Suivre ma commande',
-
-    // Tracking
     'tracking_number' => 'Numéro de suivi',
     'carrier' => 'Transporteur',
-
-    // ============================================
-    // ESPACE VENDEUR - AJOUTS
-    // ============================================
-    
-    // Dashboard vendeur
     'vendor_dashboard' => 'Tableau de bord vendeur',
     'vendor_orders' => 'Commandes reçues',
     'vendor_products' => 'Mes produits',
@@ -285,8 +238,6 @@ return [
     'vendor_no_orders' => 'Aucune commande pour le moment',
     'vendor_no_products' => 'Aucun produit pour le moment',
     'vendor_welcome' => 'Bienvenue dans votre espace vendeur',
-    
-    // Produits - Gestion
     'vendor_add_product' => 'Ajouter un produit',
     'vendor_save_product' => 'Enregistrer le produit',
     'vendor_product_name' => 'Nom du produit',
@@ -297,8 +248,6 @@ return [
     'vendor_product_edit' => 'Modifier',
     'vendor_product_delete' => 'Supprimer',
     'vendor_confirm_delete' => 'Confirmer la suppression ?',
-    
-    // Produits - Formulaire
     'select_category' => 'Sélectionnez une catégorie',
     'add_new_category' => 'Ajouter une nouvelle catégorie',
     'new_category_name' => 'Nom de la nouvelle catégorie',
@@ -312,8 +261,6 @@ return [
     'image' => 'Image',
     'monthly_revenue' => 'Chiffre d\'affaires (mois)',
     'recent_products' => 'Produits récents',
-    
-    // Inscription vendeur
     'vendor_register_info' => 'Remplissez ce formulaire pour ouvrir votre boutique. Nous examinerons votre demande sous 48h.',
     'vendor_shop_name' => 'Nom de la boutique',
     'vendor_shop_description' => 'Description de la boutique',
@@ -330,17 +277,12 @@ return [
     'vendor_benefit_commission_desc' => 'Seulement 10% sur vos ventes',
     'vendor_benefit_dashboard' => 'Dashboard dédié',
     'vendor_benefit_dashboard_desc' => 'Gérez vos produits et commandes',
-    
-    // Statut en attente
     'vendor_pending_greeting' => 'Bonjour :name,',
     'vendor_pending_message' => 'Votre demande pour ouvrir la boutique ":shop" a bien été reçue.',
     'vendor_pending_info' => 'Notre équipe examine actuellement votre demande. Vous recevrez un email sous 48h.',
     'vendor_summary' => 'Récapitulatif de votre demande',
     'request_date' => 'Date de demande',
     'back_to_shop' => 'Retour à l\'accueil',
-
-    // settings
-
     'vendor_shop_info' => 'Informations de la boutique',
     'vendor_shop_logo' => 'Logo de la boutique',
     'vendor_address_info' => 'Adresse de la boutique',
@@ -348,36 +290,19 @@ return [
     'email' => 'Email',
     'website' => 'Site web',
     'settings_updated' => 'Paramètres mis à jour avec succès !',
-
-    // catégories des produits vendeurs
-
-     'title' => 'Gestion des catégories',
-    'page_title' => 'Catégories',
-    'list_title' => 'Liste des catégories',
-    'new_category' => 'Nouvelle catégorie',
-    'id' => 'ID',
-    'name_french' => 'Nom (Français)',
-    'name_english' => 'Nom (Anglais)',
-    'name_portuguese' => 'Nom (Portugais)',
-    'name_spanish' => 'Nom (Espagnol)',
-    'name_german' => 'Nom (Allemand)',
-    'slug' => 'Slug (URL)',
-    'status' => 'Statut',
-    'products' => 'Produits',
-    'actions' => 'Actions',
-    'active' => 'Actif',
-    'inactive' => 'Inactif',
-    'edit' => 'Modifier',
-    'delete' => 'Supprimer',
-    'create' => 'Créer une catégorie',
-    'edit_category' => 'Modifier la catégorie',
-    'save' => 'Enregistrer',
-    'cancel' => 'Annuler',
-    'back_to_list' => 'Retour à la liste',
-    'confirm_delete' => 'Êtes-vous sûr de vouloir supprimer la catégorie ":name" ?',
-    'no_categories' => 'Aucune catégorie trouvée',
-    'products_associated' => ':count produit(s) sont associés à cette catégorie',
-    'slug_help' => 'Identifiant unique pour l\'URL. Ex: vins-rouges',
-    'slug_readonly' => 'Le slug ne peut pas être modifié après création',
-    'category_active' => 'Catégorie active',
+    'price' => 'Prix',
+    'min' => 'Min',
+    'max' => 'Max',
+    'all' => 'Tous',
+    'showing' => 'Affichage de',
+    'to' => 'à',
+    'of' => 'sur',
+    'results' => 'résultats',
+    'filter_search' => 'Filtrer & Rechercher',
+    'filter_by_category' => 'Catégorie',
+    'filter_by_vendor' => 'Vendu par',
+    'filter_by_stock' => 'Stock',
+    'in_stock_only' => 'En stock uniquement',
+    'sort_by' => 'Trier par',
+    'apply_filters' => 'Appliquer les filtres',
 ];

@@ -25,41 +25,72 @@
     <!-- Catégories -->
     <h2 class="mb-4 section-title">{{ __('messages.categories') }}</h2>
     <div class="row mb-5">
+        @forelse($categories as $category)
         @php
-            use App\Helpers\CategoryHelper;
+            // Nettoyer le nom de la catégorie
+            $categoryName = $category->translated_name ?? ($category->name[app()->getLocale()] ?? $category->name['fr'] ?? 'Catégorie');
+            if (is_string($categoryName) && str_starts_with($categoryName, '{') && str_ends_with($categoryName, '}')) {
+                $decoded = json_decode($categoryName, true);
+                if (is_array($decoded)) {
+                    $categoryName = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $categoryName;
+                }
+            }
         @endphp
-        
-        @foreach($categories as $category)
         <div class="col-md-3 mb-3">
             <div class="card text-center h-100 category-card border-0 shadow-sm">
                 <div class="card-body">
                     <div class="category-icon-wrapper mb-3">
-                        <i class="fas fa-{{ App\Helpers\CategoryHelper::getIcon($category) }} fa-3x text-gold"></i>
+                        @php
+                            $icon = match($category->slug) {
+                                'alimentation-chiens', 'alimentation-chats' => 'paw',
+                                'accessoires' => 'bone',
+                                'soins-sante' => 'heart',
+                                'aquariophilie' => 'fish',
+                                'vins' => 'wine-glass-alt',
+                                'produit-cuisine' => 'utensils',
+                                'jardin' => 'leaf',
+                                default => 'box'
+                            };
+                        @endphp
+                        <i class="fas fa-{{ $icon }} fa-3x text-gold"></i>
                     </div>
-                    <h5 class="card-title text-dark fw-bold">{{ $category->translated_name }}</h5>
+                    <h5 class="card-title text-dark fw-bold">
+                        {{ $categoryName }}
+                    </h5>
                     
-                    <!-- Calcul du nombre total de produits (catégorie principale + sous-catégories) -->
+                    <!-- Compteur de produits -->
                     @php
-                        $totalProducts = $category->products_count ?? 0;
-                        if ($category->children && $category->children->count() > 0) {
+                        $productCount = $category->products_count ?? 0;
+                        if(isset($category->children) && $category->children->count() > 0) {
                             foreach($category->children as $child) {
-                                $totalProducts += $child->products_count ?? 0;
+                                $productCount += $child->products_count ?? 0;
                             }
                         }
                     @endphp
-                    <p class="card-text text-muted">{{ $totalProducts }} {{ __('messages.products_count') }}</p>
+                    <p class="card-text text-muted">
+                        {{ $productCount }} {{ __('messages.products_count') }}
+                    </p>
                     
-                    <!-- Afficher les sous-catégories si elles existent -->
-                    @if($category->children && $category->children->isNotEmpty())
+                    <!-- Sous-catégories -->
+                    @if(isset($category->children) && $category->children->count() > 0)
                     <div class="subcategories mt-2">
                         @foreach($category->children as $sub)
+                            @if(($sub->products_count ?? 0) > 0)
                             @php
-                                $subCount = $sub->products_count ?? 0;
+                                $subName = $sub->translated_name ?? $sub->name;
+                                if (is_string($subName) && str_starts_with($subName, '{') && str_ends_with($subName, '}')) {
+                                    $decoded = json_decode($subName, true);
+                                    if (is_array($decoded)) {
+                                        $subName = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $subName;
+                                    }
+                                }
                             @endphp
                             <a href="{{ route('shop.products.index', ['category' => $sub->slug]) }}" 
-                               class="badge bg-light-gold text-dark mr-1 mb-1 p-2 text-decoration-none">
-                                {{ $sub->translated_name }} @if($subCount > 0)({{ $subCount }})@endif
+                               class="badge bg-light-gold text-dark me-1 mb-1 p-2 text-decoration-none">
+                                {{ $subName }}
+                                <small>({{ $sub->products_count ?? 0 }})</small>
                             </a>
+                            @endif
                         @endforeach
                     </div>
                     @endif
@@ -71,7 +102,13 @@
                 </div>
             </div>
         </div>
-        @endforeach
+        @empty
+        <div class="col-12 text-center">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> {{ __('messages.no_categories') }}
+            </div>
+        </div>
+        @endforelse
     </div>
 
     <!-- Section appel à l'action pour les visiteurs -->
@@ -122,7 +159,37 @@
     <!-- Nouveautés -->
     <h2 class="mb-4 section-title">{{ __('messages.new_arrivals') }}</h2>
     <div class="row">
-        @foreach($newProducts as $product)
+        @forelse($newProducts as $product)
+        @php
+            // Nettoyer les données du produit
+            $productName = $product->translated_name;
+            if (is_string($productName) && str_starts_with($productName, '{') && str_ends_with($productName, '}')) {
+                $decoded = json_decode($productName, true);
+                if (is_array($decoded)) {
+                    $productName = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $productName;
+                }
+            }
+            
+            $categoryName = null;
+            if ($product->category) {
+                $categoryName = $product->category->translated_name;
+                if (is_string($categoryName) && str_starts_with($categoryName, '{') && str_ends_with($categoryName, '}')) {
+                    $decoded = json_decode($categoryName, true);
+                    if (is_array($decoded)) {
+                        $categoryName = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $categoryName;
+                    }
+                }
+            }
+            
+            $description = $product->translated_description ?? '';
+            if (is_string($description) && str_starts_with($description, '{') && str_ends_with($description, '}')) {
+                $decoded = json_decode($description, true);
+                if (is_array($decoded)) {
+                    $description = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $description;
+                }
+            }
+        @endphp
+        
         <div class="col-md-3 mb-4">
             <div class="card h-100 shadow-sm product-card border-0">
                 <!-- Badge nouveau -->
@@ -131,88 +198,153 @@
                 </span>
                 
                 <!-- Image du produit -->
-                <div class="product-image-wrapper text-center bg-light" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                <div class="product-image-wrapper text-center bg-light p-3" style="height: 200px; display: flex; align-items: center; justify-content: center;">
                     @if($product->image)
                         @php
                             $imageName = basename($product->image);
+                            $imagePath = asset('storage/products/' . $imageName);
                         @endphp
-                        <img src="{{ asset('storage/products/' . $imageName) }}" 
-                             alt="{{ $product->translated_name }}" 
+                        <img src="{{ $imagePath }}" 
+                             alt="{{ $productName }}" 
                              class="img-fluid product-image"
-                             style="max-width: 100%; max-height: 180px; width: auto; height: auto; object-fit: contain;"
-                             onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\'fas fa-box fa-4x text-secondary\'></i>';">
+                             style="max-height: 180px; width: auto; object-fit: contain;"
+                             onerror="this.onerror=null; this.src='{{ asset('images/placeholder.jpg') }}';">
                     @else
-                        <i class="fas fa-box fa-4x text-secondary"></i>
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <i class="fas fa-box fa-4x text-secondary"></i>
+                        </div>
                     @endif
                 </div>
                 
                 <div class="card-body">
-                    <h5 class="card-title fw-bold">{{ $product->translated_name }}</h5>
-                    @if($product->category)
-                        <span class="badge bg-light-gold text-dark mb-2">{{ $product->category->translated_name }}</span>
+                    <h5 class="card-title fw-bold">{{ $productName }}</h5>
+                    @if($categoryName)
+                        <span class="badge bg-light-gold text-dark mb-2">{{ $categoryName }}</span>
                     @endif
-                    <p class="card-text text-muted small">{{ $product->translated_short_description ?? Str::limit($product->translated_description ?? $product->description, 50) }}</p>
-                    <p class="card-text">
-                        <strong class="text-gold fs-4">{{ number_format($product->price, 2) }} €</strong>
+                    <p class="card-text text-muted small">
+                        {{ Str::limit(strip_tags($description), 50) }}
                     </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong class="text-gold fs-4">{{ number_format($product->price, 2) }} €</strong>
+                        @if($product->quantity > 0)
+                            <small class="text-success"><i class="fas fa-check-circle"></i> {{ __('messages.in_stock') }}</small>
+                        @else
+                            <small class="text-danger"><i class="fas fa-times-circle"></i> {{ __('messages.out_of_stock') }}</small>
+                        @endif
+                    </div>
                 </div>
-                <div class="card-footer bg-transparent border-0 pb-3">
+                <div class="card-footer bg-transparent border-0 pb-3 pt-0">
                     <a href="{{ route('shop.products.show', $product) }}" class="btn btn-outline-gold w-100">
-                        {{ __('messages.view_details') }}
+                        <i class="fas fa-eye me-2"></i> {{ __('messages.view_details') }}
                     </a>
                 </div>
             </div>
         </div>
-        @endforeach
+        @empty
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle me-2"></i> {{ __('messages.no_new_products') }}
+            </div>
+        </div>
+        @endforelse
     </div>
 
     <!-- Meilleures ventes -->
     <h2 class="mb-4 mt-5 section-title">{{ __('messages.best_sellers') }}</h2>
     <div class="row">
-        @foreach($featuredProducts as $product)
+        @forelse($featuredProducts as $product)
+        @php
+            // Nettoyer les données du produit
+            $productName = $product->translated_name;
+            if (is_string($productName) && str_starts_with($productName, '{') && str_ends_with($productName, '}')) {
+                $decoded = json_decode($productName, true);
+                if (is_array($decoded)) {
+                    $productName = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $productName;
+                }
+            }
+            
+            $categoryName = null;
+            if ($product->category) {
+                $categoryName = $product->category->translated_name;
+                if (is_string($categoryName) && str_starts_with($categoryName, '{') && str_ends_with($categoryName, '}')) {
+                    $decoded = json_decode($categoryName, true);
+                    if (is_array($decoded)) {
+                        $categoryName = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $categoryName;
+                    }
+                }
+            }
+            
+            $description = $product->translated_description ?? '';
+            if (is_string($description) && str_starts_with($description, '{') && str_ends_with($description, '}')) {
+                $decoded = json_decode($description, true);
+                if (is_array($decoded)) {
+                    $description = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $description;
+                }
+            }
+        @endphp
+        
         <div class="col-md-3 mb-4">
             <div class="card h-100 shadow-sm product-card border-0">
                 <!-- Badge stock limité -->
-                @if($product->quantity <= $product->stock_threshold)
+                @if($product->quantity <= $product->stock_threshold && $product->quantity > 0)
                     <span class="position-absolute top-0 start-0 badge bg-danger m-2">
                         <i class="fas fa-exclamation-triangle me-1"></i> {{ __('messages.low_stock') }}
                     </span>
                 @endif
                 
+                <!-- Badge meilleure vente -->
+                <span class="position-absolute top-0 end-0 badge bg-warning text-dark m-2">
+                    <i class="fas fa-crown me-1"></i> {{ __('messages.best_seller') }}
+                </span>
+                
                 <!-- Image du produit -->
-                <div class="product-image-wrapper text-center bg-light" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                <div class="product-image-wrapper text-center bg-light p-3" style="height: 200px; display: flex; align-items: center; justify-content: center;">
                     @if($product->image)
                         @php
                             $imageName = basename($product->image);
+                            $imagePath = asset('storage/products/' . $imageName);
                         @endphp
-                        <img src="{{ asset('storage/products/' . $imageName) }}" 
-                             alt="{{ $product->translated_name }}" 
+                        <img src="{{ $imagePath }}" 
+                             alt="{{ $productName }}" 
                              class="img-fluid product-image"
-                             style="max-width: 100%; max-height: 180px; width: auto; height: auto; object-fit: contain;"
-                             onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\'fas fa-box fa-4x text-secondary\'></i>';">
+                             style="max-height: 180px; width: auto; object-fit: contain;"
+                             onerror="this.onerror=null; this.src='{{ asset('images/placeholder.jpg') }}';">
                     @else
-                        <i class="fas fa-box fa-4x text-secondary"></i>
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <i class="fas fa-box fa-4x text-secondary"></i>
+                        </div>
                     @endif
                 </div>
                 
                 <div class="card-body">
-                    <h5 class="card-title fw-bold">{{ $product->translated_name }}</h5>
-                    @if($product->category)
-                        <span class="badge bg-light-gold text-dark mb-2">{{ $product->category->translated_name }}</span>
+                    <h5 class="card-title fw-bold">{{ $productName }}</h5>
+                    @if($categoryName)
+                        <span class="badge bg-light-gold text-dark mb-2">{{ $categoryName }}</span>
                     @endif
-                    <p class="card-text text-muted small">{{ $product->translated_short_description ?? Str::limit($product->translated_description ?? $product->description, 50) }}</p>
-                    <p class="card-text">
-                        <strong class="text-gold fs-4">{{ number_format($product->price, 2) }} €</strong>
+                    <p class="card-text text-muted small">
+                        {{ Str::limit(strip_tags($description), 50) }}
                     </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong class="text-gold fs-4">{{ number_format($product->price, 2) }} €</strong>
+                        @if($product->quantity > 0)
+                            <small class="text-success">{{ $product->quantity }} {{ __('messages.units') }}</small>
+                        @endif
+                    </div>
                 </div>
-                <div class="card-footer bg-transparent border-0 pb-3">
+                <div class="card-footer bg-transparent border-0 pb-3 pt-0">
                     <a href="{{ route('shop.products.show', $product) }}" class="btn btn-outline-gold w-100">
-                        {{ __('messages.view_details') }}
+                        <i class="fas fa-eye me-2"></i> {{ __('messages.view_details') }}
                     </a>
                 </div>
             </div>
         </div>
-        @endforeach
+        @empty
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle me-2"></i> {{ __('messages.no_featured_products') }}
+            </div>
+        </div>
+        @endforelse
     </div>
 </div>
 @endsection
@@ -331,6 +463,7 @@
         transition: all 0.3s ease;
         border-radius: 10px;
         overflow: hidden;
+        height: 100%;
     }
     
     .category-card:hover {
@@ -362,6 +495,7 @@
         border-radius: 10px;
         overflow: hidden;
         position: relative;
+        height: 100%;
     }
     
     .product-card:hover {
@@ -431,6 +565,29 @@
         z-index: 10;
         padding: 0.5em 0.8em;
         font-weight: 500;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .col-md-3 {
+            flex: 0 0 50%;
+            max-width: 50%;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .col-md-3 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+        
+        .hero-section {
+            padding: 2rem !important;
+        }
+        
+        .hero-section h1 {
+            font-size: 2rem;
+        }
     }
 </style>
 @endpush

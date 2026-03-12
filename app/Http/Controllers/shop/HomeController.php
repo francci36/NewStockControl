@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Shop/HomeController.php
 
 namespace App\Http\Controllers\Shop;
 
@@ -12,7 +11,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // Récupérer UNIQUEMENT les catégories principales (sans parent)
+        // Catégories principales
         $categories = Category::whereNull('parent_id')
             ->with(['children' => function($query) {
                 $query->withCount(['products' => function($q) {
@@ -24,23 +23,38 @@ class HomeController extends Controller
                 $query->where('is_active', true)
                       ->where('quantity', '>', 0);
             }])
-            ->get();
+            ->get()
+            ->map(function($category) {
+                // S'assurer que le nom est accessible
+                $category->translated_name = is_array($category->name) 
+                    ? ($category->name[app()->getLocale()] ?? $category->name['fr'] ?? 'Catégorie')
+                    : $category->name;
+                return $category;
+            });
 
-        // Nouveautés (8 produits les plus récents)
+        // Nouveautés avec traduction
         $newProducts = Product::with(['category', 'supplier', 'vendor'])
             ->where('is_active', true)
             ->where('quantity', '>', 0)
             ->latest()
             ->take(8)
-            ->get();
+            ->get()
+            ->map(function($product) {
+                $product->translated_name = $product->translated_name; // Utilise l'accesseur
+                return $product;
+            });
 
-        // Produits en vedette
+        // Produits vedettes avec traduction
         $featuredProducts = Product::with(['category', 'supplier', 'vendor'])
             ->where('is_active', true)
             ->where('quantity', '>', 0)
             ->inRandomOrder()
             ->take(8)
-            ->get();
+            ->get()
+            ->map(function($product) {
+                $product->translated_name = $product->translated_name;
+                return $product;
+            });
 
         return view('shop.home', compact('categories', 'newProducts', 'featuredProducts'));
     }

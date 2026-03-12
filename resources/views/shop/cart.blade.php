@@ -55,6 +55,44 @@
             <div class="col-lg-8">
                 <!-- Liste des articles -->
                 @foreach($cartItems as $item)
+                @php
+                    // Nettoyer les noms des produits
+                    $productName = $item->product->translated_name;
+                    if (is_string($productName) && str_starts_with($productName, '{') && str_ends_with($productName, '}')) {
+                        $decoded = json_decode($productName, true);
+                        if (is_array($decoded)) {
+                            $productName = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $productName;
+                        }
+                    }
+                    
+                    $categoryName = null;
+                    if ($item->product->category) {
+                        $categoryName = $item->product->category->translated_name;
+                        if (is_string($categoryName) && str_starts_with($categoryName, '{') && str_ends_with($categoryName, '}')) {
+                            $decoded = json_decode($categoryName, true);
+                            if (is_array($decoded)) {
+                                $categoryName = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $categoryName;
+                            }
+                        }
+                    }
+                    
+                    $shortDesc = $item->product->translated_short_description ?? '';
+                    if (is_string($shortDesc) && str_starts_with($shortDesc, '{') && str_ends_with($shortDesc, '}')) {
+                        $decoded = json_decode($shortDesc, true);
+                        if (is_array($decoded)) {
+                            $shortDesc = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $shortDesc;
+                        }
+                    }
+                    
+                    $fullDesc = $item->product->translated_description ?? '';
+                    if (is_string($fullDesc) && str_starts_with($fullDesc, '{') && str_ends_with($fullDesc, '}')) {
+                        $decoded = json_decode($fullDesc, true);
+                        if (is_array($decoded)) {
+                            $fullDesc = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $fullDesc;
+                        }
+                    }
+                @endphp
+                
                 <div class="card border-0 shadow-sm mb-3 cart-item">
                     <div class="card-body p-3">
                         <div class="row align-items-center g-3">
@@ -68,7 +106,7 @@
                                                 : 'products/' . $item->product->image;
                                         @endphp
                                         <img src="{{ asset('storage/' . $imagePath) }}" 
-                                             alt="{{ $item->product->translated_name }}" 
+                                             alt="{{ $productName }}" 
                                              class="img-fluid rounded product-image"
                                              style="max-height: 80px; width: auto; object-fit: contain;"
                                              onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'bg-light-gold text-center py-3 rounded\'><i class=\'fas fa-box fa-2x text-gold\'></i></div>';">
@@ -82,9 +120,9 @@
                             
                             <!-- Infos produit -->
                             <div class="col-md-4 col-8">
-                                <h5 class="card-title fw-bold mb-1">{{ $item->product->translated_name }}</h5>
-                                @if($item->product->category)
-                                    <span class="badge bg-light-gold text-dark mb-2">{{ $item->product->category->translated_name }}</span>
+                                <h5 class="card-title fw-bold mb-1">{{ $productName }}</h5>
+                                @if($categoryName)
+                                    <span class="badge bg-light-gold text-dark mb-2">{{ $categoryName }}</span>
                                 @endif
                                 @if($item->product->supplier)
                                     <small class="text-muted d-block">
@@ -92,7 +130,11 @@
                                     </small>
                                 @endif
                                 <p class="text-muted small mb-0 mt-2 d-none d-md-block">
-                                    {{ $item->product->translated_short_description ?? Str::limit($item->product->translated_description ?? $item->product->description, 50) }}
+                                    @if(!empty($shortDesc) && $shortDesc !== '[]' && $shortDesc !== 'null')
+                                        {{ $shortDesc }}
+                                    @elseif(!empty($fullDesc) && $fullDesc !== '[]' && $fullDesc !== 'null')
+                                        {{ Str::limit($fullDesc, 50) }}
+                                    @endif
                                 </p>
                             </div>
                             
@@ -489,10 +531,13 @@
         });
     });
 
-    document.querySelector('form[action*="clear"]').addEventListener('submit', function(e) {
-        if (!confirm('{{ __('messages.confirm_clear_cart') }}')) {
-            e.preventDefault();
-        }
-    });
+    const clearForm = document.querySelector('form[action*="clear"]');
+    if (clearForm) {
+        clearForm.addEventListener('submit', function(e) {
+            if (!confirm('{{ __('messages.confirm_clear_cart') }}')) {
+                e.preventDefault();
+            }
+        });
+    }
 </script>
 @endpush

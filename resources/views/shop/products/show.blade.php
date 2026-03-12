@@ -3,6 +3,44 @@
 @section('title', $product->translated_name . ' - ' . __('messages.shop_name'))
 
 @section('content')
+@php
+    // Fonction helper pour nettoyer les traductions qui pourraient être du JSON
+    $productName = $product->translated_name;
+    if (is_string($productName) && str_starts_with($productName, '{') && str_ends_with($productName, '}')) {
+        $decoded = json_decode($productName, true);
+        if (is_array($decoded)) {
+            $productName = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $productName;
+        }
+    }
+    
+    $categoryName = null;
+    if ($product->category) {
+        $categoryName = $product->category->translated_name;
+        if (is_string($categoryName) && str_starts_with($categoryName, '{') && str_ends_with($categoryName, '}')) {
+            $decoded = json_decode($categoryName, true);
+            if (is_array($decoded)) {
+                $categoryName = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $categoryName;
+            }
+        }
+    }
+    
+    $shortDesc = $product->translated_short_description ?? '';
+    if (is_string($shortDesc) && str_starts_with($shortDesc, '{') && str_ends_with($shortDesc, '}')) {
+        $decoded = json_decode($shortDesc, true);
+        if (is_array($decoded)) {
+            $shortDesc = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $shortDesc;
+        }
+    }
+    
+    $fullDesc = $product->translated_description ?? '';
+    if (is_string($fullDesc) && str_starts_with($fullDesc, '{') && str_ends_with($fullDesc, '}')) {
+        $decoded = json_decode($fullDesc, true);
+        if (is_array($decoded)) {
+            $fullDesc = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $fullDesc;
+        }
+    }
+@endphp
+
 <div class="container py-4">
     <!-- Fil d'Ariane -->
     <nav aria-label="breadcrumb" class="mb-4">
@@ -17,7 +55,7 @@
                     <i class="fas fa-box me-1"></i> {{ __('messages.products') }}
                 </a>
             </li>
-            <li class="breadcrumb-item active" aria-current="page">{{ $product->translated_name }}</li>
+            <li class="breadcrumb-item active" aria-current="page">{{ $productName }}</li>
         </ol>
     </nav>
 
@@ -39,7 +77,7 @@
                             $imageName = basename($product->image);
                         @endphp
                         <img src="{{ asset('storage/products/' . $imageName) }}" 
-                             alt="{{ $product->translated_name }}" 
+                             alt="{{ $productName }}" 
                              class="img-fluid product-main-image"
                              style="max-height: 400px; width: auto; object-fit: contain;"
                              onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'text-center py-5\'><i class=\'fas fa-box fa-5x text-gold\'></i><p class=\'mt-3 text-muted\'>{{ __('messages.image_not_available') }}</p></div>';">
@@ -61,7 +99,7 @@
                     <div class="d-flex flex-wrap gap-2 mb-3">
                         @if($product->category)
                             <span class="badge bg-light-gold text-dark px-3 py-2">
-                                <i class="fas fa-tag me-1 text-gold"></i> {{ $product->category->translated_name }}
+                                <i class="fas fa-tag me-1 text-gold"></i> {{ $categoryName }}
                             </span>
                         @endif
                         
@@ -78,7 +116,7 @@
                     </div>
                     
                     <!-- Titre -->
-                    <h1 class="card-title h2 mb-3 fw-bold">{{ $product->translated_name }}</h1>
+                    <h1 class="card-title h2 mb-3 fw-bold">{{ $productName }}</h1>
                     
                     <!-- Prix -->
                     <div class="mb-4">
@@ -111,21 +149,21 @@
                     </div>
 
                     <!-- Description courte -->
-                    @if($product->short_description || $product->translated_short_description)
+                    @if(!empty($shortDesc) && $shortDesc !== '[]' && $shortDesc !== 'null')
                     <div class="mb-4">
                         <h5 class="fw-bold mb-2">{{ __('messages.short_description') }}</h5>
                         <p class="text-muted fst-italic border-start border-gold ps-3 py-2">
-                            {{ $product->translated_short_description ?? $product->short_description }}
+                            {{ $shortDesc }}
                         </p>
                     </div>
                     @endif
 
                     <!-- Description complète -->
-                    @if($product->description || $product->translated_description)
+                    @if(!empty($fullDesc) && $fullDesc !== '[]' && $fullDesc !== 'null')
                     <div class="mb-4">
                         <h5 class="fw-bold mb-2">{{ __('messages.full_description') }}</h5>
                         <div class="text-muted description-content">
-                            {{ $product->translated_description ?? $product->description ?? __('messages.no_description') }}
+                            {{ $fullDesc }}
                         </div>
                     </div>
                     @endif
@@ -187,7 +225,7 @@
                                     </div>
                                     <div>
                                         <small class="text-muted d-block">{{ __('messages.category') }}</small>
-                                        <strong>{{ $product->category->translated_name ?? __('messages.uncategorized') }}</strong>
+                                        <strong>{{ $categoryName ?? __('messages.uncategorized') }}</strong>
                                     </div>
                                 </div>
                             </div>
@@ -234,13 +272,13 @@
                                title="Facebook">
                                 <i class="fab fa-facebook-f"></i>
                             </a>
-                            <a href="https://twitter.com/intent/tweet?url={{ urlencode(request()->url()) }}&text={{ urlencode($product->translated_name) }}" 
+                            <a href="https://twitter.com/intent/tweet?url={{ urlencode(request()->url()) }}&text={{ urlencode($productName) }}" 
                                target="_blank" 
                                class="btn btn-outline-gold rounded-circle social-btn"
                                title="Twitter">
                                 <i class="fab fa-twitter"></i>
                             </a>
-                            <a href="https://wa.me/?text={{ urlencode($product->translated_name . ' - ' . request()->url()) }}" 
+                            <a href="https://wa.me/?text={{ urlencode($productName . ' - ' . request()->url()) }}" 
                                target="_blank" 
                                class="btn btn-outline-gold rounded-circle social-btn"
                                title="WhatsApp">
@@ -259,6 +297,43 @@
         <h3 class="section-title mb-4">{{ __('messages.similar_products') }}</h3>
         <div class="row">
             @foreach($relatedProducts as $relatedProduct)
+            @php
+                $relatedProductName = $relatedProduct->translated_name;
+                if (is_string($relatedProductName) && str_starts_with($relatedProductName, '{') && str_ends_with($relatedProductName, '}')) {
+                    $decoded = json_decode($relatedProductName, true);
+                    if (is_array($decoded)) {
+                        $relatedProductName = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $relatedProductName;
+                    }
+                }
+                
+                $relatedCategoryName = null;
+                if ($relatedProduct->category) {
+                    $relatedCategoryName = $relatedProduct->category->translated_name;
+                    if (is_string($relatedCategoryName) && str_starts_with($relatedCategoryName, '{') && str_ends_with($relatedCategoryName, '}')) {
+                        $decoded = json_decode($relatedCategoryName, true);
+                        if (is_array($decoded)) {
+                            $relatedCategoryName = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $relatedCategoryName;
+                        }
+                    }
+                }
+                
+                $relatedShortDesc = $relatedProduct->translated_short_description ?? '';
+                if (is_string($relatedShortDesc) && str_starts_with($relatedShortDesc, '{') && str_ends_with($relatedShortDesc, '}')) {
+                    $decoded = json_decode($relatedShortDesc, true);
+                    if (is_array($decoded)) {
+                        $relatedShortDesc = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $relatedShortDesc;
+                    }
+                }
+                
+                $relatedFullDesc = $relatedProduct->translated_description ?? '';
+                if (is_string($relatedFullDesc) && str_starts_with($relatedFullDesc, '{') && str_ends_with($relatedFullDesc, '}')) {
+                    $decoded = json_decode($relatedFullDesc, true);
+                    if (is_array($decoded)) {
+                        $relatedFullDesc = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $relatedFullDesc;
+                    }
+                }
+            @endphp
+            
             <div class="col-md-3 mb-4">
                 <div class="card h-100 border-0 shadow-sm product-card">
                     <!-- Image du produit similaire -->
@@ -268,7 +343,7 @@
                                 $imageName = basename($relatedProduct->image);
                             @endphp
                             <img src="{{ asset('storage/products/' . $imageName) }}" 
-                                 alt="{{ $relatedProduct->translated_name }}" 
+                                 alt="{{ $relatedProductName }}" 
                                  class="img-fluid product-image"
                                  style="max-height: 140px; width: auto; object-fit: contain;"
                                  onerror="this.onerror=null; this.parentNode.innerHTML='<i class=\'fas fa-box fa-3x text-gold\'></i>';">
@@ -278,11 +353,17 @@
                     </div>
                     
                     <div class="card-body">
-                        <h5 class="card-title fw-bold">{{ $relatedProduct->translated_name }}</h5>
-                        @if($relatedProduct->category)
-                            <span class="badge bg-light-gold text-dark mb-2">{{ $relatedProduct->category->translated_name }}</span>
+                        <h5 class="card-title fw-bold">{{ $relatedProductName }}</h5>
+                        @if($relatedCategoryName)
+                            <span class="badge bg-light-gold text-dark mb-2">{{ $relatedCategoryName }}</span>
                         @endif
-                        <p class="card-text text-muted small">{{ Str::limit($relatedProduct->translated_description ?? $relatedProduct->description, 50) }}</p>
+                        <p class="card-text text-muted small">
+                            @if(!empty($relatedShortDesc) && $relatedShortDesc !== '[]' && $relatedShortDesc !== 'null')
+                                {{ $relatedShortDesc }}
+                            @elseif(!empty($relatedFullDesc) && $relatedFullDesc !== '[]' && $relatedFullDesc !== 'null')
+                                {{ Str::limit($relatedFullDesc, 50) }}
+                            @endif
+                        </p>
                         <p class="card-text">
                             <strong class="text-gold">{{ number_format($relatedProduct->price, 2) }} €</strong>
                         </p>

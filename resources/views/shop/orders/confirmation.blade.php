@@ -74,6 +74,28 @@
                             </thead>
                             <tbody>
                                 @foreach($order->products as $product)
+                                @php
+                                    // Nettoyer le nom du produit
+                                    $productName = $product->translated_name;
+                                    if (is_string($productName) && str_starts_with($productName, '{') && str_ends_with($productName, '}')) {
+                                        $decoded = json_decode($productName, true);
+                                        if (is_array($decoded)) {
+                                            $productName = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $productName;
+                                        }
+                                    }
+                                    
+                                    // Nettoyer le nom de la catégorie
+                                    $categoryName = null;
+                                    if ($product->category) {
+                                        $categoryName = $product->category->translated_name;
+                                        if (is_string($categoryName) && str_starts_with($categoryName, '{') && str_ends_with($categoryName, '}')) {
+                                            $decoded = json_decode($categoryName, true);
+                                            if (is_array($decoded)) {
+                                                $categoryName = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $categoryName;
+                                            }
+                                        }
+                                    }
+                                @endphp
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
@@ -82,7 +104,7 @@
                                                     $imageName = basename($product->image);
                                                 @endphp
                                                 <img src="{{ asset('storage/products/' . $imageName) }}" 
-                                                     alt="{{ $product->translated_name }}" 
+                                                     alt="{{ $productName }}" 
                                                      class="rounded me-3"
                                                      style="width: 50px; height: 50px; object-fit: cover;">
                                             @else
@@ -91,12 +113,12 @@
                                                 </div>
                                             @endif
                                             <div>
-                                                <!-- Nom du produit traduit -->
-                                                <span class="fw-bold">{{ $product->translated_name }}</span>
+                                                <!-- Nom du produit traduit et nettoyé -->
+                                                <span class="fw-bold">{{ $productName }}</span>
                                                 
-                                                <!-- Catégorie du produit traduite -->
-                                                @if($product->category)
-                                                    <br><small class="text-muted">{{ $product->category->translated_name }}</small>
+                                                <!-- Catégorie du produit traduite et nettoyée -->
+                                                @if($categoryName)
+                                                    <br><small class="text-muted">{{ $categoryName }}</small>
                                                 @endif
                                                 
                                                 <!-- Fournisseur si disponible -->

@@ -45,34 +45,31 @@ return [
     'home_title' => 'Início - Carioca & Coquelicot',
     'hero_subtitle' => 'Descubra nossa seleção de produtos de qualidade para seus animais de estimação',
     'free_shipping' => 'Frete grátis acima de €50',
+    'free_shipping_over' => 'Frete grátis acima de €:amount',
     'view_all_products' => 'Ver todos os produtos',
     'categories' => 'Categorias',
     'products_count' => 'produtos',
     'view_products' => 'Ver produtos',
     'new_arrivals' => 'Novidades',
     'best_sellers' => 'Mais vendidos',
+    'best_seller' => 'Mais vendido',
     'new' => 'Novo',
     'view_details' => 'Ver detalhes',
     'low_stock' => 'Estoque baixo',
+    'units' => 'unidades',
+    'in_stock' => 'em estoque',
+    'out_of_stock' => 'Esgotado',
+    'no_categories' => 'Nenhuma categoria encontrada',
+    'no_new_products' => 'Nenhum produto novo encontrado',
+    'no_featured_products' => 'Nenhum produto em destaque encontrado',
     
-    // Comunidade
-    'join_community' => 'Junte-se à nossa comunidade!',
-    'join_benefits' => 'Crie uma conta para aproveitar diversos benefícios:',
-    'order_tracking' => 'Rastreamento de pedidos',
-    'tracking_desc' => 'Acompanhe seus pedidos em tempo real',
-    'order_history' => 'Histórico',
-    'history_desc' => 'Encontre todos os seus pedidos',
-    'quick_checkout' => 'Compra rápida',
-    'quick_desc' => 'Compre com um clique',
-    'create_account' => 'Criar conta',
-
     // Produtos
     'products_title' => 'Nossos produtos',
     'all_categories' => 'Todas as categorias',
     'all_vendors' => 'Todos os vendedores',
     'search_placeholder' => 'Buscar produtos...',
-    'min_price' => 'Min €',
-    'max_price' => 'Max €',
+    'min_price' => 'Mín €',
+    'max_price' => 'Máx €',
     'stock' => 'Estoque',
     'latest' => 'Mais recentes',
     'price_asc' => 'Menor preço',
@@ -86,8 +83,6 @@ return [
     'reset_filters' => 'Redefinir filtros',
     'products_found' => 'produto(s) encontrado(s)',
     'page' => 'Página',
-    'in_stock' => 'em estoque',
-    'out_of_stock' => 'Esgotado',
     'sold_by' => 'Vendido por',
     'supplier' => 'Fornecedor',
 
@@ -169,9 +164,7 @@ return [
     'total' => 'Total',
     'ordered_products' => 'Produtos Pedidos',
     'product' => 'Produto',
-    'quantity' => 'Quantidade',
     'unit_price' => 'Preço unitário',
-    'total_ttc' => 'Total',
     'confirmation_email_sent' => 'Um e-mail de confirmação foi enviado para :email',
     'email_info' => 'Você também receberá um e-mail de confirmação em alguns instantes.',
     'pending' => 'Pendente',
@@ -183,7 +176,6 @@ return [
     'refunded' => 'Reembolsado',
     'continue_shopping' => 'Continuar Comprando',
     'view_my_orders' => 'Ver Meus Pedidos',
-    'administration' => 'Administração',
 
     // ============================================
     // PEDIDOS - CLIENTE
@@ -203,11 +195,8 @@ return [
     'order_history' => 'Histórico do pedido',
     'no_history' => 'Nenhum histórico disponível',
     'by' => 'Por',
-    'paid' => 'Pago',
-    'pending' => 'Pendente',
     'payment' => 'Pagamento',
     'bank_transfer' => 'Transferência bancária',
-    'view_details' => 'Ver detalhes',
 
     // Status
     'status_pending' => 'pendente',
@@ -250,6 +239,7 @@ return [
     'weekdays' => 'Segunda - Sexta',
     'saturday' => 'Sábado',
     'sunday' => 'Domingo',
+    'closed' => 'Fechado',
     'support' => 'Suporte ao cliente',
     'follow_us' => 'Siga-nos',
     'download_app' => 'Baixe o aplicativo',
@@ -258,97 +248,25 @@ return [
     'terms_of_use' => 'Termos de uso',
     'cookies' => 'Cookies',
 
-    // Pedidos
-    'order_details' => 'Detalhes do pedido',
-    'payment' => 'Pagamento',
-    'back_to_orders' => 'Voltar aos pedidos',
-    'new_order' => 'Novo pedido',
-    'can_be_tracked' => 'Rastrear meu pedido',
-
     // Rastreamento
     'tracking_number' => 'Código de rastreio',
     'carrier' => 'Transportadora',
 
-    // ============================================
-    // ESPAÇO DO VENDEDOR - ADIÇÕES
-    // ============================================
-    
-    // Dashboard do vendedor
-    'vendor_dashboard' => 'Painel do Vendedor',
-    'vendor_orders' => 'Pedidos Recebidos',
-    'vendor_products' => 'Meus Produtos',
-    'vendor_pending' => 'Cadastro Pendente',
-    'pending_orders' => 'Pedidos Pendentes',
-    'vendor_register' => 'Seja um Vendedor',
-    'vendor_settings' => 'Configurações da Loja',
-    'vendor_view_store' => 'Ver Loja',
-    'vendor_no_orders' => 'Nenhum pedido ainda',
-    'vendor_no_products' => 'Nenhum produto ainda',
-    'vendor_welcome' => 'Bem-vindo ao seu painel de vendedor',
-    
-    // Produtos - Gerenciamento
-    'vendor_add_product' => 'Adicionar Produto',
-    'vendor_save_product' => 'Salvar Produto',
-    'vendor_product_name' => 'Nome do Produto',
-    'vendor_product_price' => 'Preço',
-    'vendor_product_stock' => 'Estoque',
-    'vendor_product_status' => 'Status',
-    'vendor_product_actions' => 'Ações',
-    'vendor_product_edit' => 'Editar',
-    'vendor_product_delete' => 'Excluir',
-    'vendor_confirm_delete' => 'Confirmar exclusão?',
-    
-    // Produtos - Formulário
-    'select_category' => 'Selecione uma categoria',
-    'add_new_category' => 'Adicionar nova categoria',
-    'new_category_name' => 'Nome da nova categoria',
-    'new_category_info' => 'A categoria será criada automaticamente',
-    'stock_threshold' => 'Limite de alerta de estoque',
-    'stock_threshold_help' => 'Estoque mínimo antes do alerta',
-    'product_image' => 'Imagem do produto',
-    'image_help' => 'Formatos: JPG, PNG, GIF. Máx: 2MB',
-    'active' => 'Ativo',
-    'inactive' => 'Inativo',
-    'image' => 'Imagem',
-    'monthly_revenue' => 'Faturamento mensal',
-    'recent_products' => 'Produtos recentes',
-    
-    // Registro de vendedor
-    'vendor_register_info' => 'Preencha este formulário para abrir sua loja. Analisaremos seu pedido em até 48 horas.',
-    'vendor_shop_name' => 'Nome da loja',
-    'vendor_shop_description' => 'Descrição da loja',
-    'vendor_address' => 'Endereço completo',
-    'vendor_phone' => 'Telefone',
-    'vendor_tax_id' => 'CNPJ / CPF',
-    'vendor_bank_account' => 'IBAN',
-    'bank_account_help' => 'Para receber seus pagamentos',
-    'submit_request' => 'Enviar pedido',
-    'vendor_benefits_title' => 'Por que se tornar um vendedor?',
-    'vendor_benefit_visibility' => 'Visibilidade',
-    'vendor_benefit_visibility_desc' => 'Milhares de clientes todos os dias',
-    'vendor_benefit_commission' => 'Comissão atrativa',
-    'vendor_benefit_commission_desc' => 'Apenas 10% sobre suas vendas',
-    'vendor_benefit_dashboard' => 'Painel dedicado',
-    'vendor_benefit_dashboard_desc' => 'Gerencie seus produtos e pedidos',
-    
-    // Status pendente
-    'vendor_pending_greeting' => 'Olá :name,',
-    'vendor_pending_message' => 'Seu pedido para abrir a loja ":shop" foi recebido.',
-    'vendor_pending_info' => 'Nossa equipe está analisando seu pedido. Você receberá um e-mail em até 48 horas.',
-    'vendor_summary' => 'Resumo do seu pedido',
-    'request_date' => 'Data do pedido',
-    'back_to_shop' => 'Voltar ao início',
-
-    // Configurações do vendedor
-    'vendor_shop_info' => 'Informações da Loja',
-    'vendor_shop_logo' => 'Logo da Loja',
-    'vendor_address_info' => 'Endereço da Loja',
-    'vendor_business_info' => 'Informações Comerciais',
-    'email' => 'E-mail',
-    'website' => 'Site',
-    'settings_updated' => 'Configurações atualizadas com sucesso!',
-
-    // catégorias de produtos dos vendendores
-
-    
+    // NOVOS CAMPOS PARA FILTROS E PAGINAÇÃO
+    'price' => 'Preço',
+    'min' => 'Mín',
+    'max' => 'Máx',
+    'all' => 'Todos',
+    'showing' => 'Mostrando',
+    'to' => 'até',
+    'of' => 'de',
+    'results' => 'resultados',
+    'filter_search' => 'Filtrar & Buscar',
+    'filter_by_category' => 'Categoria',
+    'filter_by_vendor' => 'Vendido por',
+    'filter_by_stock' => 'Estoque',
+    'in_stock_only' => 'Apenas em estoque',
+    'sort_by' => 'Ordenar por',
+    'apply_filters' => 'Aplicar filtros',
+    'reset_filters' => 'Redefinir filtros',
 ];

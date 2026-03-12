@@ -6,20 +6,27 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('categories')) {
+            Schema::create('categories', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('parent_id')->nullable();
+                $table->json('name');  // Pour Spatie Translatable
+                $table->string('slug')->unique();
+                $table->json('description')->nullable();  // Pour Spatie Translatable
+                $table->string('image')->nullable();
+                $table->boolean('is_active')->default(true);
+                $table->timestamps();
+                
+                $table->foreign('parent_id')
+                      ->references('id')
+                      ->on('categories')
+                      ->onDelete('cascade');
+            });
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('categories');

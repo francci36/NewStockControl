@@ -177,9 +177,19 @@
                     <!-- Liste des produits -->
                     <div class="products-list mb-3">
                         @foreach($cartItems as $item)
+                        @php
+                            // Nettoyer le nom du produit
+                            $productName = $item->product->translated_name;
+                            if (is_string($productName) && str_starts_with($productName, '{') && str_ends_with($productName, '}')) {
+                                $decoded = json_decode($productName, true);
+                                if (is_array($decoded)) {
+                                    $productName = $decoded[app()->getLocale()] ?? $decoded['fr'] ?? $productName;
+                                }
+                            }
+                        @endphp
                         <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-gold-20">
                             <div>
-                                <span class="fw-bold">{{ $item->product->translated_name }}</span>
+                                <span class="fw-bold">{{ $productName }}</span>
                                 <small class="text-muted d-block">
                                     <i class="fas fa-times me-1 text-gold" style="font-size: 0.7rem;"></i> {{ $item->quantity }}
                                 </small>

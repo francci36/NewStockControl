@@ -1,7 +1,6 @@
 <?php
 
 return [
-    // General
     'shop_name' => 'Carioca & Coquelicot',
     'home' => 'Home',
     'products' => 'Products',
@@ -35,38 +34,38 @@ return [
     'errors' => 'Errors',
     'all_rights_reserved' => 'All rights reserved',
     'welcome' => 'Welcome to our pet store',
-
-    // Navigation
     'become_vendor' => 'Become a vendor',
     'vendor_space' => 'Vendor space',
     'administration' => 'Administration',
-
-    // Home
     'home_title' => 'Home - Carioca & Coquelicot',
     'hero_subtitle' => 'Discover our selection of quality products for your pets',
     'free_shipping' => 'Free shipping over €50',
+    'free_shipping_over' => 'Free shipping over €:amount',
     'view_all_products' => 'View all products',
     'categories' => 'Categories',
     'products_count' => 'products',
     'view_products' => 'View products',
     'new_arrivals' => 'New arrivals',
     'best_sellers' => 'Best sellers',
+    'best_seller' => 'Best seller',
     'new' => 'New',
     'view_details' => 'View details',
     'low_stock' => 'Low stock',
-    
-    // Community
+    'units' => 'units',
+    'in_stock' => 'in stock',
+    'out_of_stock' => 'Out of stock',
+    'no_categories' => 'No categories found',
+    'no_new_products' => 'No new products found',
+    'no_featured_products' => 'No featured products found',
     'join_community' => 'Join our community!',
     'join_benefits' => 'Create an account to benefit from many advantages:',
     'order_tracking' => 'Order tracking',
     'tracking_desc' => 'Track your orders in real time',
-    'order_history' => 'History',
+    'order_history' => 'Order history',
     'history_desc' => 'Find all your orders',
     'quick_checkout' => 'Quick checkout',
     'quick_desc' => 'One-click ordering',
     'create_account' => 'Create account',
-
-    // Products
     'products_title' => 'Our products',
     'all_categories' => 'All categories',
     'all_vendors' => 'All vendors',
@@ -86,12 +85,8 @@ return [
     'reset_filters' => 'Reset filters',
     'products_found' => 'product(s) found',
     'page' => 'Page',
-    'in_stock' => 'in stock',
-    'out_of_stock' => 'Out of stock',
     'sold_by' => 'Sold by',
     'supplier' => 'Supplier',
-
-    // Product detail
     'image_not_available' => 'Image not available',
     'no_image' => 'No image available',
     'tax_included' => 'VAT included',
@@ -111,8 +106,6 @@ return [
     'last_updated' => 'Last updated',
     'share' => 'Share',
     'similar_products' => 'Similar products',
-
-    // Cart
     'cart_title' => 'My Cart',
     'empty_cart' => 'Your cart is empty',
     'empty_cart_message' => 'Discover our quality products for your pets!',
@@ -120,7 +113,7 @@ return [
     'max_stock' => 'Max stock',
     'remove' => 'Remove',
     'confirm_remove' => 'Remove this item from cart?',
-    'continue_shopping' => 'Continue shopping',
+    'continue_shopping' => 'Continue Shopping',
     'clear_cart' => 'Clear cart',
     'confirm_clear_cart' => 'Are you sure you want to clear your cart?',
     'summary' => 'Summary',
@@ -133,8 +126,6 @@ return [
     'secure_payment' => 'Secure payment',
     'login_to_checkout' => 'You must be logged in to checkout',
     'confirm_action' => 'Are you sure you want to perform this action?',
-
-    // Checkout
     'checkout_title' => 'Checkout',
     'shipping_address' => 'Shipping address',
     'full_name' => 'Full name',
@@ -157,8 +148,6 @@ return [
     'terms_link' => 'terms and conditions',
     'confirm_order' => 'Confirm order',
     'processing_payment' => 'Processing payment...',
-
-    // Confirmation
     'order_confirmation_title' => 'Order Confirmation',
     'thank_you' => 'Thank you for your order!',
     'order_confirmed' => 'Your order #:id has been registered.',
@@ -169,9 +158,7 @@ return [
     'total' => 'Total',
     'ordered_products' => 'Ordered Products',
     'product' => 'Product',
-    'quantity' => 'Quantity',
     'unit_price' => 'Unit price',
-    'total_ttc' => 'Total',
     'confirmation_email_sent' => 'A confirmation email has been sent to :email',
     'email_info' => 'You will also receive a confirmation email in a few moments.',
     'pending' => 'Pending',
@@ -181,13 +168,7 @@ return [
     'delivered' => 'Delivered',
     'cancelled' => 'Cancelled',
     'refunded' => 'Refunded',
-    'continue_shopping' => 'Continue Shopping',
     'view_my_orders' => 'View My Orders',
-    'administration' => 'Administration',
-
-    // ============================================
-    // ORDERS - CUSTOMER
-    // ============================================
     'order' => 'Order',
     'no_orders' => 'No orders',
     'no_orders_message' => 'Discover our products and place your first order!',
@@ -199,17 +180,10 @@ return [
     'payment_pending' => 'Payment pending',
     'back_to_orders' => 'Back to orders',
     'new_order' => 'New order',
-    'order_tracking' => 'Order tracking',
-    'order_history' => 'Order history',
     'no_history' => 'No history available',
     'by' => 'By',
-    'paid' => 'Paid',
-    'pending' => 'Pending',
     'payment' => 'Payment',
     'bank_transfer' => 'Bank transfer',
-    'view_details' => 'View details',
-
-    // Status
     'status_pending' => 'pending',
     'status_processing' => 'processing',
     'status_shipped' => 'shipped',
@@ -217,8 +191,6 @@ return [
     'status_cancelled' => 'cancelled',
     'status_arrived' => 'arrived',
     'status_paid' => 'paid',
-
-    // Flash messages
     'product_added_to_cart' => 'Product added to cart!',
     'cart_updated' => 'Cart updated!',
     'cart_cleared' => 'Cart cleared!',
@@ -231,16 +203,11 @@ return [
     'checkout_error' => 'Checkout error',
     'stock_insufficient' => 'Insufficient stock',
     'stock_error_item' => ':product: only :stock available',
-    'empty_cart' => 'Your cart is empty',
     'payment_intent_error' => 'Payment creation error',
-
-    // Footer
     'shop_description' => 'Your online pet store',
     'quick_links' => 'Quick links',
     'contact' => 'Contact',
     'language_changed' => 'Language changed to :lang',
-
-    // Footer - New fields
     'newsletter_title' => 'Get our exclusive offers',
     'newsletter_subtitle' => 'Subscribe to get -10% on your first order',
     'email_placeholder' => 'Your email address',
@@ -250,6 +217,7 @@ return [
     'weekdays' => 'Monday - Friday',
     'saturday' => 'Saturday',
     'sunday' => 'Sunday',
+    'closed' => 'Closed',
     'support' => 'Customer support',
     'follow_us' => 'Follow us',
     'download_app' => 'Download the app',
@@ -257,23 +225,8 @@ return [
     'privacy_policy' => 'Privacy policy',
     'terms_of_use' => 'Terms of use',
     'cookies' => 'Cookies',
-
-    // Orders
-    'order_details' => 'Order details',
-    'payment' => 'Payment',
-    'back_to_orders' => 'Back to orders',
-    'new_order' => 'New order',
-    'can_be_tracked' => 'Track my order',
-
-    // Tracking
     'tracking_number' => 'Tracking number',
     'carrier' => 'Carrier',
-
-    // ============================================
-    // VENDOR SPACE - ADDITIONS
-    // ============================================
-    
-    // Vendor dashboard
     'vendor_dashboard' => 'Vendor Dashboard',
     'vendor_orders' => 'Received Orders',
     'vendor_products' => 'My Products',
@@ -285,8 +238,6 @@ return [
     'vendor_no_orders' => 'No orders yet',
     'vendor_no_products' => 'No products yet',
     'vendor_welcome' => 'Welcome to your vendor dashboard',
-    
-    // Products - Management
     'vendor_add_product' => 'Add Product',
     'vendor_save_product' => 'Save Product',
     'vendor_product_name' => 'Product Name',
@@ -297,8 +248,6 @@ return [
     'vendor_product_edit' => 'Edit',
     'vendor_product_delete' => 'Delete',
     'vendor_confirm_delete' => 'Confirm deletion?',
-    
-    // Products - Form
     'select_category' => 'Select a category',
     'add_new_category' => 'Add a new category',
     'new_category_name' => 'New category name',
@@ -312,8 +261,6 @@ return [
     'image' => 'Image',
     'monthly_revenue' => 'Monthly revenue',
     'recent_products' => 'Recent products',
-    
-    // Vendor registration
     'vendor_register_info' => 'Fill out this form to open your store. We will review your request within 48 hours.',
     'vendor_shop_name' => 'Shop name',
     'vendor_shop_description' => 'Shop description',
@@ -330,16 +277,12 @@ return [
     'vendor_benefit_commission_desc' => 'Only 10% on your sales',
     'vendor_benefit_dashboard' => 'Dedicated dashboard',
     'vendor_benefit_dashboard_desc' => 'Manage your products and orders',
-    
-    // Pending status
     'vendor_pending_greeting' => 'Hello :name,',
     'vendor_pending_message' => 'Your request to open the store ":shop" has been received.',
     'vendor_pending_info' => 'Our team is currently reviewing your request. You will receive an email within 48 hours.',
     'vendor_summary' => 'Request summary',
     'request_date' => 'Request date',
     'back_to_shop' => 'Back to home',
-
-    // Settings
     'vendor_shop_info' => 'Shop Information',
     'vendor_shop_logo' => 'Shop Logo',
     'vendor_address_info' => 'Shop Address',
@@ -347,36 +290,19 @@ return [
     'email' => 'Email',
     'website' => 'Website',
     'settings_updated' => 'Settings updated successfully!',
-
-    // category vendors products
-
-    'title' => 'Category Management',
-    'page_title' => 'Categories',
-    'list_title' => 'Categories List',
-    'new_category' => 'New Category',
-    'id' => 'ID',
-    'name_french' => 'Name (French)',
-    'name_english' => 'Name (English)',
-    'name_portuguese' => 'Name (Portuguese)',
-    'name_spanish' => 'Name (Spanish)',
-    'name_german' => 'Name (German)',
-    'slug' => 'Slug (URL)',
-    'status' => 'Status',
-    'products' => 'Products',
-    'actions' => 'Actions',
-    'active' => 'Active',
-    'inactive' => 'Inactive',
-    'edit' => 'Edit',
-    'delete' => 'Delete',
-    'create' => 'Create Category',
-    'edit_category' => 'Edit Category',
-    'save' => 'Save',
-    'cancel' => 'Cancel',
-    'back_to_list' => 'Back to List',
-    'confirm_delete' => 'Are you sure you want to delete the category ":name" ?',
-    'no_categories' => 'No categories found',
-    'products_associated' => ':count product(s) are associated with this category',
-    'slug_help' => 'Unique identifier for the URL. Ex: red-wines',
-    'slug_readonly' => 'The slug cannot be modified after creation',
-    'category_active' => 'Active category',
+    'price' => 'Price',
+    'min' => 'Min',
+    'max' => 'Max',
+    'all' => 'All',
+    'showing' => 'Showing',
+    'to' => 'to',
+    'of' => 'of',
+    'results' => 'results',
+    'filter_search' => 'Filter & Search',
+    'filter_by_category' => 'Category',
+    'filter_by_vendor' => 'Sold by',
+    'filter_by_stock' => 'Stock',
+    'in_stock_only' => 'In stock only',
+    'sort_by' => 'Sort by',
+    'apply_filters' => 'Apply filters',
 ];

@@ -110,20 +110,20 @@
                 </div>
             </div>
 
-            <!-- Tableau -->
+            <!-- Tableau avec responsivité améliorée -->
             <div class="table-responsive">
                 <table class="table table-bordered table-striped table-hover" id="vendorsTable">
                     <thead class="bg-primary text-white">
                         <tr>
                             <th class="d-none d-md-table-cell">ID</th>
-                            <th>Boutique</th>
-                            <th>Vendeur</th>
+                            <th style="min-width: 150px;">Boutique</th>
+                            <th style="min-width: 120px;">Vendeur</th>
                             <th class="d-none d-lg-table-cell">Email</th>
                             <th class="d-none d-lg-table-cell">Téléphone</th>
-                            <th>Commission</th>
-                            <th>Statut</th>
+                            <th style="min-width: 80px;">Commission</th>
+                            <th style="min-width: 100px;">Statut</th>
                             <th class="d-none d-md-table-cell">Date</th>
-                            <th>Actions</th>
+                            <th style="min-width: 120px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -135,23 +135,23 @@
                                     @if($vendor->logo)
                                         <img src="{{ asset('storage/' . $vendor->logo) }}" 
                                              alt="{{ $vendor->admin_shop_name ?? $vendor->shop_name }}" 
-                                             class="rounded-circle mr-2 d-none d-sm-block" 
-                                             style="width: 30px; height: 30px; object-fit: cover;">
+                                             class="rounded-circle mr-2" 
+                                             style="width: 30px; height: 30px; object-fit: cover; flex-shrink: 0;">
                                     @endif
-                                    <div>
-                                        <strong>{{ $vendor->admin_shop_name ?? $vendor->shop_name }}</strong>
+                                    <div style="word-break: break-word;">
+                                        <strong>{{ Str::limit($vendor->admin_shop_name ?? $vendor->shop_name, 20) }}</strong>
                                         <!-- Infos supplémentaires sur mobile -->
                                         <span class="d-block d-md-none small text-muted mt-1">
-                                            {{ $vendor->user->email ?? '' }} | {{ $vendor->phone ?? '' }}
-                                            <br>Créé le: {{ $vendor->created_at->format('d/m/Y') }}
+                                            <i class="fas fa-user mr-1"></i>{{ $vendor->user->name ?? 'N/A' }}<br>
+                                            <i class="fas fa-envelope mr-1"></i>{{ Str::limit($vendor->user->email ?? '', 15) }}
                                         </span>
                                     </div>
                                 </div>
                             </td>
-                            <td>{{ $vendor->user->name ?? 'N/A' }}</td>
+                            <td class="d-none d-md-table-cell">{{ $vendor->user->name ?? 'N/A' }}</td>
                             <td class="d-none d-lg-table-cell">
-                                <a href="mailto:{{ $vendor->user->email ?? '' }}" class="text-decoration-none">
-                                    <i class="fas fa-envelope mr-1 text-primary"></i>{{ Str::limit($vendor->user->email ?? '', 25) }}
+                                <a href="mailto:{{ $vendor->user->email ?? '' }}" class="text-decoration-none" style="word-break: break-word;">
+                                    <i class="fas fa-envelope mr-1 text-primary"></i>{{ Str::limit($vendor->user->email ?? '', 20) }}
                                 </a>
                             </td>
                             <td class="d-none d-lg-table-cell">
@@ -162,30 +162,31 @@
                             <td><span class="badge bg-info">{{ $vendor->commission_rate ?? 10 }}%</span></td>
                             <td>
                                 @if($vendor->status == 'pending')
-                                    <span class="badge bg-warning text-dark p-2">
+                                    <span class="badge bg-warning text-dark p-2 d-flex align-items-center">
                                         <i class="fas fa-clock mr-1"></i> En attente
                                     </span>
                                 @elseif($vendor->status == 'active')
-                                    <span class="badge bg-success p-2">
+                                    <span class="badge bg-success p-2 d-flex align-items-center">
                                         <i class="fas fa-check-circle mr-1"></i> Actif
                                     </span>
                                 @elseif($vendor->status == 'suspended')
-                                    <span class="badge bg-danger p-2">
+                                    <span class="badge bg-danger p-2 d-flex align-items-center">
                                         <i class="fas fa-ban mr-1"></i> Suspendu
                                     </span>
                                 @elseif($vendor->status == 'rejected')
-                                    <span class="badge bg-secondary p-2">
+                                    <span class="badge bg-secondary p-2 d-flex align-items-center">
                                         <i class="fas fa-times-circle mr-1"></i> Rejeté
                                     </span>
                                 @endif
                             </td>
                             <td class="d-none d-md-table-cell">{{ $vendor->created_at->format('d/m/Y') }}</td>
                             <td>
-                                <div class="btn-group btn-group-sm" role="group">
+                                <div class="btn-group btn-group-sm" role="group" style="flex-wrap: wrap; gap: 2px;">
                                     <a href="{{ route('admin.vendors.show', $vendor) }}" 
                                        class="btn btn-info" 
                                        title="Voir détails">
                                         <i class="fas fa-eye"></i>
+                                        <span class="d-none d-sm-inline ml-1">Voir</span>
                                     </a>
                                     @if($vendor->status == 'pending')
                                         <button type="button" 
@@ -193,12 +194,14 @@
                                                 onclick="approveVendor({{ $vendor->id }})"
                                                 title="Approuver">
                                             <i class="fas fa-check"></i>
+                                            <span class="d-none d-sm-inline ml-1">Approuver</span>
                                         </button>
                                         <button type="button" 
                                                 class="btn btn-danger" 
                                                 onclick="rejectVendor({{ $vendor->id }})"
                                                 title="Rejeter">
                                             <i class="fas fa-times"></i>
+                                            <span class="d-none d-sm-inline ml-1">Rejeter</span>
                                         </button>
                                     @endif
                                     @if($vendor->status == 'active')
@@ -207,6 +210,7 @@
                                                 onclick="suspendVendor({{ $vendor->id }})"
                                                 title="Suspendre">
                                             <i class="fas fa-ban"></i>
+                                            <span class="d-none d-sm-inline ml-1">Suspendre</span>
                                         </button>
                                     @endif
                                 </div>
@@ -376,6 +380,44 @@
 .badge {
     font-size: 0.85rem;
     padding: 6px 10px;
+    white-space: normal;
+    text-align: left;
+    line-height: 1.2;
+}
+
+/* ===== TABLEAU ===== */
+.table td {
+    vertical-align: middle;
+}
+
+/* Largeurs minimales pour les colonnes principales */
+@media (max-width: 768px) {
+    .table th, .table td {
+        font-size: 0.85rem;
+    }
+    
+    .btn-group .btn {
+        padding: 0.25rem 0.4rem;
+    }
+    
+    .btn-group .btn i {
+        margin-right: 0 !important;
+    }
+    
+    .btn-group .btn span {
+        display: none !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .badge {
+        font-size: 0.75rem;
+        padding: 4px 6px;
+    }
+    
+    .table th, .table td {
+        font-size: 0.8rem;
+    }
 }
 
 /* ===== BOUTONS DANS TABLEAU ===== */
@@ -386,9 +428,16 @@
 /* ===== PAGINATION ===== */
 .pagination {
     margin-bottom: 0;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
-/* ===== RESPONSIVE ===== */
+.pagination .page-link {
+    padding: 0.4rem 0.8rem;
+    margin: 2px;
+}
+
+/* ===== RESPONSIVE GLOBAL ===== */
 @media (max-width: 768px) {
     .small-box {
         padding: 10px;
@@ -404,7 +453,6 @@
     }
     .table td, .table th {
         padding: 8px 5px;
-        font-size: 0.85rem;
     }
 }
 
