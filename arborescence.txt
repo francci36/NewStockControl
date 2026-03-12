@@ -1,0 +1,259 @@
+.
+├── admin_name
+├── app
+│   ├── Console
+│   │   ├── Commands
+│   │   └── Kernel.php
+│   ├── Events
+│   │   ├── OrderDelivered.php
+│   │   ├── OrderProcessing.php
+│   │   ├── OrderShipped.php
+│   │   └── VendorOrderCompleted.php
+│   ├── Helpers
+│   │   └── CategoryHelper.php
+│   ├── Http
+│   │   ├── Controllers
+│   │   ├── Kernel.php
+│   │   ├── Middleware
+│   │   └── Requests
+│   ├── Livewire
+│   │   ├── Actions
+│   │   └── Forms
+│   ├── Mail
+│   │   ├── NewOrderNotification.php
+│   │   └── OrderConfirmation.php
+│   ├── Models
+│   │   ├── Cart.php
+│   │   ├── CartItem.php
+│   │   ├── Category.php
+│   │   ├── CategoryTranslation.php
+│   │   ├── Commission.php
+│   │   ├── FinancialTransaction.php
+│   │   ├── Order.php
+│   │   ├── OrderItem.php
+│   │   ├── OrderStatusHistory.php
+│   │   ├── Payment.php
+│   │   ├── Payout.php
+│   │   ├── Product.php
+│   │   ├── ProductTranslation.php
+│   │   ├── Report.php
+│   │   ├── Stock.php
+│   │   ├── Supplier.php
+│   │   ├── Transaction.php
+│   │   ├── User.php
+│   │   └── Vendor.php
+│   ├── Notifications
+│   │   ├── LowStockNotification.php
+│   │   ├── OrderDeliveredNotification.php
+│   │   ├── OrderShippedNotification.php
+│   │   └── VendorRequestNotification.php
+│   ├── Providers
+│   │   ├── AppServiceProvider.php
+│   │   └── VoltServiceProvider.php
+│   ├── Services
+│   │   ├── OrderStatusService.php
+│   │   └── VendorWebhookService.php
+│   └── View
+│       └── Components
+├── arborescence.txt
+├── artisan
+├── bootstrap
+│   ├── app.php
+│   └── providers.php
+├── composer.json
+├── composer.lock
+├── config
+│   ├── app.php
+│   ├── auth.php
+│   ├── cache.php
+│   ├── database.php
+│   ├── filesystems.php
+│   ├── laravel-pwa-kit.php
+│   ├── logging.php
+│   ├── mail.php
+│   ├── queue.php
+│   ├── services.php
+│   └── session.php
+├── count()
+├── create_financial_transactions.php
+├── database
+│   ├── factories
+│   │   ├── CategoryFactory.php
+│   │   ├── CommissionFactory.php
+│   │   ├── FinancialTransactionFactory.php
+│   │   ├── OrderFactory.php
+│   │   ├── OrderItemFactory.php
+│   │   ├── PayoutFactory.php
+│   │   ├── ProductFactory.php
+│   │   ├── SupplierFactory.php
+│   │   ├── UserFactory.php
+│   │   └── VendorFactory.php
+│   ├── migrations
+│   │   ├── 0001_01_01_000000_create_users_table.php
+│   │   ├── 0001_01_01_000001_create_cache_table.php
+│   │   ├── 0001_01_01_000002_create_jobs_table.php
+│   │   ├── 2024_11_09_144623_create_suppliers_table.php
+│   │   ├── 2024_11_09_144624_create_products_table.php
+│   │   ├── 2024_11_09_153455_create_categories_table.php
+│   │   ├── 2024_11_09_153512_create_orders_table.php
+│   │   ├── 2024_11_12_114108_create_commandes_table.php
+│   │   ├── 2025_01_14_140429_add_user_id_to_commandes_table.php
+│   │   ├── 2025_01_15_105828_drop_product_column_from_commandes_table.php
+│   │   ├── 2025_01_20_152354_add_stock_to_products_table.php
+│   │   ├── 2025_02_05_085415_add_email_and_telephone_to_suppliers_table.php
+│   │   ├── 2025_02_07_204435_create_transactions_table.php
+│   │   ├── 2025_03_03_121317_create_order_items_table.php
+│   │   ├── 2025_03_07_103000_create_stocks_table.php
+│   │   ├── 2025_03_07_110130_update_stocks_table.php
+│   │   ├── 2025_03_07_110618_update_stocks_table_structure.php
+│   │   ├── 2025_03_07_122333_remove_stock_from_products_table.php
+│   │   ├── 2025_03_09_224523_add_price_to_transactions_table.php
+│   │   ├── 2025_03_14_152228_update_products_table_add_default_name.php
+│   │   ├── 2025_03_14_153129_update_products_table_add_default_name.php
+│   │   ├── 2025_03_16_091527_add_price_to_order_items_table.php
+│   │   ├── 2025_03_16_112406_update_transactions_table_foreign_key.php
+│   │   ├── 2025_03_17_090407_update_stock_threshold_default_in_products_table.php
+│   │   ├── 2025_03_17_092656_add_foreign_key_to_transactions_table.php
+│   │   ├── 2025_03_17_130840_create_reports_table.php
+│   │   ├── 2025_03_17_133711_add_summary_to_reports_table.php
+│   │   ├── 2025_03_18_084941_add_report_id_to_transactions_table.php
+│   │   ├── 2025_03_18_090453_add_report_id_to_stocks.php
+│   │   ├── 2025_03_20_131852_add_total_amount_to_orders_table.php
+│   │   ├── 2025_03_20_173407_add_profile_photo_url_to_users_table.php
+│   │   ├── 2025_03_25_122840_add_role_to_users_table.php
+│   │   ├── 2026_02_17_132221_remove_product_id_from_orders_table.php
+│   │   ├── 2026_02_17_132720_remove_quantity_from_orders_table.php
+│   │   ├── 2026_02_17_160441_create_cart_items_table.php
+│   │   ├── 2026_02_17_164845_add_shipping_fields_to_orders_table.php
+│   │   ├── 2026_02_17_165638_create_carts_table.php
+│   │   ├── 2026_02_17_233706_add_type_to_orders_table.php
+│   │   ├── 2026_02_18_102839_make_supplier_id_nullable_in_orders.php
+│   │   ├── 2026_02_18_120611_add_order_id_and_user_id_to_transactions.php
+│   │   ├── 2026_02_18_153351_create_payments_table.php
+│   │   ├── 2026_02_18_170529_create_order_status_history_table.php
+│   │   ├── 2026_02_20_085900_create_vendors_table.php
+│   │   ├── 2026_02_20_090459_add_vendor_id_to_products_table.php
+│   │   ├── 2026_02_20_095501_create_notifications_table.php
+│   │   ├── 2026_02_20_111633_make_supplier_id_nullable_in_products.php
+│   │   ├── 2026_02_20_112230_make_supplier_id_nullable_in_products.php
+│   │   ├── 2026_02_23_133608_add_tracking_fields_to_orders_table.php
+│   │   ├── 2026_02_23_133731_create_vendor_webhooks_table.php
+│   │   ├── 2026_02_23_143555_add_shipping_fields_to_order_items_table.php
+│   │   ├── 2026_02_25_112710_create_product_translations_table.php
+│   │   ├── 2026_02_25_122043_add_is_active_to_suppliers_table.php
+│   │   ├── 2026_02_27_104051_add_vendor_id_to_order_items_table.php
+│   │   ├── 2026_02_27_104927_add_address_fields_to_vendors_table.php
+│   │   ├── 2026_02_27_122942_add_address_fields_to_suppliers_table.php
+│   │   ├── 2026_02_28_133248_create_delivery_webhooks_table.php
+│   │   ├── 2026_03_03_121017_add_sku_to_products_table.php
+│   │   ├── 2026_03_05_124449_add_json_columns_to_products.php
+│   │   ├── 2026_03_06_141006_create_financial_transactions_table.php
+│   │   ├── 2026_03_06_141024_create_commissions_table.php
+│   │   ├── 2026_03_06_141052_create_payouts_table.php
+│   │   ├── 2026_03_08_231502_add_category_id_to_products_table.php
+│   │   ├── 2026_03_08_232642_add_is_active_to_products_table.php
+│   │   ├── 2026_03_11_121312_add_short_description_to_products_table.php
+│   │   ├── 2026_03_11_121736_add_category_id_to_products_table.php
+│   │   ├── 2026_03_11_122212_add_stock_threshold_to_products_table.php
+│   │   ├── 2026_03_11_123005_convert_product_columns_to_json.php
+│   │   └── 2026_03_11_132508_convert_categories_name_to_json.php
+│   ├── schema
+│   │   └── sqlite-schema.sql
+│   └── seeders
+│       ├── CategorySeeder.php
+│       ├── CreateCategoriesSeeder.php
+│       ├── DatabaseSeeder.php
+│       ├── FinancialDataSeeder.php
+│       ├── MissingTranslationsSeeder.php
+│       ├── ProductSeeder.php
+│       ├── ProductTranslationSeeder.php
+│       ├── TranslationSeeder.php
+│       └── UpdateLanguageFilesSeeder.php
+├── dist
+│   ├── assets
+│   │   ├── index.js
+│   │   └── style.css
+│   └── index.html
+├── fix_double_json.php
+├── get()
+├── index.html
+├── index.js
+├── logo.png
+├── manifest.json
+├── newstockcontrol_backup.sql
+├── offline.html
+├── package-lock.json
+├── package.json
+├── phpunit.xml
+├── postcss.config.js
+├── public
+│   ├── build
+│   │   ├── assets
+│   │   └── manifest.json
+│   ├── dist
+│   │   ├── assets
+│   │   ├── css
+│   │   ├── js
+│   │   └── pages
+│   ├── favicon.ico
+│   ├── index.php
+│   ├── logo.png
+│   ├── manifest.json
+│   ├── offline.html
+│   ├── packages
+│   │   └── devrabiul
+│   ├── robots.txt
+│   └── sw.js
+├── README.md
+├── requirements.txt
+├── resources
+│   ├── css
+│   │   └── app.css
+│   ├── js
+│   │   ├── app.js
+│   │   └── bootstrap.js
+│   ├── lang
+│   │   ├── de
+│   │   ├── en
+│   │   ├── es
+│   │   ├── fr
+│   │   ├── pt_BR
+│   │   └── pt_PT
+│   └── views
+│       ├── admin
+│       ├── auth
+│       ├── client
+│       ├── dashboard
+│       ├── emails
+│       ├── layouts
+│       ├── partials
+│       ├── products
+│       ├── profile
+│       ├── rapports
+│       ├── shop
+│       ├── stocks
+│       ├── suppliers
+│       └── transactions
+├── routes
+│   ├── api-webhooks.php
+│   ├── console.php
+│   ├── shop.php
+│   ├── vendor.php
+│   └── web.php
+├── shop_name
+├── sw.js
+├── tailwind.config.js
+├── test.php
+├── tests
+│   ├── Feature
+│   │   ├── Auth
+│   │   ├── ExampleTest.php
+│   │   ├── OrderStatusUpdateTest.php
+│   │   └── ProfileTest.php
+│   ├── TestCase.php
+│   └── Unit
+│       └── ExampleTest.php
+├── vite.config.js
+└── webpack.mix.js
+
+69 directories, 188 files
