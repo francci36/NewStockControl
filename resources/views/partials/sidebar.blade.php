@@ -1,11 +1,11 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4 sidebar-gradient">
     <!-- Brand Logo -->
     <a href="{{ route('admin.dashboard') }}" class="brand-link brand-gradient border-bottom-gold">
-        <img src="{{ asset('images/logo.png') }}" 
-             alt="Carioca & Coquelicot" 
-             class="brand-image img-circle elevation-3 border-gold"
-             style="height: 40px; width: auto;">
-        <span class="brand-text font-weight-light brand-text-gold">Carioca & Coquelicot</span>
+        <img src="{{ asset('storage/images/mon-design.png') }}" 
+            alt="Carioca & Coquelicot" 
+            class="brand-image img-circle elevation-3 border-gold"
+            style="height: 40px; width: auto;">
+                <span class="brand-text font-weight-light brand-text-gold">Carioca & Coquelicot</span>
     </a>
 
     <div class="sidebar">

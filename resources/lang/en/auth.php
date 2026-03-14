@@ -32,4 +32,24 @@ return [
     'password_required' => 'Password is required',
     'password_min' => 'Password must be at least 8 characters',
     'password_confirmed' => 'Passwords do not match',
+
+    // ============================================
+    // VENDOR ORDERS
+    // ============================================
+    'orders_count' => 'order(s)',
+    'all_statuses' => 'All statuses',
+    'unknown_customer' => 'Unknown customer',
+    'reset' => 'Reset',
+    'confirm_status_change' => 'Confirm status change?',
+    'status_change_error' => 'Error changing status',
+    'mark_processing' => 'Mark as processing',
+    'products' => 'product(s)',
+    'units' => 'unit(s)',
+    'order_id' => 'Order ID',
+    'date' => 'Date',
+    'customer' => 'Customer',
+    'total' => 'Total',
+    'status' => 'Status',
+    'actions' => 'Actions',
+'view_details' => 'View details',                                                                                                                                           
 ];

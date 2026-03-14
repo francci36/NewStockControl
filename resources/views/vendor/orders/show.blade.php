@@ -1,7 +1,7 @@
 @extends('vendor.layouts.app')
 
-@section('title', 'Détails de la commande #' . $order->id)
-@section('page-title', 'Commande #' . $order->id)
+@section('title', __('messages.order_details') . ' #' . $order->id)
+@section('page-title', __('messages.order') . ' #' . $order->id)
 
 @section('content')
 <div class="container-fluid py-3 py-md-4">
@@ -10,15 +10,15 @@
         <div class="card-header bg-gradient-info text-white d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
             <div>
                 <h5 class="mb-0">
-                    <i class="fas fa-info-circle mr-2"></i> Commande #{{ $order->id }}
+                    <i class="fas fa-info-circle mr-2"></i> {{ __('messages.order') }} #{{ $order->id }}
                 </h5>
                 <small class="text-white-50 d-block d-md-inline mt-1 mt-md-0">
-                    <i class="fas fa-calendar mr-1"></i> Passée le {{ $order->created_at->format('d/m/Y à H:i') }}
+                    <i class="fas fa-calendar mr-1"></i> {{ __('messages.placed_on') }} {{ $order->created_at->format('d/m/Y à H:i') }}
                 </small>
             </div>
             <div>
                 <a href="{{ route('vendor.orders.index') }}" class="btn btn-light btn-sm">
-                    <i class="fas fa-arrow-left mr-2"></i> <span class="d-none d-sm-inline">Retour</span>
+                    <i class="fas fa-arrow-left mr-2"></i> <span class="d-none d-sm-inline">{{ __('messages.back') }}</span>
                     <span class="d-sm-none">←</span>
                 </a>
             </div>
@@ -54,11 +54,11 @@
                             'cancelled' => 'fa-times-circle',
                         ];
                         $statusLabels = [
-                            'pending' => 'En attente',
-                            'processing' => 'En préparation',
-                            'shipped' => 'Expédiée',
-                            'delivered' => 'Livrée',
-                            'cancelled' => 'Annulée',
+                            'pending' => __('messages.pending'),
+                            'processing' => __('messages.processing'),
+                            'shipped' => __('messages.shipped'),
+                            'delivered' => __('messages.delivered'),
+                            'cancelled' => __('messages.cancelled'),
                         ];
                     @endphp
                     <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3">
@@ -69,7 +69,7 @@
                         @if($order->status == 'shipped' && $order->shipped_at)
                             <span class="text-success">
                                 <i class="fas fa-check-circle mr-1"></i> 
-                                Expédiée le {{ $order->shipped_at->format('d/m/Y à H:i') }}
+                                {{ __('messages.shipped_on') }} {{ $order->shipped_at->format('d/m/Y à H:i') }}
                             </span>
                         @endif
                     </div>
@@ -81,25 +81,25 @@
                 <div class="col-md-6 mb-4 mb-md-0">
                     <div class="card h-100">
                         <div class="card-header bg-info text-white">
-                            <h6 class="mb-0"><i class="fas fa-user mr-2"></i> Client</h6>
+                            <h6 class="mb-0"><i class="fas fa-user mr-2"></i> {{ __('messages.customer') }}</h6>
                         </div>
                         <div class="card-body">
                             <div class="info-grid">
                                 <div class="info-row">
-                                    <span class="info-label">Nom :</span>
-                                    <span class="info-value">{{ $order->user->name ?? 'Inconnu' }}</span>
+                                    <span class="info-label">{{ __('messages.name') }} :</span>
+                                    <span class="info-value">{{ $order->user->name ?? __('messages.unknown_customer') }}</span>
                                 </div>
                                 <div class="info-row">
-                                    <span class="info-label">Email :</span>
+                                    <span class="info-label">{{ __('messages.email') }} :</span>
                                     <span class="info-value">
                                         <a href="mailto:{{ $order->user->email }}" class="text-decoration-none">
-                                            <i class="fas fa-envelope mr-1 text-primary"></i>{{ $order->user->email ?? 'Inconnu' }}
+                                            <i class="fas fa-envelope mr-1 text-primary"></i>{{ $order->user->email ?? __('messages.unknown_customer') }}
                                         </a>
                                     </span>
                                 </div>
                                 @if($order->shipping_phone)
                                 <div class="info-row">
-                                    <span class="info-label">Téléphone :</span>
+                                    <span class="info-label">{{ __('messages.phone') }} :</span>
                                     <span class="info-value">
                                         <a href="tel:{{ $order->shipping_phone }}" class="text-decoration-none">
                                             <i class="fas fa-phone mr-1 text-success"></i>{{ $order->shipping_phone }}
@@ -116,7 +116,7 @@
                 <div class="col-md-6">
                     <div class="card h-100">
                         <div class="card-header bg-info text-white">
-                            <h6 class="mb-0"><i class="fas fa-truck mr-2"></i> Livraison</h6>
+                            <h6 class="mb-0"><i class="fas fa-truck mr-2"></i> {{ __('messages.shipping_address') }}</h6>
                         </div>
                         <div class="card-body">
                             @if($order->shipping_address)
@@ -127,7 +127,7 @@
                                     {{ $order->shipping_country }}
                                 </address>
                             @else
-                                <p class="text-muted mb-0">Adresse non renseignée</p>
+                                <p class="text-muted mb-0">{{ __('messages.address_not_provided') }}</p>
                             @endif
                         </div>
                     </div>
@@ -138,27 +138,27 @@
             @if($order->status == 'shipped' && ($order->tracking_number || $order->carrier))
             <div class="card mt-4 bg-light">
                 <div class="card-header bg-primary text-white">
-                    <h6 class="mb-0"><i class="fas fa-search-location mr-2"></i> Suivi de livraison</h6>
+                    <h6 class="mb-0"><i class="fas fa-search-location mr-2"></i> {{ __('messages.tracking_info') }}</h6>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-sm-6">
                             <div class="info-row">
-                                <span class="info-label">Transporteur :</span>
-                                <span class="info-value">{{ $order->carrier ?? 'Non spécifié' }}</span>
+                                <span class="info-label">{{ __('messages.carrier') }} :</span>
+                                <span class="info-value">{{ $order->carrier ?? __('messages.not_specified') }}</span>
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="info-row">
-                                <span class="info-label">Numéro de suivi :</span>
-                                <span class="info-value">{{ $order->tracking_number ?? 'Non spécifié' }}</span>
+                                <span class="info-label">{{ __('messages.tracking_number') }} :</span>
+                                <span class="info-value">{{ $order->tracking_number ?? __('messages.not_specified') }}</span>
                             </div>
                         </div>
                     </div>
                     @if($order->carrier && $order->tracking_number && $order->tracking_url)
                     <div class="mt-3">
                         <a href="{{ $order->tracking_url }}" target="_blank" class="btn btn-outline-primary w-100 w-sm-auto">
-                            <i class="fas fa-external-link-alt mr-2"></i> Suivre mon colis
+                            <i class="fas fa-external-link-alt mr-2"></i> {{ __('messages.track_package') }}
                         </a>
                     </div>
                     @endif
@@ -169,17 +169,17 @@
             <!-- Produits de la commande -->
             <div class="card mt-4">
                 <div class="card-header bg-info text-white">
-                    <h6 class="mb-0"><i class="fas fa-boxes mr-2"></i> Produits commandés</h6>
+                    <h6 class="mb-0"><i class="fas fa-boxes mr-2"></i> {{ __('messages.ordered_products') }}</h6>
                 </div>
                 <div class="card-body p-0 p-md-3">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="product-col">Produit</th>
-                                    <th class="qty-col">Qté</th>
-                                    <th class="price-col">P.U.</th>
-                                    <th class="total-col">Total</th>
+                                    <th class="product-col">{{ __('messages.product') }}</th>
+                                    <th class="qty-col">{{ __('messages.quantity') }}</th>
+                                    <th class="price-col">{{ __('messages.unit_price') }}</th>
+                                    <th class="total-col">{{ __('messages.total') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -189,13 +189,13 @@
                                         <div class="product-info">
                                             @if($item->product && $item->product->image)
                                                 <img src="{{ asset('storage/' . $item->product->image) }}" 
-                                                     alt="{{ $item->product->translated_name ?? 'Produit' }}" 
+                                                     alt="{{ $item->product->translated_name ?? __('messages.product') }}" 
                                                      class="product-image d-none d-sm-block">
                                             @endif
                                             <div>
-                                                <strong>{{ Str::limit($item->product->translated_name ?? 'Produit inconnu', 40) }}</strong>
+                                                <strong>{{ Str::limit($item->product->translated_name ?? __('messages.unknown_product'), 40) }}</strong>
                                                 <span class="d-block d-sm-none small text-muted mt-1">
-                                                    Prix: {{ number_format($item->price, 2) }} €
+                                                    {{ __('messages.price') }}: {{ number_format($item->price, 2) }} €
                                                 </span>
                                             </div>
                                         </div>
@@ -208,7 +208,7 @@
                             </tbody>
                             <tfoot class="bg-light">
                                 <tr>
-                                    <td colspan="3" class="text-right font-weight-bold">Total (vos produits) :</td>
+                                    <td colspan="3" class="text-right font-weight-bold">{{ __('messages.vendor_total') }} :</td>
                                     <td class="font-weight-bold text-success">{{ number_format($vendorTotal, 2) }} €</td>
                                 </tr>
                             </tfoot>
@@ -221,7 +221,7 @@
             @if(in_array($order->status, ['pending', 'processing']))
             <div class="card mt-4">
                 <div class="card-header bg-warning">
-                    <h6 class="mb-0"><i class="fas fa-tasks mr-2"></i> Gérer la commande</h6>
+                    <h6 class="mb-0"><i class="fas fa-tasks mr-2"></i> {{ __('messages.manage_order') }}</h6>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('vendor.orders.update-shipping', $order->id) }}" method="POST">
@@ -231,40 +231,39 @@
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="status">Mettre à jour le statut</label>
+                                    <label for="status">{{ __('messages.update_status') }}</label>
                                     <select name="status" id="status" class="form-control">
-                                        <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>En préparation</option>
-                                        <option value="shipped">Expédiée</option>
+                                        <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>{{ __('messages.processing') }}</option>
+                                        <option value="shipped">{{ __('messages.shipped') }}</option>
                                     </select>
                                 </div>
                             </div>
                             
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="carrier">Transporteur</label>
+                                    <label for="carrier">{{ __('messages.carrier') }}</label>
                                     <input type="text" name="carrier" id="carrier" class="form-control" 
-                                           value="{{ $order->carrier }}" placeholder="Ex: Colissimo, UPS, DHL...">
+                                           value="{{ $order->carrier }}" placeholder="{{ __('messages.carrier_placeholder') }}">
                                 </div>
                             </div>
                             
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="tracking_number">Numéro de suivi</label>
+                                    <label for="tracking_number">{{ __('messages.tracking_number') }}</label>
                                     <input type="text" name="tracking_number" id="tracking_number" class="form-control" 
-                                           value="{{ $order->tracking_number }}" placeholder="Ex: LX123456789FR">
+                                           value="{{ $order->tracking_number }}" placeholder="{{ __('messages.tracking_placeholder') }}">
                                 </div>
                             </div>
                         </div>
                         
                         <div class="alert alert-info mt-3">
                             <i class="fas fa-info-circle mr-2"></i>
-                            <strong>Important :</strong> Une fois la commande marquée comme expédiée, vous ne pourrez plus la modifier.
-                            Le client recevra une notification avec les informations de suivi.
+                            <strong>{{ __('messages.important') }} :</strong> {{ __('messages.shipping_confirmation_warning') }}
                         </div>
                         
                         <button type="submit" class="btn btn-success w-100 w-md-auto mt-3" 
-                                onclick="return confirm('Confirmer l\'expédition de cette commande ?')">
-                            <i class="fas fa-truck mr-2"></i> Confirmer l'expédition
+                                onclick="return confirm('{{ __('messages.confirm_shipping') }}')">
+                            <i class="fas fa-truck mr-2"></i> {{ __('messages.confirm_shipping_button') }}
                         </button>
                     </form>
                 </div>
@@ -275,13 +274,12 @@
             @if($order->status == 'shipped')
             <div class="card mt-4">
                 <div class="card-header bg-success text-white">
-                    <h6 class="mb-0"><i class="fas fa-check-circle mr-2"></i> Commande finalisée</h6>
+                    <h6 class="mb-0"><i class="fas fa-check-circle mr-2"></i> {{ __('messages.order_completed') }}</h6>
                 </div>
                 <div class="card-body">
                     <div class="alert alert-success mb-0">
                         <i class="fas fa-check-circle mr-2"></i>
-                        Cette commande a été expédiée le {{ $order->shipped_at ? $order->shipped_at->format('d/m/Y à H:i') : 'Date inconnue' }}.
-                        Aucune action supplémentaire n'est requise de votre part.
+                        {{ __('messages.order_shipped_message', ['date' => $order->shipped_at ? $order->shipped_at->format('d/m/Y à H:i') : __('messages.unknown_date')]) }}
                     </div>
                 </div>
             </div>

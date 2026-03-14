@@ -17,7 +17,7 @@
                 </a>
             </div>
             <div class="col-lg-4 text-center d-none d-lg-block">
-                <img src="{{ asset('images/logo.png') }}" alt="Carioca & Coquelicot" style="max-width: 200px; opacity: 0.9;">
+                <img src="{{ asset('storage/images/mon-design.png') }}" alt="Carioca & Coquelicot" style="max-width: 200px; opacity: 0.9;">
             </div>
         </div>
     </div>

@@ -65,7 +65,8 @@ Route::middleware(['auth', 'vendor'])->prefix('vendor')->name('vendor.')->group(
     // ===========================================
     Route::get('/settings', [DashboardController::class, 'settings'])->name('settings');
     Route::patch('/settings', [DashboardController::class, 'updateSettings'])->name('settings.update');
-
+    Route::delete('/settings/logo', [DashboardController::class, 'removeLogo'])->name('settings.remove-logo'); // AJOUTÉ
+    
     // ===========================================
     // API INTERNE (routes AJAX pour les vendeurs)
     // ===========================================

@@ -581,7 +581,7 @@
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container">
             <a class="navbar-brand" href="{{ route('shop.home') }}">
-                <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }}">
+                <img src="{{ asset('storage/images/mon-design.png') }}" alt="{{ config('app.name') }}">
                 <span>Carioca & Coquelicot</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -608,19 +608,38 @@
                 </ul>
                 
                 <ul class="navbar-nav">
-                    <!-- Sélecteur de langue amélioré -->
+                    <!-- Sélecteur de langue amélioré avec les drapeaux -->
+                    <!-- Sélecteur de langue compact -->
                     <li class="nav-item dropdown lang-switcher">
-                        <a class="nav-link dropdown-toggle" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-globe"></i>
-                            <span>{{ strtoupper(app()->getLocale()) }}</span>
+                        <a class="nav-link" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown">
+                            @php
+                                $flags = [
+                                    'fr' => '🇫🇷',
+                                    'en' => '🇬🇧',
+                                    'es' => '🇪🇸',
+                                    'de' => '🇩🇪',
+                                    'pt' => '🇧🇷',
+                                ];
+                                $locale = app()->getLocale();
+                                $displayLocale = $locale == 'pt' ? 'pt_BR' : $locale;
+                            @endphp
+                            <span class="d-flex align-items-center gap-1">
+                                <span>{{ $flags[$locale] ?? '🌐' }}</span>
+                                <span class="d-none d-md-inline">{{ strtoupper($displayLocale) }}</span>
+                            </span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             @foreach(config('app.available_locales') as $code => $name)
                                 <li>
                                     <a class="dropdown-item {{ app()->getLocale() == $code ? 'active' : '' }}" 
-                                       href="{{ route('language.switch', $code) }}">
-                                        <i class="fas fa-check-circle"></i>
-                                        {{ $name }}
+                                    href="{{ route('language.switch', $code) }}">
+                                        <span class="d-flex align-items-center gap-2">
+                                            <span>{{ $flags[$code] ?? '🌐' }}</span>
+                                            <span>{{ $name }}</span>
+                                            @if(app()->getLocale() == $code)
+                                                <i class="fas fa-check-circle ms-2 text-gold"></i>
+                                            @endif
+                                        </span>
                                     </a>
                                 </li>
                             @endforeach
@@ -808,7 +827,7 @@
                 <!-- Colonne 1 - Logo et description -->
                 <div class="col-lg-4 col-md-6">
                     <div class="d-flex align-items-center mb-3">
-                        <img src="{{ asset('images/logo.png') }}" alt="Carioca & Coquelicot" style="height: 50px; width: auto; margin-right: 15px;">
+                        <img src="{{ asset('storage/images/mon-design.png') }}" alt="Carioca & Coquelicot" style="height: 50px; width: auto; margin-right: 15px;">
                         <h4 style="color: var(--accent-gold); font-weight: 700;">Carioca & Coquelicot</h4>
                     </div>
                     <p style="color: var(--text-light); opacity: 0.8; line-height: 1.8;">

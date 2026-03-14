@@ -32,4 +32,24 @@ return [
     'password_required' => 'Le mot de passe est requis',
     'password_min' => 'Le mot de passe doit contenir au moins 8 caractères',
     'password_confirmed' => 'Les mots de passe ne correspondent pas',
+
+    // ============================================
+    // COMMANDES VENDEUR - VENDOR ORDERS
+    // ============================================
+    'orders_count' => 'commande(s)',
+    'all_statuses' => 'Tous les statuts',
+    'unknown_customer' => 'Client inconnu',
+    'reset' => 'Réinitialiser',
+    'confirm_status_change' => 'Confirmer le changement de statut ?',
+    'status_change_error' => 'Erreur lors du changement de statut',
+    'mark_processing' => 'Passer en préparation',
+    'products' => 'produit(s)',
+    'units' => 'unité(s)',
+    'order_id' => 'ID Commande',
+    'date' => 'Date',
+    'customer' => 'Client',
+    'total' => 'Total',
+    'status' => 'Statut',                   
+    'actions' => 'Actions',
+    'view_details' => 'Voir détails',
 ];

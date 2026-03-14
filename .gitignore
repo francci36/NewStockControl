@@ -26,4 +26,5 @@ download_images.php
 structure.txt
 
 # Dossiers d'assets
-public/images/
+public/images/db_structure.sql
+storage/framework/views/*

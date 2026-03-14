@@ -4,13 +4,15 @@
 @section('page-title', __('messages.vendor_orders'))
 
 @section('content')
+
+
 <div class="container-fluid py-3 py-md-4">
     <div class="card shadow-lg border-0">
         <div class="card-header bg-gradient-primary text-white d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
             <h5 class="mb-0">
                 <i class="fas fa-shopping-cart mr-2"></i> {{ __('messages.vendor_orders') }}
             </h5>
-            <span class="badge bg-light text-dark">{{ $orders->total() }} commande(s)</span>
+            <span class="badge bg-light text-dark">{{ $orders->total() }} {{ __('messages.orders_count') }}</span>
         </div>
         
         <div class="card-body">
@@ -20,16 +22,16 @@
                     <form method="GET" action="{{ route('vendor.orders.index') }}" class="form-inline w-100">
                         <div class="input-group w-100">
                             <select name="status" class="form-control" onchange="this.form.submit()">
-                                <option value="all">{{ __('Tous les statuts') }}</option>
-                                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>En attente</option>
-                                <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>En préparation</option>
-                                <option value="shipped" {{ request('status') == 'shipped' ? 'selected' : '' }}>Expédiée</option>
-                                <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>Livrée</option>
-                                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Annulée</option>
+                                <option value="all">{{ __('messages.all_statuses') }}</option>
+                                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>{{ __('messages.pending') }}</option>
+                                <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>{{ __('messages.processing') }}</option>
+                                <option value="shipped" {{ request('status') == 'shipped' ? 'selected' : '' }}>{{ __('messages.shipped') }}</option>
+                                <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>{{ __('messages.delivered') }}</option>
+                                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>{{ __('messages.cancelled') }}</option>
                             </select>
                             @if(request('status') && request('status') != 'all')
                             <div class="input-group-append">
-                                <a href="{{ route('vendor.orders.index') }}" class="btn btn-outline-secondary" title="Réinitialiser">
+                                <a href="{{ route('vendor.orders.index') }}" class="btn btn-outline-secondary" title="{{ __('messages.reset') }}">
                                     <i class="fas fa-times"></i>
                                 </a>
                             </div>
@@ -49,13 +51,13 @@
                     <table class="table table-hover table-striped">
                         <thead class="thead-dark">
                             <tr>
-                                <th class="d-none d-md-table-cell">ID</th>
-                                <th>Date</th>
-                                <th>Client</th>
-                                <th class="d-none d-sm-table-cell">Produits</th>
-                                <th>Total</th>
-                                <th>Statut</th>
-                                <th>Actions</th>
+                                <th class="d-none d-md-table-cell">{{ __('messages.order_id') }}</th>
+                                <th>{{ __('messages.date') }}</th>
+                                <th>{{ __('messages.customer') }}</th>
+                                <th class="d-none d-sm-table-cell">{{ __('messages.products') }}</th>
+                                <th>{{ __('messages.total') }}</th>
+                                <th>{{ __('messages.status') }}</th>
+                                <th>{{ __('messages.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -65,7 +67,7 @@
                                 <td>{{ $order->created_at->format('d/m/Y') }}</td>
                                 <td>
                                     <div>
-                                        <strong>{{ $order->user->name ?? 'Client inconnu' }}</strong>
+                                        <strong>{{ $order->user->name ?? __('messages.unknown_customer') }}</strong>
                                         <span class="d-block d-md-none small text-muted mt-1">
                                             {{ $order->user->email ?? '' }}
                                         </span>
@@ -78,8 +80,8 @@
                                             $unitCount = $vendorItems->sum('quantity');
                                         @endphp
                                         <span class="d-block d-md-none small text-muted mt-1">
-                                            <span class="badge bg-info">{{ $productCount }} prod.</span>
-                                            <span class="badge bg-secondary">{{ $unitCount }} unités</span>
+                                            <span class="badge bg-info">{{ $productCount }} {{ __('messages.products') }}</span>
+                                            <span class="badge bg-secondary">{{ $unitCount }} {{ __('messages.units') }}</span>
                                         </span>
                                     </div>
                                 </td>
@@ -91,8 +93,8 @@
                                         $productCount = $vendorItems->count();
                                         $unitCount = $vendorItems->sum('quantity');
                                     @endphp
-                                    <span class="badge bg-info">{{ $productCount }} produit(s)</span>
-                                    <span class="badge bg-secondary">{{ $unitCount }} unité(s)</span>
+                                    <span class="badge bg-info">{{ $productCount }} {{ __('messages.products') }}</span>
+                                    <span class="badge bg-secondary">{{ $unitCount }} {{ __('messages.units') }}</span>
                                 </td>
                                 <td>
                                     @php
@@ -112,11 +114,11 @@
                                             'cancelled' => 'danger',
                                         ];
                                         $statusLabels = [
-                                            'pending' => 'En attente',
-                                            'processing' => 'En prépa',
-                                            'shipped' => 'Expédiée',
-                                            'delivered' => 'Livrée',
-                                            'cancelled' => 'Annulée',
+                                            'pending' => __('messages.pending'),
+                                            'processing' => __('messages.processing'),
+                                            'shipped' => __('messages.shipped'),
+                                            'delivered' => __('messages.delivered'),
+                                            'cancelled' => __('messages.cancelled'),
                                         ];
                                     @endphp
                                     <span class="badge bg-{{ $statusColors[$order->status] ?? 'secondary' }} status-badge">
@@ -133,13 +135,13 @@
                                 <td>
                                     <div class="btn-group btn-group-sm" role="group">
                                         <a href="{{ route('vendor.orders.show', $order->id) }}" 
-                                           class="btn btn-info" title="Voir détails">
+                                           class="btn btn-info" title="{{ __('messages.view_details') }}">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         @if($order->status == 'pending')
                                         <button type="button" class="btn btn-success" 
                                                 onclick="updateStatus({{ $order->id }}, 'processing')"
-                                                title="Passer en préparation">
+                                                title="{{ __('messages.mark_processing') }}">
                                             <i class="fas fa-play"></i>
                                         </button>
                                         @endif
@@ -295,7 +297,7 @@
 
 <script>
 function updateStatus(orderId, status) {
-    if (confirm('Confirmer le changement de statut ?')) {
+    if (confirm('{{ __("messages.confirm_status_change") }}')) {
         fetch(`/vendor/orders/${orderId}/status`, {
             method: 'POST',
             headers: {
@@ -309,12 +311,12 @@ function updateStatus(orderId, status) {
             if (data.success) {
                 location.reload();
             } else {
-                alert('Erreur lors du changement de statut');
+                alert('{{ __("messages.status_change_error") }}');
             }
         })
         .catch(error => {
             console.error('Erreur:', error);
-            alert('Une erreur est survenue');
+            alert('{{ __("messages.error_occurred") }}');
         });
     }
 }

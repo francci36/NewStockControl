@@ -42,7 +42,7 @@ class CheckoutController extends Controller
         $shipping = $total >= 50 ? 0 : 5.99;
         $finalTotal = $total + $shipping;
 
-        return view('shop.checkout', compact('cartItems', 'total', 'shipping', 'finalTotal'));
+        return view('shop.checkout.index', compact('cartItems', 'total', 'shipping', 'finalTotal'));
     }
 
     /**
@@ -323,7 +323,7 @@ class CheckoutController extends Controller
             return $product->pivot->price * $product->pivot->quantity;
         });
 
-        return view('shop.orders.confirmation', compact('order'));
+        return view('shop.checkout.confirmation', compact('order'));
     }
 
     /**

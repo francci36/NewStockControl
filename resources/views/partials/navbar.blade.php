@@ -6,6 +6,7 @@
                 <i class="fas fa-bars"></i>
             </a>
         </li>
+        @auth
         <li class="nav-item d-none d-sm-inline-block">
             <a href="{{ route('admin.dashboard') }}" class="nav-link text-white hover-gold">
                 <i class="fas fa-tachometer-alt mr-1"></i> Dashboard
@@ -26,16 +27,18 @@
                 <i class="fas fa-truck mr-1"></i> Fournisseurs
             </a>
         </li>
+        @endauth
     </ul>
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
+        @auth
         <!-- Notifications -->
         <li class="nav-item dropdown">
             <a class="nav-link text-white hover-gold" data-toggle="dropdown" href="#">
                 <i class="far fa-bell"></i>
                 @php
-                    $unreadNotifications = auth()->user()->unreadNotifications;
+                    $unreadNotifications = auth()->user()->unreadNotifications ?? collect([]);
                     $notificationCount = $unreadNotifications->count();
                 @endphp
                 @if($notificationCount > 0)
@@ -47,53 +50,30 @@
                     <i class="far fa-bell mr-2"></i>
                     <span>{{ $notificationCount }} Notification(s)</span>
                 </div>
+                <!-- Contenu des notifications -->
+                @forelse($unreadNotifications->take(5) as $notification)
+                    <div class="dropdown-item notification-item py-2 hover-gold-bg">
+                        <div class="d-flex align-items-center">
+                            <div class="mr-3">
+                                <i class="fas fa-info-circle text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <span>{{ $notification->data['message'] ?? 'Nouvelle notification' }}</span>
+                                <small class="text-muted d-block">{{ $notification->created_at->diffForHumans() }}</small>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="dropdown-item text-center py-3 text-muted">
+                        <i class="far fa-check-circle mr-2"></i> Aucune notification
+                    </div>
+                @endforelse
                 
-                <div class="notification-list" style="max-height: 300px; overflow-y: auto;">
-                    @forelse($unreadNotifications as $notification)
-                        @php
-                            $data = $notification->data;
-                            $actionUrl = $data['action_url'] ?? '#';
-                            $icon = $data['icon'] ?? 'fa-info-circle';
-                            $color = $data['color'] ?? 'info';
-                            $message = $data['message'] ?? 'Nouvelle notification';
-                        @endphp
-                        
-                        <div class="dropdown-item notification-item p-3 border-bottom">
-                            <a href="{{ $actionUrl }}" class="d-flex align-items-center text-decoration-none" onclick="markAsRead('{{ $notification->id }}')">
-                                <div class="mr-3">
-                                    <div class="rounded-circle p-2 bg-{{ $color }} bg-opacity-10">
-                                        <i class="fas {{ $icon }} text-{{ $color }}"></i>
-                                    </div>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <small class="float-right text-muted">{{ $notification->created_at->diffForHumans() }}</small>
-                                    <h6 class="mb-0 text-dark">{{ $message }}</h6>
-                                    @if(isset($data['shop_name']))
-                                        <p class="text-muted mb-0 small">{{ $data['shop_name'] }}</p>
-                                    @endif
-                                </div>
-                            </a>
-                            <form id="read-form-{{ $notification->id }}" action="{{ route('notifications.read', $notification->id) }}" method="POST" class="d-none">
-                                @csrf
-                            </form>
-                        </div>
-                    @empty
-                        <div class="text-center py-4">
-                            <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
-                            <p class="text-muted mb-0">Aucune notification</p>
-                        </div>
-                    @endforelse
-                </div>
-
-                @if($notificationCount > 0)
-                <div class="dropdown-footer p-2 bg-light">
-                    <form action="{{ route('notifications.read-all') }}" method="POST" class="m-0">
-                        @csrf
-                        <button type="submit" class="btn btn-sm btn-primary btn-block">
-                            <i class="fas fa-check-double mr-2"></i> Marquer tout comme lu
-                        </button>
-                    </form>
-                </div>
+                @if($notificationCount > 5)
+                    <div class="dropdown-divider"></div>
+                    <a href="#" class="dropdown-item text-center py-2 text-primary hover-gold-bg">
+                        Voir toutes les notifications
+                    </a>
                 @endif
             </div>
         </li>
@@ -182,6 +162,19 @@
                 </div>
             </div>
         </li>
+        @else
+        <!-- Liens pour les visiteurs non connectés -->
+        <li class="nav-item">
+            <a href="{{ route('login') }}" class="nav-link text-white hover-gold">
+                <i class="fas fa-sign-in-alt mr-1"></i> Connexion
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('register') }}" class="nav-link text-white hover-gold">
+                <i class="fas fa-user-plus mr-1"></i> Inscription
+            </a>
+        </li>
+        @endauth
     </ul>
 </nav>
 

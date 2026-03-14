@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Log;
 
 class SetLocale
 {
+    /**
+     * Liste des locales disponibles
+     */
+    protected $availableLocales = ['fr', 'en', 'pt', 'es', 'de'];
+
     public function handle(Request $request, Closure $next)
     {
         // Log pour debug
@@ -18,6 +23,24 @@ class SetLocale
         
         // Récupérer la locale de la session ou utiliser la locale par défaut
         $locale = Session::get('locale', config('app.locale', 'fr'));
+        
+            // Normalisation : pt_BR -> pt (maintenant que le dossier s'appelle pt)
+        if ($locale === 'pt_BR') {
+            $locale = 'pt';
+            Session::put('locale', $locale);
+        }
+        
+        App::setLocale($locale);
+        
+        return $next($request);
+    
+        
+        // Vérifier que la locale est valide
+        if (!in_array($locale, $this->availableLocales)) {
+            $locale = 'fr'; // Fallback sur français
+            Session::put('locale', $locale);
+            Log::warning('Locale invalide, fallback sur fr');
+        }
         
         // Appliquer la locale à l'application
         App::setLocale($locale);

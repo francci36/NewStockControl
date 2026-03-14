@@ -234,4 +234,24 @@ class DashboardController extends Controller
         return redirect()->route('vendor.settings')
             ->with('success', __('messages.settings_updated'));
     }
+
+    public function removeLogo(Request $request)
+    {
+        $vendor = auth()->user()->vendor;
+        
+        if ($vendor && $vendor->logo) {
+            // Supprimer le fichier
+            if (Storage::disk('public')->exists($vendor->logo)) {
+                Storage::disk('public')->delete($vendor->logo);
+            }
+            
+            // Mettre à jour la base de données
+            $vendor->update(['logo' => null]);
+            
+            return back()->with('success', __('messages.logo_removed'));
+        }
+        
+        return back()->with('error', __('messages.logo_not_found'));
+    }
+
 }

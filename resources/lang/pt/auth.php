@@ -32,4 +32,6 @@ return [
     'password_required' => 'A senha é obrigatória',
     'password_min' => 'A senha deve ter pelo menos 8 caracteres',
     'password_confirmed' => 'As senhas não coincidem',
+
+   
 ];

@@ -1,16 +1,16 @@
 @extends('vendor.layouts.app')
 
-@section('title', 'Mes sous-catégories')
-@section('page-title', 'Sous-catégories')
+@section('title', __('messages.vendor_subcategories'))
+@section('page-title', __('messages.vendor_subcategories'))
 
 @section('content')
 <div class="container-fluid">
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="card-title">Liste de mes sous-catégories</h3>
+            <h3 class="card-title">{{ __('messages.subcategories_list') }}</h3>
             <div class="card-tools">
                 <a href="{{ route('vendor.categories.create') }}" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus"></i> Nouvelle sous-catégorie
+                    <i class="fas fa-plus"></i> {{ __('messages.new_subcategory') }}
                 </a>
             </div>
         </div>
@@ -27,12 +27,12 @@
                     <thead class="bg-primary text-white">
                         <tr>
                             <th>ID</th>
-                            <th>Catégorie principale</th>
-                            <th>Sous-catégorie</th>
-                            <th>Slug</th>
-                            <th>Statut</th>
-                            <th>Produits</th>
-                            <th>Actions</th>
+                            <th>{{ __('messages.main_category') }}</th>
+                            <th>{{ __('messages.subcategory') }}</th>
+                            <th>{{ __('messages.slug') }}</th>
+                            <th>{{ __('messages.status') }}</th>
+                            <th>{{ __('messages.products') }}</th>
+                            <th>{{ __('messages.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -44,22 +44,22 @@
                             <td><code>{{ $category->slug }}</code></td>
                             <td>
                                 @if($category->is_active)
-                                    <span class="badge bg-success">Actif</span>
+                                    <span class="badge bg-success">{{ __('messages.active') }}</span>
                                 @else
-                                    <span class="badge bg-secondary">Inactif</span>
+                                    <span class="badge bg-secondary">{{ __('messages.inactive') }}</span>
                                 @endif
                             </td>
                             <td>
                                 <span class="badge bg-info">{{ $category->products_count ?? 0 }}</span>
                             </td>
                             <td>
-                                <a href="{{ route('vendor.categories.edit', $category) }}" class="btn btn-sm btn-warning">
+                                <a href="{{ route('vendor.categories.edit', $category) }}" class="btn btn-sm btn-warning" title="{{ __('messages.edit') }}">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <form action="{{ route('vendor.categories.destroy', $category) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Supprimer ?')">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('{{ __('messages.confirm_delete_category') }}')" title="{{ __('messages.delete') }}">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -68,7 +68,10 @@
                         @empty
                         <tr>
                             <td colspan="7" class="text-center py-4">
-                                <p>Aucune sous-catégorie créée</p>
+                                <p>{{ __('messages.no_subcategories') }}</p>
+                                <a href="{{ route('vendor.categories.create') }}" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> {{ __('messages.new_subcategory') }}
+                                </a>
                             </td>
                         </tr>
                         @endforelse

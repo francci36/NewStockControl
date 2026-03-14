@@ -4,7 +4,7 @@
             <!-- Colonne 1 : Logo et copyright -->
             <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
                 <div class="d-flex align-items-center mb-3">
-                    <img src="{{ asset('images/logo.png') }}" alt="Carioca & Coquelicot" style="height: 45px; width: auto; margin-right: 12px;">
+                    <img src="{{ asset('storage/images/mon-design.png') }}" alt="Carioca & Coquelicot" style="height: 45px; width: auto; margin-right: 12px;">
                     <div>
                         <h5 class="mb-0 text-white font-weight-bold" style="line-height: 1.2;">Carioca</h5>
                         <h5 class="mb-0 text-white font-weight-bold" style="line-height: 1.2;">& Coquelicot</h5>

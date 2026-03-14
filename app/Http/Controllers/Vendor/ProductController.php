@@ -23,7 +23,7 @@ class ProductController extends Controller
         return view('vendor.products.index', compact('products'));
     }
 
-        public function create()
+    public function create()
     {
         // Récupérer uniquement les catégories principales (sans parent)
         $mainCategories = Category::whereNull('parent_id')
@@ -48,15 +48,8 @@ class ProductController extends Controller
             'quantity' => 'required|integer|min:0',
             'image' => 'nullable|image|max:2048',
             'stock_threshold' => 'nullable|integer|min:1',
+            'category_id' => 'required|exists:categories,id', // Maintenant on utilise directement category_id
         ];
-
-        // Gestion de la catégorie (nouvelle ou existante)
-        if ($request->category_id === 'new') {
-            $rules['new_category_fr'] = 'required|string|max:255';
-            $rules['new_category_en'] = 'nullable|string|max:255';
-        } else {
-            $rules['category_id'] = 'required|exists:categories,id';
-        }
 
         $request->validate($rules);
 
@@ -67,37 +60,6 @@ class ProductController extends Controller
             
             if (!$vendor) {
                 throw new \Exception('Vendeur non trouvé');
-            }
-
-            // ✅ GESTION DE LA CATÉGORIE
-            $categoryId = null;
-            
-            if ($request->category_id === 'new') {
-                // Créer une nouvelle catégorie avec traductions
-                $slug = Str::slug($request->new_category_fr);
-                
-                // Vérifier l'unicité du slug
-                $originalSlug = $slug;
-                $counter = 1;
-                while (Category::where('slug', $slug)->exists()) {
-                    $slug = $originalSlug . '-' . $counter;
-                    $counter++;
-                }
-
-                $category = Category::create([
-                    'name' => [
-                        'fr' => $request->new_category_fr,
-                        'en' => $request->new_category_en ?? $request->new_category_fr,
-                    ],
-                    'slug' => $slug,
-                    'is_active' => true
-                ]);
-                
-                $categoryId = $category->id;
-                Log::info('Nouvelle catégorie créée: ' . $request->new_category_fr . ' (ID: ' . $categoryId . ')');
-            } else {
-                $categoryId = $request->category_id;
-                Log::info('Catégorie existante sélectionnée: ID ' . $categoryId);
             }
 
             // ✅ PRÉPARATION DES DONNÉES AVEC TRADUCTIONS
@@ -116,7 +78,7 @@ class ProductController extends Controller
                 ],
                 'price' => $request->price,
                 'quantity' => $request->quantity,
-                'category_id' => $categoryId,
+                'category_id' => $request->category_id,
                 'vendor_id' => $vendor->id,
                 'stock_threshold' => $request->stock_threshold ?? 5,
                 'is_active' => true,
@@ -141,7 +103,7 @@ class ProductController extends Controller
             Log::info('Stock créé pour le produit');
 
             // ✅ GÉNÉRATION DU SKU
-            $category = Category::find($categoryId);
+            $category = Category::find($request->category_id);
             $categoryName = is_array($category->name) ? ($category->name['fr'] ?? '') : $category->name;
             $categoryPrefix = $category ? strtoupper(substr($categoryName, 0, 3)) : 'VEN';
             $product->sku = $categoryPrefix . '-' . str_pad($product->id, 6, '0', STR_PAD_LEFT);
@@ -165,59 +127,54 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        // Vérifier que le produit appartient bien au vendeur connecté
+        // Vérification d'autorisation
         $vendor = auth()->user()->vendor;
-        if ($product->vendor_id != $vendor->id) {
-            abort(403, 'Vous n\'êtes pas autorisé à modifier ce produit.');
-        }
+        abort_if($product->vendor_id != $vendor->id, 403, __('messages.unauthorized_product_edit'));
 
         // Récupérer les catégories actives
-        $categories = Category::where('is_active', true)
-            ->orderBy('name')
-            ->get();
+        $categories = Category::where('is_active', true)->get();
+        
+        // Séparer les catégories principales (parent_id = null)
+        $mainCategories = $categories->whereNull('parent_id')->values();
+        
+        // Grouper les sous-catégories par parent_id
+        $subCategories = [];
+        foreach ($mainCategories as $mainCat) {
+            $subCategories[$mainCat->id] = $categories
+                ->where('parent_id', $mainCat->id)
+                ->values();
+        }
 
-        return view('vendor.products.edit', compact('product', 'categories'));
+        return view('vendor.products.edit', compact('product', 'categories', 'mainCategories', 'subCategories'));
     }
 
     public function update(Request $request, Product $product)
     {
-        if ($product->vendor_id !== auth()->user()->vendor->id) {
-            abort(403);
-        }
+        // Vérification d'autorisation
+        $vendor = auth()->user()->vendor;
+        abort_if($product->vendor_id != $vendor->id, 403, __('messages.unauthorized_product_edit'));
 
         // Validation avec les champs de traduction
         $request->validate([
-            'name_fr' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
-            'description_fr' => 'nullable|string',
-            'description_en' => 'nullable|string',
-            'short_description_fr' => 'nullable|string|max:500',
-            'short_description_en' => 'nullable|string|max:500',
+            'name' => 'required|string|max:255',
+            'short_description' => 'nullable|string|max:500',
+            'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'quantity' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
             'image' => 'nullable|image|max:2048',
             'stock_threshold' => 'nullable|integer|min:1',
-            'is_active' => 'boolean',
+            'is_active' => 'sometimes|boolean',
         ]);
 
         try {
             DB::beginTransaction();
 
-            // ✅ PRÉPARATION DES DONNÉES AVEC TRADUCTIONS
+            // ✅ PRÉPARATION DES DONNÉES
             $data = [
-                'name' => [
-                    'fr' => $request->name_fr,
-                    'en' => $request->name_en ?? $request->name_fr,
-                ],
-                'description' => [
-                    'fr' => $request->description_fr,
-                    'en' => $request->description_en,
-                ],
-                'short_description' => [
-                    'fr' => $request->short_description_fr,
-                    'en' => $request->short_description_en,
-                ],
+                'name' => $request->name, // Spatie Translatable convertit automatiquement en JSON
+                'description' => $request->description,
+                'short_description' => $request->short_description,
                 'price' => $request->price,
                 'quantity' => $request->quantity,
                 'category_id' => $request->category_id,
@@ -225,6 +182,7 @@ class ProductController extends Controller
                 'is_active' => $request->has('is_active'),
             ];
 
+            // Gestion de l'image
             if ($request->hasFile('image')) {
                 // Supprimer l'ancienne image
                 if ($product->image && Storage::disk('public')->exists($product->image)) {
@@ -243,25 +201,34 @@ class ProductController extends Controller
                 ['quantity' => $request->quantity]
             );
 
+            // Mettre à jour le SKU si la catégorie a changé
+            if ($product->wasChanged('category_id')) {
+                $category = Category::find($request->category_id);
+                $categoryName = is_array($category->name) ? ($category->name['fr'] ?? '') : $category->name;
+                $categoryPrefix = $category ? strtoupper(substr($categoryName, 0, 3)) : 'VEN';
+                $product->sku = $categoryPrefix . '-' . str_pad($product->id, 6, '0', STR_PAD_LEFT);
+                $product->save();
+            }
+
             DB::commit();
 
             return redirect()->route('vendor.products.index')
-                ->with('success', 'Produit "' . $request->name_fr . '" mis à jour.');
+                ->with('success', __('messages.product_updated', ['name' => $product->translated_name]));
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Erreur modification produit: ' . $e->getMessage());
             
-            return back()->with('error', 'Une erreur est survenue.')
+            return back()->with('error', __('messages.error_occurred'))
                 ->withInput();
         }
     }
 
     public function destroy(Product $product)
     {
-        if ($product->vendor_id !== auth()->user()->vendor->id) {
-            abort(403);
-        }
+        // Vérification d'autorisation
+        $vendor = auth()->user()->vendor;
+        abort_if($product->vendor_id != $vendor->id, 403, __('messages.unauthorized_product_edit'));
 
         try {
             DB::beginTransaction();
@@ -280,13 +247,13 @@ class ProductController extends Controller
             DB::commit();
 
             return redirect()->route('vendor.products.index')
-                ->with('success', 'Produit supprimé.');
+                ->with('success', __('messages.product_deleted'));
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Erreur suppression produit: ' . $e->getMessage());
             
-            return back()->with('error', 'Une erreur est survenue.');
+            return back()->with('error', __('messages.error_occurred'));
         }
     }
 }

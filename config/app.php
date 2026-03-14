@@ -96,7 +96,7 @@ return [
     'available_locales' => [
         'fr' => 'Français',
         'en' => 'English',
-        'pt_BR' => 'Português (Brasil)',
+        'pt' => 'Português (Brasil)',
         'es' => 'Español',
         'de' => 'Deutsch',
        // 'es' => 'Español',

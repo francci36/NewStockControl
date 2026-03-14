@@ -68,9 +68,9 @@
                                    id="name" 
                                    class="form-control form-control-lg @error('name') is-invalid @enderror" 
                                    value="{{ old('name') }}"
-                                   placeholder="Ex: Croquettes pour chiens Premium"
+                                   placeholder="{{ __('messages.product_name_placeholder') }}"
                                    required>
-                            <small class="text-muted">Ce nom sera traduit automatiquement selon la langue du visiteur</small>
+                            <small class="text-muted">{{ __('messages.product_name_help') }}</small>
                             @error('name')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
@@ -85,7 +85,7 @@
                                    class="form-control @error('short_description') is-invalid @enderror" 
                                    value="{{ old('short_description') }}"
                                    maxlength="500"
-                                   placeholder="Brève description (max 500 caractères)">
+                                   placeholder="{{ __('messages.short_description_placeholder') }}">
                             <small class="text-muted">{{ __('messages.max_characters', ['count' => 500]) }}</small>
                             @error('short_description')
                                 <span class="invalid-feedback">{{ $message }}</span>
@@ -99,7 +99,7 @@
                                       id="description" 
                                       rows="6" 
                                       class="form-control @error('description') is-invalid @enderror"
-                                      placeholder="Description détaillée du produit...">{{ old('description') }}</textarea>
+                                      placeholder="{{ __('messages.description_placeholder') }}">{{ old('description') }}</textarea>
                             @error('description')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
@@ -116,7 +116,7 @@
                             <div class="card-body">
                                 <!-- Catégorie principale -->
                                 <div class="form-group mb-3">
-                                    <label for="main_category" class="form-label fw-bold small">Catégorie principale</label>
+                                    <label for="main_category" class="form-label fw-bold small">{{ __('messages.main_category') }}</label>
                                     <select name="main_category" 
                                             id="main_category" 
                                             class="form-control" 
@@ -132,23 +132,23 @@
 
                                 <!-- Sous-catégorie (chargée dynamiquement) -->
                                 <div class="form-group mb-2" id="subcategory_group" style="display: none;">
-                                    <label for="category_id" class="form-label fw-bold small">Sous-catégorie</label>
+                                    <label for="category_id" class="form-label fw-bold small">{{ __('messages.subcategory') }}</label>
                                     <select name="category_id" 
                                             id="category_id" 
                                             class="form-control @error('category_id') is-invalid @enderror"
                                             required>
-                                        <option value="">Choisissez d'abord une catégorie principale</option>
+                                        <option value="">{{ __('messages.select_subcategory_first') }}</option>
                                     </select>
                                     @error('category_id')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
                                 </div>
 
-                                <!-- Option nouvelle sous-catégorie (si le vendeur veut en créer une) -->
+                                <!-- Option nouvelle sous-catégorie -->
                                 <div class="mt-2">
                                     <small>
                                         <a href="{{ route('vendor.categories.create') }}" target="_blank" class="text-primary">
-                                            <i class="fas fa-plus-circle mr-1"></i> Créer une nouvelle sous-catégorie
+                                            <i class="fas fa-plus-circle mr-1"></i> {{ __('messages.create_subcategory') }}
                                         </a>
                                     </small>
                                 </div>
@@ -248,7 +248,7 @@
                                 
                                 <!-- Aperçu de l'image -->
                                 <div id="imagePreview" class="text-center mt-3" style="display: none;">
-                                    <img src="#" alt="Aperçu" class="img-fluid rounded border" style="max-height: 150px;">
+                                    <img src="#" alt="{{ __('messages.preview_image') }}" class="img-fluid rounded border" style="max-height: 150px;">
                                     <p class="text-muted small mt-1">{{ __('messages.image_preview') }}</p>
                                 </div>
                             </div>
@@ -461,7 +461,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (mainCategoryId) {
                 // Réinitialiser et cacher le select des sous-catégories pendant le chargement
-                subcategorySelect.innerHTML = '<option value="">Chargement...</option>';
+                subcategorySelect.innerHTML = '<option value="">{{ __("messages.loading") }}</option>';
                 subcategorySelect.disabled = true;
                 subcategoryGroup.style.display = 'block';
                 
@@ -469,10 +469,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 fetch(`/api/categories/${mainCategoryId}/subcategories`)
                     .then(response => response.json())
                     .then(data => {
-                        subcategorySelect.innerHTML = '<option value="">Choisissez une sous-catégorie</option>';
+                        subcategorySelect.innerHTML = '<option value="">{{ __("messages.select_subcategory") }}</option>';
                         
                         if (data.length === 0) {
-                            subcategorySelect.innerHTML += '<option value="" disabled>Aucune sous-catégorie disponible</option>';
+                            subcategorySelect.innerHTML += '<option value="" disabled>{{ __("messages.no_subcategories") }}</option>';
                         } else {
                             data.forEach(subcat => {
                                 const option = document.createElement('option');
@@ -486,7 +486,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                     .catch(error => {
                         console.error('Erreur:', error);
-                        subcategorySelect.innerHTML = '<option value="">Erreur de chargement</option>';
+                        subcategorySelect.innerHTML = '<option value="">{{ __("messages.loading_error") }}</option>';
                         subcategorySelect.disabled = false;
                     });
             } else {

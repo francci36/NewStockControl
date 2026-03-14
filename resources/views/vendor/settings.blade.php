@@ -34,10 +34,19 @@
                         </div>
                     @endif
 
+                    @if(session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle mr-2"></i> {{ session('error') }}
+                            <button type="button" class="close" data-dismiss="alert">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                    @endif
+
                     @if($errors->any())
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <i class="fas fa-exclamation-triangle mr-2"></i>
-                            <strong>Erreurs :</strong>
+                            <strong>{{ __('messages.validation_errors') }} :</strong>
                             <ul class="mb-0 mt-2">
                                 @foreach($errors->all() as $error)
                                     <li>{{ $error }}</li>
@@ -62,15 +71,19 @@
                             <div class="col-md-3 text-center text-md-left">
                                 <label class="form-label fw-bold">{{ __('messages.vendor_shop_logo') }}</label>
                                 @if($vendor && $vendor->logo)
-                                    <div class="mb-3">
+                                    <div class="mb-3 logo-container">
                                         <img src="{{ asset('storage/' . $vendor->logo) }}" 
                                              alt="{{ $vendor->translated_shop_name ?? $vendor->shop_name }}" 
-                                             class="img-thumbnail" 
-                                             style="max-width: 150px; max-height: 150px; border: 2px solid var(--accent-gold);">
+                                             class="img-thumbnail logo-image" 
+                                             style="border: 2px solid var(--accent-gold);">
+                                        <button type="button" class="btn btn-sm btn-danger mt-2 remove-logo-btn" onclick="removeLogo()">
+                                            <i class="fas fa-trash mr-1"></i> {{ __('messages.remove_logo') }}
+                                        </button>
                                     </div>
                                 @else
-                                    <div class="mb-3 p-4 bg-light rounded text-center" style="border: 2px dashed var(--accent-gold);">
+                                    <div class="mb-3 p-4 bg-light rounded text-center logo-placeholder" style="border: 2px dashed var(--accent-gold);">
                                         <i class="fas fa-store fa-3x" style="color: var(--accent-gold); opacity: 0.5;"></i>
+                                        <p class="text-muted small mt-2">{{ __('messages.no_logo') }}</p>
                                     </div>
                                 @endif
                                 <div class="form-group">
@@ -81,7 +94,7 @@
                                             <i class="fas fa-upload mr-2"></i> {{ __('messages.choose_file') }}
                                         </label>
                                     </div>
-                                    <small class="text-muted">{{ __('messages.image_help') }}</small>
+                                    <small class="text-muted d-block mt-1">{{ __('messages.image_help') }}</small>
                                     @error('logo')
                                         <span class="invalid-feedback d-block">{{ $message }}</span>
                                     @enderror
@@ -92,10 +105,11 @@
                             <div class="col-md-9">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label for="shop_name" class="form-label fw-bold">{{ __('messages.vendor_shop_name') }} *</label>
+                                        <label for="shop_name" class="form-label fw-bold">{{ __('messages.vendor_shop_name') }} <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control @error('shop_name') is-invalid @enderror" 
                                                id="shop_name" name="shop_name" 
-                                               value="{{ old('shop_name', $vendor->shop_name) }}" required>
+                                               value="{{ old('shop_name', $vendor->shop_name) }}" 
+                                               placeholder="{{ __('messages.shop_name_placeholder') }}" required>
                                         <small class="text-muted">{{ __('messages.shop_name_help') }}</small>
                                         @error('shop_name')
                                             <span class="invalid-feedback">{{ $message }}</span>
@@ -103,10 +117,11 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label for="phone" class="form-label fw-bold">{{ __('messages.vendor_phone') }} *</label>
+                                        <label for="phone" class="form-label fw-bold">{{ __('messages.vendor_phone') }} <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control @error('phone') is-invalid @enderror" 
                                                id="phone" name="phone" 
-                                               value="{{ old('phone', $vendor->phone) }}" required>
+                                               value="{{ old('phone', $vendor->phone) }}" 
+                                               placeholder="{{ __('messages.phone_placeholder') }}" required>
                                         @error('phone')
                                             <span class="invalid-feedback">{{ $message }}</span>
                                         @enderror
@@ -122,7 +137,9 @@
                                     <div class="col-12 mb-3">
                                         <label for="description" class="form-label fw-bold">{{ __('messages.vendor_shop_description') }}</label>
                                         <textarea class="form-control @error('description') is-invalid @enderror" 
-                                                  id="description" name="description" rows="4">{{ old('description', $vendor->description) }}</textarea>
+                                                  id="description" name="description" rows="4" 
+                                                  placeholder="{{ __('messages.description_placeholder') }}">{{ old('description', $vendor->description) }}</textarea>
+                                        <small class="text-muted">{{ __('messages.description_help') }}</small>
                                         @error('description')
                                             <span class="invalid-feedback">{{ $message }}</span>
                                         @enderror
@@ -135,10 +152,11 @@
                         <h5 class="mb-3"><i class="fas fa-map-marker-alt mr-2 text-gold"></i> {{ __('messages.vendor_address_info') }}</h5>
                         <div class="row mb-4">
                             <div class="col-md-6 mb-3">
-                                <label for="address" class="form-label fw-bold">{{ __('messages.full_address') }} *</label>
+                                <label for="address" class="form-label fw-bold">{{ __('messages.full_address') }} <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control @error('address') is-invalid @enderror" 
                                        id="address" name="address" 
-                                       value="{{ old('address', $vendor->address) }}" required>
+                                       value="{{ old('address', $vendor->address) }}" 
+                                       placeholder="{{ __('messages.address_placeholder') }}" required>
                                 @error('address')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -148,7 +166,8 @@
                                 <label for="city" class="form-label fw-bold">{{ __('messages.city') }}</label>
                                 <input type="text" class="form-control @error('city') is-invalid @enderror" 
                                        id="city" name="city" 
-                                       value="{{ old('city', $vendor->city) }}">
+                                       value="{{ old('city', $vendor->city) }}" 
+                                       placeholder="{{ __('messages.city_placeholder') }}">
                                 @error('city')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -158,7 +177,8 @@
                                 <label for="postal_code" class="form-label fw-bold">{{ __('messages.postal_code') }}</label>
                                 <input type="text" class="form-control @error('postal_code') is-invalid @enderror" 
                                        id="postal_code" name="postal_code" 
-                                       value="{{ old('postal_code', $vendor->postal_code) }}">
+                                       value="{{ old('postal_code', $vendor->postal_code) }}" 
+                                       placeholder="{{ __('messages.postal_code_placeholder') }}">
                                 @error('postal_code')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -168,7 +188,8 @@
                                 <label for="country" class="form-label fw-bold">{{ __('messages.country') }}</label>
                                 <input type="text" class="form-control @error('country') is-invalid @enderror" 
                                        id="country" name="country" 
-                                       value="{{ old('country', $vendor->country) }}">
+                                       value="{{ old('country', $vendor->country) }}" 
+                                       placeholder="{{ __('messages.country_placeholder') }}">
                                 @error('country')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -182,7 +203,8 @@
                                 <label for="tax_id" class="form-label fw-bold">{{ __('messages.vendor_tax_id') }}</label>
                                 <input type="text" class="form-control @error('tax_id') is-invalid @enderror" 
                                        id="tax_id" name="tax_id" 
-                                       value="{{ old('tax_id', $vendor->tax_id) }}">
+                                       value="{{ old('tax_id', $vendor->tax_id) }}" 
+                                       placeholder="{{ __('messages.tax_id_placeholder') }}">
                                 <small class="text-muted">{{ __('messages.tax_id_help') }}</small>
                                 @error('tax_id')
                                     <span class="invalid-feedback">{{ $message }}</span>
@@ -190,10 +212,11 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="bank_account" class="form-label fw-bold">{{ __('messages.vendor_bank_account') }} *</label>
+                                <label for="bank_account" class="form-label fw-bold">{{ __('messages.vendor_bank_account') }} <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control @error('bank_account') is-invalid @enderror" 
                                        id="bank_account" name="bank_account" 
-                                       value="{{ old('bank_account', $vendor->bank_account) }}" required>
+                                       value="{{ old('bank_account', $vendor->bank_account) }}" 
+                                       placeholder="{{ __('messages.bank_account_placeholder') }}" required>
                                 <small class="text-muted">{{ __('messages.bank_account_help') }}</small>
                                 @error('bank_account')
                                     <span class="invalid-feedback">{{ $message }}</span>
@@ -207,7 +230,7 @@
                                 <div class="card bg-light">
                                     <div class="card-body">
                                         <div class="row">
-                                            <div class="col-md-6">
+                                            <div class="col-md-6 mb-3 mb-md-0">
                                                 <label class="form-label fw-bold">{{ __('messages.vendor_commission_rate') }}</label>
                                                 <div class="input-group">
                                                     <input type="text" class="form-control bg-white" 
@@ -235,6 +258,7 @@
                                                         <span class="badge bg-secondary p-2">{{ $vendor->status }}</span>
                                                     @endif
                                                 </div>
+                                                <small class="text-muted d-block mt-2">{{ __('messages.status_help') }}</small>
                                             </div>
                                         </div>
                                     </div>
@@ -243,12 +267,12 @@
                         </div>
 
                         <!-- Boutons -->
-                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-4">
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-4 action-buttons">
                             <a href="{{ route('vendor.dashboard') }}" class="btn btn-secondary mb-2 mb-sm-0 w-100 w-sm-auto">
                                 <i class="fas fa-times mr-2"></i> {{ __('messages.cancel') }}
                             </a>
                             <button type="submit" class="btn btn-gold w-100 w-sm-auto">
-                                <i class="fas fa-save mr-2"></i> {{ __('messages.save') }}
+                                <i class="fas fa-save mr-2"></i> {{ __('messages.save_settings') }}
                             </button>
                         </div>
                     </form>
@@ -257,6 +281,12 @@
         </div>
     </div>
 </div>
+
+<!-- Hidden input pour suppression logo -->
+<form id="remove-logo-form" action="{{ route('vendor.settings.remove-logo') }}" method="POST" style="display: none;">
+    @csrf
+    @method('DELETE')
+</form>
 
 <style>
 .bg-gradient-primary {
@@ -270,6 +300,7 @@
     color: #1a1a2e;
     border: none;
     transition: all 0.3s;
+    font-weight: 600;
 }
 .btn-gold:hover {
     background: #e5c03a;
@@ -284,14 +315,41 @@
     content: "{{ __('messages.browse') }}";
     background: #667eea;
     color: white;
+    border-radius: 0 0.25rem 0.25rem 0;
+}
+.custom-file-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Logo styles */
+.logo-image {
+    max-width: 150px;
+    max-height: 150px;
+    transition: transform 0.3s;
+}
+.logo-image:hover {
+    transform: scale(1.05);
+}
+.remove-logo-btn {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.5rem;
+}
+
+/* Action buttons */
+.action-buttons {
+    gap: 1rem;
 }
 
 /* Mode sombre */
 .dark .card {
     background: #2d2d44;
+    border-color: #4a4a6a;
 }
 .dark .card-header {
     background: #3a3a5a;
+    color: #e0e0e0;
 }
 .dark .bg-light {
     background: #35354a !important;
@@ -302,17 +360,272 @@
     border-color: #4a4a6a;
     color: #e0e0e0;
 }
+.dark .form-control:focus {
+    background: #35354a;
+    border-color: #6a6a9a;
+    color: #ffffff;
+}
 .dark .form-control.bg-white {
     background: #2d2d44 !important;
     color: #e0e0e0;
 }
+.dark .form-control.bg-light {
+    background: #35354a !important;
+    color: #e0e0e0;
+}
+.dark .input-group-text {
+    background: #3a3a5a;
+    border-color: #4a4a6a;
+    color: #e0e0e0;
+}
+.dark .bg-gold {
+    background-color: #f7d44a !important;
+    color: #1a1a2e;
+}
+.dark .bg-gold .fas {
+    color: #1a1a2e;
+}
+.dark .custom-file-label {
+    background: #2d2d44;
+    border-color: #4a4a6a;
+    color: #e0e0e0;
+}
+.dark .custom-file-label::after {
+    background: #5a6fd8;
+    color: white;
+    border-left-color: #4a4a6a;
+}
 
-/* Responsive */
+/* ===== STYLES RESPONSIVES AMÉLIORÉS ===== */
+
+/* Tablettes */
 @media (max-width: 768px) {
     .col-md-3.text-center.text-md-left {
         text-align: center !important;
+        margin-bottom: 1.5rem;
+    }
+    
+    .logo-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .logo-image {
+        max-width: 120px;
+        max-height: 120px;
+    }
+    
+    .remove-logo-btn {
+        width: auto;
+        display: inline-block;
+    }
+    
+    .form-label {
+        font-size: 0.95rem;
+    }
+    
+    h5 {
+        font-size: 1.1rem;
+    }
+    
+    .card-header h5 {
+        font-size: 1rem;
+    }
+    
+    .breadcrumb {
+        justify-content: center;
+        padding: 0.5rem 0;
+    }
+    
+    .breadcrumb-item {
+        font-size: 0.9rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .bg-light .row {
+        flex-direction: column;
+    }
+    
+    .bg-light .col-md-6 {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .input-group {
+        flex-wrap: wrap;
+    }
+    
+    .input-group .form-control {
+        border-radius: 0.25rem !important;
+        margin-bottom: 0.5rem;
+    }
+    
+    .input-group-append {
+        width: 100%;
+    }
+    
+    .input-group-append .input-group-text {
+        width: 100%;
+        border-radius: 0.25rem;
+        justify-content: center;
     }
 }
+
+/* Mobiles */
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-control {
+        font-size: 0.95rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.95rem;
+    }
+    
+    h5 {
+        font-size: 1rem;
+    }
+    
+    .card-header h5 {
+        font-size: 0.95rem;
+    }
+    
+    .badge {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.6rem;
+    }
+    
+    .breadcrumb {
+        flex-wrap: wrap;
+        font-size: 0.85rem;
+    }
+    
+    .text-muted.small {
+        font-size: 0.75rem !important;
+    }
+    
+    .logo-placeholder {
+        padding: 1rem !important;
+    }
+    
+    .logo-placeholder i {
+        font-size: 2rem !important;
+    }
+    
+    .logo-image {
+        max-width: 100px;
+        max-height: 100px;
+    }
+    
+    .remove-logo-btn {
+        font-size: 0.7rem;
+        padding: 0.15rem 0.4rem;
+    }
+    
+    .custom-file-label {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.6rem;
+    }
+    
+    .custom-file-label i {
+        margin-right: 0.3rem;
+    }
+    
+    .action-buttons {
+        margin-top: 1rem !important;
+    }
+    
+    .action-buttons .btn {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.8rem;
+    }
+    
+    .action-buttons .btn i {
+        margin-right: 0.3rem;
+    }
+    
+    /* Réorganisation des colonnes */
+    .row > [class*="col-"] {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    
+    /* Alerte messages */
+    .alert {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .alert ul {
+        margin-top: 0.5rem;
+        padding-left: 1.2rem;
+    }
+    
+    .alert li {
+        font-size: 0.85rem;
+    }
+}
+
+/* Très petits écrans */
+@media (max-width: 375px) {
+    .btn {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.7rem;
+    }
+    
+    .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.2rem;
+    }
+    
+    .form-control {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.6rem;
+    }
+    
+    .card-body {
+        padding: 0.8rem;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.5rem;
+    }
+    
+    .logo-image {
+        max-width: 80px;
+        max-height: 80px;
+    }
+    
+    .breadcrumb-item {
+        font-size: 0.8rem;
+    }
+}
+
+/* Classes utilitaires */
 .w-sm-auto { width: auto; }
 @media (max-width: 576px) {
     .w-sm-auto { width: 100%; }
@@ -327,11 +640,25 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (fileInput && fileLabel) {
         fileInput.addEventListener('change', function() {
-            let fileName = this.files.length ? this.files[0].name : '{{ __("messages.choose_file") }}';
-            fileLabel.innerHTML = '<i class="fas fa-upload mr-2"></i> ' + fileName;
+            if (this.files && this.files[0]) {
+                let fileName = this.files[0].name;
+                // Tronquer le nom si trop long
+                if (fileName.length > 30) {
+                    fileName = fileName.substring(0, 27) + '...';
+                }
+                fileLabel.innerHTML = '<i class="fas fa-upload mr-2"></i> ' + fileName;
+            } else {
+                fileLabel.innerHTML = '<i class="fas fa-upload mr-2"></i> {{ __("messages.choose_file") }}';
+            }
         });
     }
 });
+
+function removeLogo() {
+    if (confirm('{{ __("messages.confirm_remove_logo") }}')) {
+        document.getElementById('remove-logo-form').submit();
+    }
+}
 </script>
 @endpush
 @endsection

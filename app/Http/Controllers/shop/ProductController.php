@@ -69,7 +69,7 @@ class ProductController extends Controller
             })
             ->get();
 
-        return view('shop.products.index', compact('products', 'categories'));
+        return view('shop.products.list', compact('products', 'categories'));
     }
 
     public function show(Product $product)
@@ -88,6 +88,6 @@ class ProductController extends Controller
             ->limit(4)
             ->get();
 
-        return view('shop.products.show', compact('product', 'similarProducts'));
+        return view('shop.products.detail', compact('product', 'similarProducts'));
     }
 }

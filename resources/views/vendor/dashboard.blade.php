@@ -48,11 +48,11 @@
                 <h3 class="stats-number revenue-number">{{ number_format($stats['revenue_month'], 2) }} €</h3>
                 <p class="stats-label">{{ __('messages.monthly_revenue') }}</p>
                 <small class="text-white-50 d-block">
-                    Total global: {{ number_format($stats['revenue_total'], 2) }} €
+                    {{ __('messages.total_global') }}: {{ number_format($stats['revenue_total'], 2) }} €
                 </small>
                 @if($stats['revenue_last_month'] > 0)
                 <small class="text-white-50">
-                    Mois dernier: {{ number_format($stats['revenue_last_month'], 2) }} €
+                    {{ __('messages.last_month') }}: {{ number_format($stats['revenue_last_month'], 2) }} €
                 </small>
                 @endif
             </div>
@@ -69,7 +69,7 @@
                 <h3 class="stats-number">{{ $stats['pending_orders'] }}</h3>
                 <p class="stats-label">{{ __('messages.pending_orders') }}</p>
                 @if($stats['processing_orders'] > 0)
-                <small class="text-white-50">En préparation: {{ $stats['processing_orders'] }}</small>
+                <small class="text-white-50">{{ __('messages.processing') }}: {{ $stats['processing_orders'] }}</small>
                 @endif
             </div>
             <div class="icon">
@@ -85,31 +85,31 @@
     <div class="col-lg-12">
         <div class="card">
             <div class="card-header bg-light">
-                <h6 class="mb-0"><i class="fas fa-chart-line mr-2 text-gold"></i> Statistiques avancées</h6>
+                <h6 class="mb-0"><i class="fas fa-chart-line mr-2 text-gold"></i> {{ __('messages.advanced_stats') }}</h6>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-6 col-md-3">
                         <div class="text-center p-3 border rounded">
-                            <span class="text-muted d-block">Panier moyen</span>
+                            <span class="text-muted d-block">{{ __('messages.avg_order_value') }}</span>
                             <strong class="h4 text-gold">{{ number_format($stats['avg_order_value'], 2) }} €</strong>
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
                         <div class="text-center p-3 border rounded">
-                            <span class="text-muted d-block">Clients uniques</span>
+                            <span class="text-muted d-block">{{ __('messages.unique_customers') }}</span>
                             <strong class="h4 text-info">{{ $stats['unique_customers'] }}</strong>
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
                         <div class="text-center p-3 border rounded">
-                            <span class="text-muted d-block">Commandes traitées</span>
+                            <span class="text-muted d-block">{{ __('messages.processed_orders') }}</span>
                             <strong class="h4 text-success">{{ $stats['shipped_orders'] + $stats['delivered_orders'] }}</strong>
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
                         <div class="text-center p-3 border rounded">
-                            <span class="text-muted d-block">Taux de conversion</span>
+                            <span class="text-muted d-block">{{ __('messages.conversion_rate') }}</span>
                             <strong class="h4 text-primary">
                                 @php
                                     $total = $stats['total_orders'] ?: 1;
@@ -134,9 +134,9 @@
             <div class="card-header bg-light d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">
                     <i class="fas fa-chart-line mr-2 text-gold"></i>
-                    Évolution des ventes (6 derniers mois)
+                    {{ __('messages.sales_evolution') }}
                 </h6>
-                <span class="badge bg-gold text-dark">Total: {{ number_format(array_sum($monthlySales), 2) }} €</span>
+                <span class="badge bg-gold text-dark">{{ __('messages.total') }}: {{ number_format(array_sum($monthlySales), 2) }} €</span>
             </div>
             <div class="card-body p-3">
                 @if(count($monthlySales) > 0 && array_sum($monthlySales) > 0)
@@ -146,7 +146,7 @@
                 @else
                     <div class="text-center py-5">
                         <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">Aucune donnée de vente pour les 6 derniers mois</p>
+                        <p class="text-muted">{{ __('messages.no_sales_data') }}</p>
                     </div>
                 @endif
             </div>
@@ -159,7 +159,7 @@
             <div class="card-header bg-light">
                 <h6 class="mb-0">
                     <i class="fas fa-chart-pie mr-2 text-gold"></i>
-                    Répartition des commandes
+                    {{ __('messages.order_distribution') }}
                 </h6>
             </div>
             <div class="card-body p-3">
@@ -170,30 +170,30 @@
                     </div>
                     <div class="mt-3 small">
                         <div class="d-flex justify-content-between mb-1">
-                            <span><span class="badge bg-warning" style="width: 12px; height: 12px; display: inline-block;"></span> En attente</span>
+                            <span><span class="badge bg-warning" style="width: 12px; height: 12px; display: inline-block;"></span> {{ __('messages.pending') }}</span>
                             <span class="fw-bold">{{ $statusDistribution['pending'] }} ({{ round(($statusDistribution['pending']/$totalStatus)*100) }}%)</span>
                         </div>
                         <div class="d-flex justify-content-between mb-1">
-                            <span><span class="badge bg-info" style="width: 12px; height: 12px; display: inline-block;"></span> En préparation</span>
+                            <span><span class="badge bg-info" style="width: 12px; height: 12px; display: inline-block;"></span> {{ __('messages.processing') }}</span>
                             <span class="fw-bold">{{ $statusDistribution['processing'] }} ({{ round(($statusDistribution['processing']/$totalStatus)*100) }}%)</span>
                         </div>
                         <div class="d-flex justify-content-between mb-1">
-                            <span><span class="badge bg-primary" style="width: 12px; height: 12px; display: inline-block;"></span> Expédiée</span>
+                            <span><span class="badge bg-primary" style="width: 12px; height: 12px; display: inline-block;"></span> {{ __('messages.shipped') }}</span>
                             <span class="fw-bold">{{ $statusDistribution['shipped'] }} ({{ round(($statusDistribution['shipped']/$totalStatus)*100) }}%)</span>
                         </div>
                         <div class="d-flex justify-content-between mb-1">
-                            <span><span class="badge bg-success" style="width: 12px; height: 12px; display: inline-block;"></span> Livrée</span>
+                            <span><span class="badge bg-success" style="width: 12px; height: 12px; display: inline-block;"></span> {{ __('messages.delivered') }}</span>
                             <span class="fw-bold">{{ $statusDistribution['delivered'] }} ({{ round(($statusDistribution['delivered']/$totalStatus)*100) }}%)</span>
                         </div>
                         <div class="d-flex justify-content-between mb-1">
-                            <span><span class="badge bg-danger" style="width: 12px; height: 12px; display: inline-block;"></span> Annulée</span>
+                            <span><span class="badge bg-danger" style="width: 12px; height: 12px; display: inline-block;"></span> {{ __('messages.cancelled') }}</span>
                             <span class="fw-bold">{{ $statusDistribution['cancelled'] }} ({{ round(($statusDistribution['cancelled']/$totalStatus)*100) }}%)</span>
                         </div>
                     </div>
                 @else
                     <div class="text-center py-4">
                         <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">Aucune commande</p>
+                        <p class="text-muted">{{ __('messages.no_orders_data') }}</p>
                     </div>
                 @endif
             </div>
@@ -209,7 +209,7 @@
             <div class="card-header bg-light">
                 <h6 class="mb-0">
                     <i class="fas fa-trophy mr-2 text-gold"></i>
-                    Top 5 des produits les plus vendus
+                    {{ __('messages.top_products') }}
                 </h6>
             </div>
             <div class="card-body">
@@ -230,7 +230,7 @@
                             </div>
                             <div class="flex-grow-1">
                                 <strong>{{ Str::limit($product->translated_name, 30) }}</strong>
-                                <div class="small text-muted">{{ $product->total_sold }} unité(s) vendue(s)</div>
+                                <div class="small text-muted">{{ $product->total_sold }} {{ __('messages.units_sold') }}</div>
                             </div>
                         </div>
                     </div>
@@ -247,7 +247,7 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">
             <i class="fas fa-box mr-2 text-gold"></i>{{ __('messages.recent_products') }}
-            <small class="text-muted ml-2">({{ $stats['total_products'] }} total)</small>
+            <small class="text-muted ml-2">({{ $stats['total_products'] }} {{ __('messages.total') }})</small>
         </h5>
         <a href="{{ route('vendor.products.create') }}" class="btn btn-primary btn-sm">
             <i class="fas fa-plus"></i> 
@@ -277,8 +277,8 @@
                                 @endif
                                 <!-- Infos supplémentaires sur mobile -->
                                 <span class="d-block d-md-none small text-muted mt-1">
-                                    Prix: {{ number_format($product->price, 2) }} € | 
-                                    Stock: {{ $product->quantity }}
+                                    {{ __('messages.price') }}: {{ number_format($product->price, 2) }} € | 
+                                    {{ __('messages.stock') }}: {{ $product->quantity }}
                                 </span>
                             </div>
                         </td>
@@ -296,7 +296,7 @@
                             @endif
                         </td>
                         <td class="action-col">
-                            <a href="{{ route('vendor.products.edit', $product) }}" class="btn btn-sm btn-info" title="Modifier">
+                            <a href="{{ route('vendor.products.edit', $product) }}" class="btn btn-sm btn-info" title="{{ __('messages.edit') }}">
                                 <i class="fas fa-edit"></i>
                             </a>
                         </td>
@@ -323,11 +323,11 @@
 <div class="card mt-4">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">
-            <i class="fas fa-shopping-cart mr-2 text-gold"></i>Dernières commandes
-            <small class="text-muted ml-2">({{ $stats['total_orders'] }} total)</small>
+            <i class="fas fa-shopping-cart mr-2 text-gold"></i>{{ __('messages.recent_orders') }}
+            <small class="text-muted ml-2">({{ $stats['total_orders'] }} {{ __('messages.total') }})</small>
         </h5>
         <a href="{{ route('vendor.orders.index') }}" class="btn btn-outline-info btn-sm">
-            <span class="d-none d-sm-inline">Voir toutes</span>
+            <span class="d-none d-sm-inline">{{ __('messages.view_all') }}</span>
             <i class="fas fa-arrow-right ml-1"></i>
         </a>
     </div>
@@ -336,18 +336,18 @@
             <table class="table table-hover table-striped mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <th>ID</th>
-                        <th>Client</th>
-                        <th>Date</th>
-                        <th>Total</th>
-                        <th>Statut</th>
+                        <th>{{ __('messages.order_id') }}</th>
+                        <th>{{ __('messages.customer') }}</th>
+                        <th>{{ __('messages.date') }}</th>
+                        <th>{{ __('messages.total') }}</th>
+                        <th>{{ __('messages.status') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($recentOrders as $order)
                     <tr>
                         <td>#{{ $order->id }}</td>
-                        <td>{{ $order->user->name ?? 'Client' }}</td>
+                        <td>{{ $order->user->name ?? __('messages.customer') }}</td>
                         <td>{{ $order->created_at->format('d/m/Y') }}</td>
                         <td class="font-weight-bold text-success">{{ number_format($order->total_amount, 2) }} €</td>
                         <td>
@@ -361,12 +361,12 @@
                                     'cancelled' => 'bg-danger',
                                 ];
                                 $statusLabels = [
-                                    'pending' => 'En attente',
-                                    'processing' => 'En prépa',
-                                    'shipped' => 'Expédiée',
-                                    'delivered' => 'Livrée',
-                                    'arrived' => 'Arrivée',
-                                    'cancelled' => 'Annulée',
+                                    'pending' => __('messages.pending'),
+                                    'processing' => __('messages.processing'),
+                                    'shipped' => __('messages.shipped'),
+                                    'delivered' => __('messages.delivered'),
+                                    'arrived' => __('messages.arrived'),
+                                    'cancelled' => __('messages.cancelled'),
                                 ];
                             @endphp
                             <span class="badge {{ $statusColors[$order->status] ?? 'bg-secondary' }} status-badge">
@@ -646,7 +646,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     data: {
                         labels: @json($months),
                         datasets: [{
-                            label: 'Chiffre d\'affaires (€)',
+                            label: '{{ __("messages.revenue") }} (€)',
                             data: monthlySales,
                             borderColor: '#f7d44a',
                             backgroundColor: 'rgba(247, 212, 74, 0.1)',
@@ -666,7 +666,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        return 'CA: ' + context.raw.toFixed(2) + ' €';
+                                        return '{{ __("messages.revenue") }}: ' + context.raw.toFixed(2) + ' €';
                                     }
                                 }
                             }
@@ -711,7 +711,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 new Chart(statusCtx, {
                     type: 'doughnut',
                     data: {
-                        labels: ['En attente', 'En préparation', 'Expédiée', 'Livrée', 'Annulée'],
+                        labels: [
+                            '{{ __("messages.pending") }}',
+                            '{{ __("messages.processing") }}',
+                            '{{ __("messages.shipped") }}',
+                            '{{ __("messages.delivered") }}',
+                            '{{ __("messages.cancelled") }}'
+                        ],
                         datasets: [{
                             data: statusData,
                             backgroundColor: [
@@ -733,7 +739,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        return context.label + ': ' + context.raw + ' commande(s)';
+                                        return context.label + ': ' + context.raw + ' {{ __("messages.orders") }}';
                                     }
                                 }
                             }

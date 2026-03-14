@@ -1,22 +1,22 @@
 {{-- resources/views/vendor/products/edit.blade.php --}}
 @extends('vendor.layouts.app')
 
-@section('title', 'Modifier le produit')
+@section('title', __('messages.vendor_edit_product'))
 
-@section('page-title', 'Modifier le produit')
+@section('page-title', __('messages.vendor_edit_product'))
 
 @section('content')
 <div class="container-fluid py-3 py-md-4">
     <div class="card shadow-lg border-0">
         <!-- En-tête responsive -->
         <div class="card-header bg-gradient-warning text-white d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3">
-            <h5 class="mb-0">
-                <i class="fas fa-edit mr-2"></i> Modifier le produit : <strong>{{ $product->translated_name ?? 'Produit' }}</strong>
-            </h5>
             <div>
-                <span class="badge bg-light text-dark mr-2">SKU: {{ $product->sku ?? 'Non défini' }}</span>
+                <i class="fas fa-edit mr-2"></i> {{ __('messages.vendor_edit_product') }}: <strong>{{ $product->translated_name }}</strong>
+            </div>
+            <div>
+                <span class="badge bg-light text-dark mr-2">{{ __('messages.sku') }}: {{ $product->sku ?? __('messages.not_defined') }}</span>
                 <a href="{{ route('vendor.products.index') }}" class="btn btn-light btn-sm">
-                    <i class="fas fa-arrow-left mr-2"></i> <span class="d-none d-sm-inline">Retour</span>
+                    <i class="fas fa-arrow-left mr-2"></i> <span class="d-none d-sm-inline">{{ __('messages.back') }}</span>
                     <span class="d-sm-none">←</span>
                 </a>
             </div>
@@ -44,7 +44,7 @@
             @if($errors->any())
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="fas fa-exclamation-triangle mr-2"></i>
-                    <strong>Erreurs de validation :</strong>
+                    <strong>{{ __('messages.validation_errors') }} :</strong>
                     <ul class="mb-0 mt-2">
                         @foreach($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -63,91 +63,48 @@
                 <div class="row">
                     <!-- Colonne principale (gauche) -->
                     <div class="col-lg-8 mb-4 mb-lg-0">
-                        <!-- Nom du produit (français) -->
+                        <!-- Nom du produit -->
                         <div class="form-group mb-3">
-                            <label for="name_fr" class="form-label fw-bold">
-                                Nom du produit (français) <span class="text-danger">*</span>
+                            <label for="name" class="form-label fw-bold">
+                                {{ __('messages.vendor_product_name') }} <span class="text-danger">*</span>
                             </label>
                             <input type="text" 
-                                   name="name_fr" 
-                                   id="name_fr" 
-                                   class="form-control form-control-lg @error('name_fr') is-invalid @enderror" 
-                                   value="{{ old('name_fr', is_array($product->name) ? ($product->name['fr'] ?? '') : $product->name) }}"
+                                   name="name" 
+                                   id="name" 
+                                   class="form-control form-control-lg @error('name') is-invalid @enderror" 
+                                   value="{{ old('name', $product->name) }}"
                                    required>
-                            <small class="text-muted">Le nom en français sera utilisé pour l'administration</small>
-                            @error('name_fr')
+                            <small class="text-muted">{{ __('messages.product_name_help') }}</small>
+                            @error('name')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
                         </div>
 
-                        <!-- Nom du produit (anglais) -->
+                        <!-- Description courte -->
                         <div class="form-group mb-3">
-                            <label for="name_en" class="form-label fw-bold">
-                                Nom du produit (anglais)
-                            </label>
+                            <label for="short_description" class="form-label fw-bold">{{ __('messages.short_description') }}</label>
                             <input type="text" 
-                                   name="name_en" 
-                                   id="name_en" 
-                                   class="form-control @error('name_en') is-invalid @enderror" 
-                                   value="{{ old('name_en', is_array($product->name) ? ($product->name['en'] ?? '') : '') }}">
-                            <small class="text-muted">Nom du produit en anglais pour les clients internationaux</small>
-                            @error('name_en')
-                                <span class="invalid-feedback">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <!-- Description courte (français) -->
-                        <div class="form-group mb-3">
-                            <label for="short_description_fr" class="form-label fw-bold">Description courte (français)</label>
-                            <input type="text" 
-                                   name="short_description_fr" 
-                                   id="short_description_fr" 
-                                   class="form-control @error('short_description_fr') is-invalid @enderror" 
-                                   value="{{ old('short_description_fr', is_array($product->short_description) ? ($product->short_description['fr'] ?? '') : $product->short_description) }}"
+                                   name="short_description" 
+                                   id="short_description" 
+                                   class="form-control @error('short_description') is-invalid @enderror" 
+                                   value="{{ old('short_description', $product->short_description) }}"
                                    maxlength="500"
-                                   placeholder="Brève description en français (max 500 caractères)">
-                            @error('short_description_fr')
+                                   placeholder="{{ __('messages.short_description_placeholder') }}">
+                            <small class="text-muted">{{ __('messages.max_characters', ['count' => 500]) }}</small>
+                            @error('short_description')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
                         </div>
 
-                        <!-- Description courte (anglais) -->
+                        <!-- Description complète -->
                         <div class="form-group mb-3">
-                            <label for="short_description_en" class="form-label fw-bold">Description courte (anglais)</label>
-                            <input type="text" 
-                                   name="short_description_en" 
-                                   id="short_description_en" 
-                                   class="form-control @error('short_description_en') is-invalid @enderror" 
-                                   value="{{ old('short_description_en', is_array($product->short_description) ? ($product->short_description['en'] ?? '') : '') }}"
-                                   maxlength="500"
-                                   placeholder="Brief description in English (max 500 characters)">
-                            @error('short_description_en')
-                                <span class="invalid-feedback">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <!-- Description détaillée (français) -->
-                        <div class="form-group mb-3">
-                            <label for="description_fr" class="form-label fw-bold">Description détaillée (français)</label>
-                            <textarea name="description_fr" 
-                                      id="description_fr" 
+                            <label for="description" class="form-label fw-bold">{{ __('messages.full_description') }}</label>
+                            <textarea name="description" 
+                                      id="description" 
                                       rows="6" 
-                                      class="form-control @error('description_fr') is-invalid @enderror"
-                                      placeholder="Description détaillée en français...">{{ old('description_fr', is_array($product->description) ? ($product->description['fr'] ?? '') : $product->description) }}</textarea>
-                            @error('description_fr')
-                                <span class="invalid-feedback">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <!-- Description détaillée (anglais) -->
-                        <div class="form-group mb-3">
-                            <label for="description_en" class="form-label fw-bold">Description détaillée (anglais)</label>
-                            <textarea name="description_en" 
-                                      id="description_en" 
-                                      rows="6" 
-                                      class="form-control @error('description_en') is-invalid @enderror"
-                                      placeholder="Detailed description in English...">{{ old('description_en', is_array($product->description) ? ($product->description['en'] ?? '') : '') }}</textarea>
-                            @error('description_en')
+                                      class="form-control @error('description') is-invalid @enderror"
+                                      placeholder="{{ __('messages.description_placeholder') }}">{{ old('description', $product->description) }}</textarea>
+                            @error('description')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
                         </div>
@@ -155,40 +112,81 @@
 
                     <!-- Colonne latérale (droite) -->
                     <div class="col-lg-4">
-                        <!-- Catégorie -->
+                        <!-- Catégorie principale et sous-catégorie -->
                         <div class="card mb-3">
                             <div class="card-header bg-light py-2">
-                                <h6 class="mb-0 fw-bold">Catégorie <span class="text-danger">*</span></h6>
+                                <h6 class="mb-0 fw-bold">{{ __('messages.category') }} <span class="text-danger">*</span></h6>
                             </div>
                             <div class="card-body">
-                                <select name="category_id" 
-                                        id="category_id" 
-                                        class="form-control @error('category_id') is-invalid @enderror"
-                                        required>
-                                    <option value="">Sélectionner une catégorie</option>
-                                    @foreach($categories as $category)
-                                        <option value="{{ $category->id }}" 
-                                            {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
-                                            {{ $category->translated_name ?? $category->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('category_id')
-                                    <span class="invalid-feedback">{{ $message }}</span>
-                                @enderror
+                                @php
+                                    // Récupérer la catégorie actuelle du produit
+                                    $currentCategory = $categories->find($product->category_id);
+                                    $currentMainCategoryId = $currentCategory ? $currentCategory->parent_id : null;
+                                @endphp
+
+                                <!-- Catégorie principale -->
+                                <div class="form-group mb-3">
+                                    <label for="main_category" class="form-label fw-bold small">{{ __('messages.main_category') }}</label>
+                                    <select name="main_category" 
+                                            id="main_category" 
+                                            class="form-control" 
+                                            required>
+                                        <option value="">{{ __('messages.select_main_category') }}</option>
+                                        @foreach($mainCategories as $category)
+                                            <option value="{{ $category->id }}" 
+                                                data-id="{{ $category->id }}"
+                                                {{ $currentMainCategoryId == $category->id ? 'selected' : '' }}>
+                                                {{ $category->translated_name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Sous-catégorie -->
+                                <div class="form-group mb-2" id="subcategory_group" style="{{ $currentMainCategoryId ? 'display:block;' : 'display:none;' }}">
+                                    <label for="category_id" class="form-label fw-bold small">{{ __('messages.subcategory') }}</label>
+                                    <select name="category_id" 
+                                            id="category_id" 
+                                            class="form-control @error('category_id') is-invalid @enderror"
+                                            required>
+                                        <option value="">{{ __('messages.select_subcategory') }}</option>
+                                        @if($currentMainCategoryId && isset($subCategories[$currentMainCategoryId]) && count($subCategories[$currentMainCategoryId]) > 0)
+                                            @foreach($subCategories[$currentMainCategoryId] as $subcategory)
+                                                <option value="{{ $subcategory->id }}" 
+                                                    {{ $product->category_id == $subcategory->id ? 'selected' : '' }}>
+                                                    {{ $subcategory->translated_name }}
+                                                </option>
+                                            @endforeach
+                                        @else
+                                            <option value="" disabled>{{ __('messages.no_subcategories') }}</option>
+                                        @endif
+                                    </select>
+                                    @error('category_id')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <!-- Option nouvelle sous-catégorie -->
+                                <div class="mt-2">
+                                    <small>
+                                        <a href="{{ route('vendor.categories.create') }}" target="_blank" class="text-primary">
+                                            <i class="fas fa-plus-circle mr-1"></i> {{ __('messages.create_subcategory') }}
+                                        </a>
+                                    </small>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Prix et Stock -->
                         <div class="card mb-3">
                             <div class="card-header bg-light py-2">
-                                <h6 class="mb-0 fw-bold">Prix et Stock</h6>
+                                <h6 class="mb-0 fw-bold">{{ __('messages.pricing_stock') }}</h6>
                             </div>
                             <div class="card-body">
                                 <!-- Prix -->
                                 <div class="form-group mb-3">
                                     <label for="price" class="form-label fw-bold">
-                                        Prix (€) <span class="text-danger">*</span>
+                                        {{ __('messages.vendor_product_price') }} (€) <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-group">
                                         <div class="input-group-prepend">
@@ -211,7 +209,7 @@
                                 <!-- Quantité -->
                                 <div class="form-group mb-3">
                                     <label for="quantity" class="form-label fw-bold">
-                                        Quantité en stock <span class="text-danger">*</span>
+                                        {{ __('messages.vendor_product_stock') }} <span class="text-danger">*</span>
                                     </label>
                                     <input type="number" 
                                            name="quantity" 
@@ -227,7 +225,7 @@
 
                                 <!-- Seuil d'alerte -->
                                 <div class="form-group mb-3">
-                                    <label for="stock_threshold" class="form-label fw-bold">Seuil d'alerte</label>
+                                    <label for="stock_threshold" class="form-label fw-bold">{{ __('messages.stock_threshold') }}</label>
                                     <input type="number" 
                                            name="stock_threshold" 
                                            id="stock_threshold" 
@@ -237,7 +235,7 @@
                                     @error('stock_threshold')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
-                                    <small class="text-muted d-block mt-1">Stock minimum avant alerte</small>
+                                    <small class="text-muted d-block mt-1">{{ __('messages.stock_threshold_help') }}</small>
                                 </div>
 
                                 <!-- Statut actif -->
@@ -250,7 +248,7 @@
                                                class="custom-control-input"
                                                {{ old('is_active', $product->is_active) ? 'checked' : '' }}>
                                         <label class="custom-control-label" for="is_active">
-                                            <i class="fas fa-check-circle text-success mr-1"></i> Produit actif
+                                            <i class="fas fa-check-circle text-success mr-1"></i> {{ __('messages.active_product') }}
                                         </label>
                                     </div>
                                 </div>
@@ -260,21 +258,21 @@
                         <!-- Image -->
                         <div class="card mb-3">
                             <div class="card-header bg-light py-2">
-                                <h6 class="mb-0 fw-bold">Image du produit</h6>
+                                <h6 class="mb-0 fw-bold">{{ __('messages.product_image') }}</h6>
                             </div>
                             <div class="card-body">
                                 @if($product->image)
                                     <div class="text-center mb-3">
                                         <img src="{{ asset('storage/' . $product->image) }}" 
-                                             alt="{{ $product->translated_name ?? 'Produit' }}" 
+                                             alt="{{ $product->translated_name }}" 
                                              class="img-fluid rounded border" 
                                              style="max-height: 150px;">
-                                        <p class="text-muted small mt-1">Image actuelle</p>
+                                        <p class="text-muted small mt-1">{{ __('messages.current_image') }}</p>
                                     </div>
                                 @endif
 
                                 <div class="form-group">
-                                    <label for="image" class="form-label fw-bold">Nouvelle image</label>
+                                    <label for="image" class="form-label fw-bold">{{ __('messages.new_image') }}</label>
                                     <div class="custom-file">
                                         <input type="file" 
                                                name="image" 
@@ -282,12 +280,12 @@
                                                class="custom-file-input @error('image') is-invalid @enderror"
                                                accept="image/jpeg,image/png,image/jpg,image/gif">
                                         <label class="custom-file-label" for="image">
-                                            <i class="fas fa-upload mr-2"></i> Choisir un fichier
+                                            <i class="fas fa-upload mr-2"></i> {{ __('messages.choose_file') }}
                                         </label>
                                     </div>
                                     <small class="text-muted d-block mt-1">
                                         <i class="fas fa-info-circle mr-1"></i>
-                                        Formats: JPG, PNG, GIF. Max: 2Mo. Laissez vide pour conserver l'image actuelle.
+                                        {{ __('messages.image_help_edit') }}
                                     </small>
                                     @error('image')
                                         <span class="invalid-feedback d-block">{{ $message }}</span>
@@ -296,8 +294,8 @@
                                 
                                 <!-- Aperçu de la nouvelle image -->
                                 <div id="imagePreview" class="text-center mt-3" style="display: none;">
-                                    <img src="#" alt="Aperçu" class="img-fluid rounded border" style="max-height: 150px;">
-                                    <p class="text-muted small mt-1">Nouvelle image</p>
+                                    <img src="#" alt="{{ __('messages.preview_image') }}" class="img-fluid rounded border" style="max-height: 150px;">
+                                    <p class="text-muted small mt-1">{{ __('messages.new_image_preview') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -309,165 +307,94 @@
                 <!-- Boutons d'action responsives -->
                 <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
                     <a href="{{ route('vendor.products.index') }}" class="btn btn-secondary w-100 w-sm-auto">
-                        <i class="fas fa-times mr-2"></i> Annuler
+                        <i class="fas fa-times mr-2"></i> {{ __('messages.cancel') }}
                     </a>
                     <button type="submit" class="btn btn-warning w-100 w-sm-auto">
-                        <i class="fas fa-save mr-2"></i> Mettre à jour
+                        <i class="fas fa-save mr-2"></i> {{ __('messages.update_product') }}
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+@endsection
 
-@push('styles')
-<style>
-.bg-gradient-warning {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-/* ===== STYLES POUR LE FORMULAIRE ===== */
-.form-label {
-    font-weight: 600;
-    color: #495057;
-    margin-bottom: 5px;
-}
-
-.form-control:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.2rem rgba(102,126,234,0.25);
-}
-
-.form-control-lg {
-    border-radius: 0.5rem;
-}
-
-.input-group-text {
-    background: #f8f9fa;
-    border: 1px solid #ced4da;
-}
-
-/* ===== STYLES POUR LE CUSTOM FILE ===== */
-.custom-file-label {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    cursor: pointer;
-    border-radius: 0.5rem;
-}
-.custom-file-label::after {
-    content: "Parcourir";
-    background: #667eea;
-    color: white;
-    border-left: 1px solid #5a6fd8;
-    border-radius: 0 0.5rem 0.5rem 0;
-}
-.custom-file-input:focus ~ .custom-file-label {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.2rem rgba(102,126,234,0.25);
-}
-
-/* ===== MODE SOMBRE ===== */
-.dark .card {
-    background: #2d2d44;
-    border-color: #4a4a6a;
-}
-.dark .card-header.bg-light {
-    background: #3a3a5a !important;
-    border-bottom-color: #4a4a6a;
-}
-.dark .form-label {
-    color: #c0c0e0;
-}
-.dark .form-control {
-    background: #2d2d44;
-    border-color: #4a4a6a;
-    color: #e0e0e0;
-}
-.dark .form-control:focus {
-    background: #35354a;
-    border-color: #6a6a9a;
-    color: #ffffff;
-}
-.dark .input-group-text {
-    background: #35354a;
-    border-color: #4a4a6a;
-    color: #c0c0e0;
-}
-.dark .custom-file-label {
-    background: #2d2d44;
-    border-color: #4a4a6a;
-    color: #c0c0e0;
-}
-.dark .custom-file-label::after {
-    background: #5a6fd8;
-    color: white;
-    border-left-color: #4a4a6a;
-}
-.dark .text-muted {
-    color: #a0a0c0 !important;
-}
-
-/* ===== STYLES RESPONSIVES ===== */
-@media (max-width: 768px) {
-    .card-body {
-        padding: 1rem;
-    }
-    
-    .form-control-lg {
-        font-size: 1rem;
-    }
-    
-    .btn {
-        padding: 0.6rem 1rem;
-    }
-    
-    .custom-file-label {
-        font-size: 0.9rem;
-    }
-    
-    .card-header h5 {
-        font-size: 1.1rem;
-    }
-}
-
-@media (max-width: 576px) {
-    .card-body {
-        padding: 0.8rem;
-    }
-    
-    .form-group {
-        margin-bottom: 1rem;
-    }
-    
-    .btn {
-        width: 100%;
-        margin-bottom: 0.5rem;
-    }
-    
-    .w-sm-auto {
-        width: 100%;
-    }
-    
-    .d-flex.gap-3 {
-        flex-direction: column;
-    }
-}
-
-/* Classes utilitaires */
-.w-sm-auto { width: auto; }
-@media (min-width: 576px) {
-    .w-sm-auto { width: auto; }
-}
-</style>
-@endpush
-
+<!-- Script pour la gestion dynamique des catégories -->
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const mainCategorySelect = document.getElementById('main_category');
+    const subcategoryGroup = document.getElementById('subcategory_group');
+    const subcategorySelect = document.getElementById('category_id');
     const imageInput = document.getElementById('image');
     const imagePreview = document.getElementById('imagePreview');
     const previewImg = imagePreview ? imagePreview.querySelector('img') : null;
+
+    // Chargement des sous-catégories
+    if (mainCategorySelect) {
+        console.log('✅ Sélecteur de catégorie principale trouvé');
+        
+        mainCategorySelect.addEventListener('change', function() {
+            const mainCategoryId = this.value;
+            console.log('🔄 Catégorie sélectionnée:', mainCategoryId);
+            
+            if (mainCategoryId) {
+                // Afficher le groupe
+                subcategoryGroup.style.display = 'block';
+                
+                // Message de chargement
+                subcategorySelect.innerHTML = '<option value="">{{ __("messages.loading") }}</option>';
+                subcategorySelect.disabled = true;
+                
+                // Construire l'URL
+                const url = `/api/categories/${mainCategoryId}/subcategories`;
+                console.log('📡 Appel API:', url);
+                
+                // Charger les sous-catégories
+                fetch(url)
+                    .then(response => {
+                        console.log('📥 Réponse reçue, status:', response.status);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('📦 Données reçues:', data);
+                        
+                        // Vider et remplir le select
+                        subcategorySelect.innerHTML = '<option value="">{{ __("messages.select_subcategory") }}</option>';
+                        
+                        if (data.length === 0) {
+                            console.log('⚠️ Aucune sous-catégorie trouvée');
+                            subcategorySelect.innerHTML += '<option value="" disabled>{{ __("messages.no_subcategories") }}</option>';
+                        } else {
+                            data.forEach(subcat => {
+                                const option = document.createElement('option');
+                                option.value = subcat.id;
+                                option.textContent = subcat.name;
+                                subcategorySelect.appendChild(option);
+                            });
+                        }
+                        
+                        subcategorySelect.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('❌ Erreur:', error);
+                        subcategorySelect.innerHTML = '<option value="">{{ __("messages.select_subcategory") }}</option>';
+                        subcategorySelect.innerHTML += '<option value="" disabled class="text-danger">{{ __("messages.loading_error") }}</option>';
+                        subcategorySelect.disabled = false;
+                    });
+            } else {
+                console.log('👁️ Aucune catégorie sélectionnée, cache le groupe');
+                subcategoryGroup.style.display = 'none';
+                subcategorySelect.value = '';
+                subcategorySelect.disabled = true;
+            }
+        });
+    } else {
+        console.error('❌ Sélecteur de catégorie principale non trouvé');
+    }
 
     // Aperçu de l'image
     if (imageInput && imagePreview && previewImg) {
@@ -491,7 +418,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const fileLabel = document.querySelector('.custom-file-label');
         if (fileLabel) {
             imageInput.addEventListener('change', function() {
-                let fileName = this.files.length ? this.files[0].name : 'Choisir un fichier';
+                let fileName = this.files.length ? this.files[0].name : '{{ __("messages.choose_file") }}';
                 fileLabel.innerHTML = '<i class="fas fa-upload mr-2"></i> ' + fileName;
             });
         }
@@ -499,4 +426,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
-@endsection
